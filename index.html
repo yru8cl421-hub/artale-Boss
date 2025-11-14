@@ -1,0 +1,1165 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>楓之谷BOSS重生時間系統</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #0a0a1a 0%, #15152b 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(21, 21, 43, 0.5);
+            border-radius: 15px;
+            border: 1px solid #00ccff;
+        }
+
+        .header h1 {
+            color: #00ccff;
+            font-size: 2em;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px rgba(0, 204, 255, 0.5);
+        }
+
+        .header p {
+            color: #00ff99;
+            font-size: 1.1em;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #00ccff;
+        }
+
+        .tab {
+            padding: 12px 24px;
+            background: #1e1e3a;
+            border: 1px solid #00ccff;
+            border-bottom: none;
+            border-radius: 8px 8px 0 0;
+            cursor: pointer;
+            color: #a0a0c0;
+            transition: all 0.3s;
+        }
+
+        .tab:hover {
+            background: #2a2a4a;
+        }
+
+        .tab.active {
+            background: #00ccff;
+            color: #0a0a1a;
+            font-weight: bold;
+        }
+
+        .tab-content {
+            display: none;
+            background: #15152b;
+            padding: 25px;
+            border-radius: 10px;
+            border: 1px solid #00ccff;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .section {
+            background: #1e1e3a;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #00ccff;
+        }
+
+        .section h2 {
+            color: #00ccff;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .input-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .input-field {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        label {
+            color: #a0a0c0;
+            font-size: 0.9em;
+        }
+
+        select, input[type="text"], input[type="number"] {
+            padding: 10px;
+            background: #0a0a1a;
+            border: 1px solid #00ccff;
+            border-radius: 5px;
+            color: #ffffff;
+            font-size: 1em;
+        }
+
+        select:focus, input:focus {
+            outline: none;
+            border-color: #00ff99;
+            box-shadow: 0 0 5px rgba(0, 255, 153, 0.5);
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .info-box {
+            background: rgba(0, 204, 255, 0.1);
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+            border-left: 4px solid #00ccff;
+        }
+
+        .info-box p {
+            color: #00ff99;
+            margin: 5px 0;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+
+        button {
+            padding: 12px 24px;
+            background: #1e1e3a;
+            border: 1px solid #00ccff;
+            border-radius: 5px;
+            color: #ffffff;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s;
+        }
+
+        button:hover {
+            background: #00ccff;
+            color: #0a0a1a;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 204, 255, 0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button.danger {
+            border-color: #ff3366;
+        }
+
+        button.danger:hover {
+            background: #ff3366;
+            color: #ffffff;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #2a2a4a;
+        }
+
+        th {
+            background: #0a0a1a;
+            color: #00ccff;
+            font-weight: bold;
+            position: sticky;
+            top: 0;
+        }
+
+        tr:hover {
+            background: rgba(0, 204, 255, 0.1);
+        }
+
+        tr.selected {
+            background: rgba(0, 204, 255, 0.2);
+        }
+
+        .status-waiting {
+            color: #a0a0c0;
+        }
+
+        .status-possible {
+            color: #ff9800;
+            font-weight: bold;
+        }
+
+        .status-definite {
+            color: #ff3366;
+            font-weight: bold;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        .status-display {
+            background: #0a0a1a;
+            padding: 20px;
+            border-radius: 10px;
+            max-height: 600px;
+            overflow-y: auto;
+            font-family: 'Consolas', monospace;
+        }
+
+        .boss-status-card {
+            background: #1e1e3a;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #00ccff;
+        }
+
+        .boss-status-card h3 {
+            color: #00ccff;
+            margin-bottom: 10px;
+        }
+
+        .boss-status-card p {
+            margin: 5px 0;
+            color: #a0a0c0;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #1e1e3a;
+            padding: 20px;
+            border-radius: 10px;
+            border: 2px solid #00ccff;
+            max-width: 400px;
+            z-index: 1000;
+            animation: slideIn 0.3s ease-out;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(500px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .notification.success {
+            border-color: #00ff99;
+        }
+
+        .notification.error {
+            border-color: #ff3366;
+        }
+
+        .notification.warning {
+            border-color: #ff9800;
+        }
+
+        .scrollbar::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        .scrollbar::-webkit-scrollbar-track {
+            background: #0a0a1a;
+        }
+
+        .scrollbar::-webkit-scrollbar-thumb {
+            background: #00ccff;
+            border-radius: 5px;
+        }
+
+        .scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #00ff99;
+        }
+
+        .current-time {
+            text-align: center;
+            font-size: 1.2em;
+            color: #00ff99;
+            margin-bottom: 20px;
+            padding: 10px;
+            background: rgba(0, 255, 153, 0.1);
+            border-radius: 5px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .hint {
+            color: #00ff99;
+            font-size: 0.9em;
+            margin-top: 10px;
+            font-style: italic;
+        }
+
+        @media (max-width: 768px) {
+            .input-group {
+                grid-template-columns: 1fr;
+            }
+
+            .header h1 {
+                font-size: 1.5em;
+            }
+
+            table {
+                font-size: 0.85em;
+            }
+
+            th, td {
+                padding: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎮 楓之谷BOSS重生時間系統</h1>
+            <p>實時監控與提醒</p>
+        </div>
+
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab(0)">BOSS記錄</div>
+            <div class="tab" onclick="switchTab(1)">重生狀態</div>
+            <div class="tab" onclick="switchTab(2)">BOSS列表</div>
+            <div class="tab" onclick="switchTab(3)">改善建議</div>
+        </div>
+
+        <div class="tab-content active" id="tab-record">
+            <div class="section">
+                <h2>記錄新BOSS擊殺</h2>
+                <div class="input-group">
+                    <div class="input-field">
+                        <label>選擇BOSS:</label>
+                        <select id="boss-select" onchange="onBossSelected()">
+                            <option value="">請選擇...</option>
+                        </select>
+                    </div>
+                    <div class="input-field">
+                        <label>頻道:</label>
+                        <input type="number" id="channel-input" value="1" min="1" max="20">
+                    </div>
+                </div>
+
+
+
+                <div class="info-box" id="boss-info" style="display: none;">
+                    <p id="map-info"></p>
+                    <p id="time-info"></p>
+                </div>
+
+                <div class="button-group">
+                    <button onclick="recordBoss()">📝 記錄擊殺時間 (Enter)</button>
+                </div>
+                <p class="hint">💡 提示: 選擇BOSS → 輸入頻道 → 按Enter或點擊按鈕記錄</p>
+            </div>
+
+            <div class="section">
+                <h2>當前記錄中的BOSS</h2>
+                <div style="overflow-x: auto;">
+                    <table id="record-table">
+                        <thead>
+                            <tr>
+                                <th><input type="checkbox" id="select-all" onchange="toggleSelectAll()"></th>
+                                <th>BOSS名稱</th>
+                                <th>頻道</th>
+                                <th>擊殺時間</th>
+                                <th>最早重生</th>
+                                <th>最晚重生</th>
+                                <th>狀態</th>
+                                <th>最後巡邏</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="record-tbody">
+                        </tbody>
+                    </table>
+                </div>
+                <div class="action-buttons">
+                    <button onclick="deleteRecords()">🗑️ 刪除選取記錄</button>
+                    <button onclick="respawnBoss()">🔄 完成擊殺重新計時</button>
+                    <button onclick="patrolBoss()">👀 巡邏打卡</button>
+                    <button onclick="clearAll()" class="danger">⚠️ 清空所有記錄</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-content" id="tab-status">
+            <div class="current-time" id="current-time"></div>
+            <div class="status-display scrollbar" id="status-display">
+                <p style="text-align: center; color: #a0a0c0;">目前沒有記錄中的BOSS</p>
+            </div>
+        </div>
+
+        <div class="tab-content" id="tab-settings">
+            <div class="section">
+                <h2>BOSS資訊一覽</h2>
+                <div style="overflow-x: auto;">
+                    <table id="boss-list-table">
+                        <thead>
+                            <tr>
+                                <th>BOSS名稱</th>
+                                <th>重生時間範圍</th>
+                                <th>地圖</th>
+                            </tr>
+                        </thead>
+                        <tbody id="boss-list-tbody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-content" id="tab-feedback">
+            <div class="section">
+                <h2>💡 改善建議</h2>
+                <p style="color: #a0a0c0; margin-bottom: 20px;">
+                    如果您在使用過程中有任何改善建議或發現問題，歡迎透過下方表單告訴我們！
+                </p>
+                
+                <div class="input-group">
+                    <div class="input-field" style="grid-column: 1 / -1;">
+                        <label>建議類型:</label>
+                        <select id="feedback-type" style="width: 100%;">
+                            <option value="功能建議">功能建議</option>
+                            <option value="錯誤回報">錯誤回報</option>
+                            <option value="UI/UX改善">UI/UX改善</option>
+                            <option value="其他">其他</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <div class="input-field" style="grid-column: 1 / -1;">
+                        <label>詳細說明:</label>
+                        <textarea id="feedback-content" 
+                                  style="width: 100%; min-height: 150px; padding: 10px; 
+                                         background: #0a0a1a; border: 1px solid #00ccff; 
+                                         border-radius: 5px; color: #ffffff; font-family: inherit; 
+                                         font-size: 1em; resize: vertical;"
+                                  placeholder="請詳細描述您的建議或問題..."></textarea>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <div class="input-field">
+                        <label>聯絡方式 (選填):</label>
+                        <input type="text" id="feedback-contact" 
+                               placeholder="Discord ID 或其他聯絡方式"
+                               style="width: 100%;">
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button onclick="submitFeedback()" style="padding: 15px 30px; font-size: 1.1em;">
+                        📨 提交建議
+                    </button>
+                    <button onclick="clearFeedbackForm()" class="danger">
+                        🔄 清空表單
+                    </button>
+                </div>
+
+                <div class="info-box" style="margin-top: 20px;">
+                    <p style="color: #00ff99; font-size: 0.9em;">
+                        ℹ️ 您的建議將會被發送到開發團隊，我們會仔細閱讀每一條建議並持續改進系統。感謝您的支持！
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Discord Webhook URL
+        const DISCORD_WEBHOOK = 'https://discord.com/api/webhooks/1438472081003118653/4KS7P2dGU_7KF-6tIQRgUuaLQYGPf8AZD0oDhYnUNGAJFFZKY6FhAs96O1UnLYnV9TvC';
+        const FEEDBACK_WEBHOOK = 'https://discord.com/api/webhooks/1438760814466039910/iYegYu_LoPALQokZnyEjFJKuVXU9MxBHhMKvcQpZx0Ny3sKeVvUjmob0ozV5-BBHsxsj';
+
+        // BOSS 數據
+        const BOSS_DATA = {
+            "紅寶王": { min: 23, max: 30, maps: ["海岸草叢3"], color: "#ff4444" },
+            "樹妖王": { min: 23, max: 30, maps: ["東方岩石山5"], color: "#8bc34a" },
+            "冥界幽靈": { min: 45, max: 60, maps: ["1號線<4區>", "2號線<3區>"], color: "#9c27b0" },
+            "巨居蟹": { min: 45, max: 60, maps: ["海龜沙灘"], color: "#ff9800" },
+            "殭屍猴王": { min: 38, max: 45, maps: ["巫婆森林1"], color: "#795548" },
+            "蘑菇王": { min: 195, max: 225, maps: ["鋼之肥肥公園3"], color: "#ff5722" },
+            "沼澤巨鱷": { min: 90, max: 105, maps: ["危險的黑鱷魚1"], color: "#4caf50" },
+            "殭屍蘑菇王": { min: 195, max: 225, maps: ["蘑菇王之墓"], color: "#e91e63" },
+            "巴洛古": { min: 195, max: 225, maps: ["受詛咒的神殿"], color: "#ff0000" },
+            "艾利傑": { min: 118, max: 128, maps: ["天空階梯2"], color: "#00bcd4" },
+            "雪山女巫": { min: 158, max: 180, maps: ["冰面1"], color: "#87ceeb" },
+            "雪毛怪人": { min: 45, max: 68, maps: ["雪人之谷"], color: "#f0f8ff" },
+            "厄運死神": { min: 45, max: 105, maps: ["死亡森林4"], color: "#2f4f4f" },
+            "咕咕鐘": { min: 68, max: 90, maps: ["時間之路<3>"], color: "#daa520" },
+            "葛雷金剛": { min: 270, max: 350, maps: ["葛雷草原"], color: "#8b4513" },
+            "書生幽靈": { min: 150, max: 300, maps: ["狐狸谷"], color: "#9370db" },
+            "九尾妖狐": { min: 210, max: 570, maps: ["月亮山坡"], color: "#ff69b4" },
+            "黑輪王": { min: 780, max: 1020, maps: ["夜市徒步區7"], color: "#000000" },
+            "瘋狂喵z客": { min: 110, max: 420, maps: ["天空階梯2"], color: "#ffa500" },
+            "仙人娃娃": { min: 158, max: 180, maps: ["上級訓練場"], color: "#98fb98" },
+            "肯德熊": { min: 113, max: 128, maps: ["流浪熊的領土"], color: "#8b7355" },
+            "喵怪仙人": { min: 150, max: 170, maps: ["喵怪仙人的領域"], color: "#ffb6c1" },
+            "巨大深山人蔘": { min: 60, max: 135, maps: ["豐饒的藥草田"], color: "#ffd700" },
+            "海怒斯": { min: 180, max: 300, maps: ["海怒斯洞穴"], color: "#1e90ff" }
+        };
+
+        // 存儲數據
+        let activeBosses = [];
+        let patrolRecords = [];
+
+        // 初始化
+        function init() {
+            loadData();
+            populateBossSelect();
+            populateBossListTable();
+            updateAllDisplays();
+            setInterval(checkNotifications, 60000); // 每分鐘檢查一次
+            setInterval(updateAllDisplays, 10000); // 每10秒更新一次
+
+            // 添加Enter鍵監聽
+            document.getElementById('channel-input').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    recordBoss();
+                }
+            });
+        }
+
+        // 填充BOSS選擇列表
+        function populateBossSelect() {
+            const select = document.getElementById('boss-select');
+            Object.keys(BOSS_DATA).forEach(boss => {
+                const option = document.createElement('option');
+                option.value = boss;
+                option.textContent = boss;
+                select.appendChild(option);
+            });
+        }
+
+        // 填充BOSS列表表格
+        function populateBossListTable() {
+            const tbody = document.getElementById('boss-list-tbody');
+            tbody.innerHTML = '';
+            Object.entries(BOSS_DATA).forEach(([name, info]) => {
+                const row = tbody.insertRow();
+                row.insertCell(0).textContent = name;
+                row.insertCell(1).textContent = formatTimeRange(info.min, info.max);
+                row.insertCell(2).textContent = info.maps.join(', ');
+            });
+        }
+
+        // 格式化時間範圍
+        function formatTimeRange(min, max) {
+            if (min >= 60) {
+                return `${Math.floor(min/60)}小時${min%60}分 ~ ${Math.floor(max/60)}小時${max%60}分`;
+            }
+            return `${min} ~ ${max}分鐘`;
+        }
+
+        // BOSS選擇事件
+        function onBossSelected() {
+            const bossName = document.getElementById('boss-select').value;
+            if (bossName && BOSS_DATA[bossName]) {
+                const info = BOSS_DATA[bossName];
+                document.getElementById('map-info').textContent = `地圖: ${info.maps.join(', ')}`;
+                document.getElementById('time-info').textContent = `重生時間: ${formatTimeRange(info.min, info.max)}`;
+                document.getElementById('boss-info').style.display = 'block';
+            } else {
+                document.getElementById('boss-info').style.display = 'none';
+            }
+        }
+
+        // 記錄BOSS擊殺
+        function recordBoss() {
+            const bossName = document.getElementById('boss-select').value;
+            const channel = document.getElementById('channel-input').value;
+            const notification = true; // 默認開啟提醒
+
+            if (!bossName) {
+                showNotification('請選擇BOSS', 'warning');
+                return;
+            }
+
+            if (!channel) {
+                showNotification('請輸入頻道', 'warning');
+                return;
+            }
+
+            const info = BOSS_DATA[bossName];
+            const now = new Date();
+            const respawnMin = new Date(now.getTime() + info.min * 60000);
+            const respawnMax = new Date(now.getTime() + info.max * 60000);
+
+            const record = {
+                id: Date.now(),
+                channel: channel,
+                bossName: bossName,
+                deathTime: now.toISOString(),
+                respawnMin: respawnMin.toISOString(),
+                respawnMax: respawnMax.toISOString(),
+                notified: false,
+                notificationEnabled: notification,
+                lastPatrolTime: null
+            };
+
+            activeBosses.push(record);
+            saveData();
+            updateAllDisplays();
+
+            showNotification(
+                `頻道 ${channel} - ${bossName} 擊殺時間已記錄！\n預計重生: ${formatTime(respawnMin)} ~ ${formatTime(respawnMax)}`,
+                'success'
+            );
+
+            // 清空輸入
+            document.getElementById('channel-input').value = '';
+            document.getElementById('channel-input').focus();
+        }
+
+        // 刪除單個記錄
+        function deleteRecord(id) {
+            if (confirm('確定要刪除此記錄嗎？')) {
+                activeBosses = activeBosses.filter(b => b.id !== id);
+                saveData();
+                updateAllDisplays();
+                showNotification('已刪除BOSS記錄', 'success');
+            }
+        }
+
+        // 重新計時單個BOSS
+        function respawnSingleBoss(id) {
+            const record = activeBosses.find(b => b.id === id);
+            if (record) {
+                const info = BOSS_DATA[record.bossName];
+                const now = new Date();
+                record.deathTime = now.toISOString();
+                record.respawnMin = new Date(now.getTime() + info.min * 60000).toISOString();
+                record.respawnMax = new Date(now.getTime() + info.max * 60000).toISOString();
+                record.notified = false;
+                
+                saveData();
+                updateAllDisplays();
+                showNotification(`已重新計時 ${record.bossName}！`, 'success');
+            }
+        }
+
+        // 巡邏打卡單個BOSS
+        function patrolSingleBoss(id) {
+            const record = activeBosses.find(b => b.id === id);
+            if (record) {
+                const now = new Date();
+                record.lastPatrolTime = now.toISOString();
+                
+                patrolRecords.push({
+                    timestamp: now.toISOString(),
+                    bossName: record.bossName,
+                    channel: record.channel,
+                    result: '未重生',
+                    note: '從BOSS記錄巡邏打卡'
+                });
+
+                saveData();
+                updateAllDisplays();
+                showNotification(
+                    `巡邏打卡記錄已儲存！\nBOSS: ${record.bossName}\n頻道: ${record.channel}`,
+                    'success'
+                );
+            }
+        }
+
+        // 刪除記錄
+        function deleteRecords() {
+            const selected = getSelectedRecords();
+            if (selected.length === 0) {
+                showNotification('請選擇要刪除的記錄', 'warning');
+                return;
+            }
+
+            if (confirm(`確定要刪除 ${selected.length} 個記錄嗎？`)) {
+                activeBosses = activeBosses.filter(b => !selected.includes(b.id));
+                saveData();
+                updateAllDisplays();
+                showNotification(`已刪除 ${selected.length} 個BOSS記錄`, 'success');
+            }
+        }
+
+        // 重新計時BOSS
+        function respawnBoss() {
+            const selected = getSelectedRecords();
+            if (selected.length === 0) {
+                showNotification('請選擇要重新計時的BOSS記錄', 'warning');
+                return;
+            }
+
+            selected.forEach(id => {
+                const record = activeBosses.find(b => b.id === id);
+                if (record) {
+                    const info = BOSS_DATA[record.bossName];
+                    const now = new Date();
+                    record.deathTime = now.toISOString();
+                    record.respawnMin = new Date(now.getTime() + info.min * 60000).toISOString();
+                    record.respawnMax = new Date(now.getTime() + info.max * 60000).toISOString();
+                    record.notified = false;
+                }
+            });
+
+            saveData();
+            updateAllDisplays();
+            showNotification(`已重新計時 ${selected.length} 個BOSS！`, 'success');
+        }
+
+        // 巡邏打卡
+        function patrolBoss() {
+            const selected = getSelectedRecords();
+            if (selected.length === 0) {
+                showNotification('請選擇要巡邏打卡的BOSS記錄', 'warning');
+                return;
+            }
+
+            const id = selected[0];
+            const record = activeBosses.find(b => b.id === id);
+            if (record) {
+                const now = new Date();
+                record.lastPatrolTime = now.toISOString();
+                
+                patrolRecords.push({
+                    timestamp: now.toISOString(),
+                    bossName: record.bossName,
+                    channel: record.channel,
+                    result: '未重生',
+                    note: '從BOSS記錄巡邏打卡'
+                });
+
+                saveData();
+                updateAllDisplays();
+                showNotification(
+                    `巡邏打卡記錄已儲存！\nBOSS: ${record.bossName}\n頻道: ${record.channel}\n時間: ${formatTime(now)}`,
+                    'success'
+                );
+            }
+        }
+
+        // 清空所有記錄
+        function clearAll() {
+            if (activeBosses.length === 0) {
+                showNotification('目前沒有記錄', 'warning');
+                return;
+            }
+
+            if (confirm('確定要清空所有BOSS記錄嗎？')) {
+                activeBosses = [];
+                saveData();
+                updateAllDisplays();
+                showNotification('已清空所有記錄', 'success');
+            }
+        }
+
+        // 獲取選中的記錄ID
+        function getSelectedRecords() {
+            const checkboxes = document.querySelectorAll('#record-tbody input[type="checkbox"]:checked');
+            return Array.from(checkboxes).map(cb => parseInt(cb.dataset.id));
+        }
+
+        // 切換全選
+        function toggleSelectAll() {
+            const selectAll = document.getElementById('select-all').checked;
+            document.querySelectorAll('#record-tbody input[type="checkbox"]').forEach(cb => {
+                cb.checked = selectAll;
+            });
+        }
+
+        // 更新所有顯示
+        function updateAllDisplays() {
+            updateRecordDisplay();
+            updateStatusDisplay();
+        }
+
+        // 更新記錄顯示
+        function updateRecordDisplay() {
+            const tbody = document.getElementById('record-tbody');
+            tbody.innerHTML = '';
+
+            const sorted = [...activeBosses].sort((a, b) => 
+                new Date(a.respawnMin) - new Date(b.respawnMin)
+            );
+
+            sorted.forEach(record => {
+                const row = tbody.insertRow();
+                
+                // 複選框
+                const checkCell = row.insertCell(0);
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.dataset.id = record.id;
+                checkCell.appendChild(checkbox);
+
+                row.insertCell(1).textContent = record.bossName;
+                row.insertCell(2).textContent = record.channel;
+                row.insertCell(3).textContent = formatDateTime(new Date(record.deathTime));
+                row.insertCell(4).textContent = formatDateTime(new Date(record.respawnMin));
+                row.insertCell(5).textContent = formatDateTime(new Date(record.respawnMax));
+
+                const statusCell = row.insertCell(6);
+                const status = getStatus(record);
+                statusCell.textContent = status.text;
+                statusCell.className = status.className;
+
+                row.insertCell(7).textContent = record.lastPatrolTime ? formatTime(new Date(record.lastPatrolTime)) : '';
+                
+                // 操作按鈕
+                const actionCell = row.insertCell(8);
+                actionCell.innerHTML = `
+                    <button onclick="deleteRecord(${record.id})" style="padding: 5px 10px; margin: 2px; font-size: 0.9em;">🗑️</button>
+                    <button onclick="respawnSingleBoss(${record.id})" style="padding: 5px 10px; margin: 2px; font-size: 0.9em;">🔄</button>
+                    <button onclick="patrolSingleBoss(${record.id})" style="padding: 5px 10px; margin: 2px; font-size: 0.9em;">👀</button>
+                `;
+            });
+        }
+
+        // 更新狀態顯示
+        function updateStatusDisplay() {
+            const display = document.getElementById('status-display');
+            const now = new Date();
+            
+            document.getElementById('current-time').textContent = 
+                `當前時間: ${formatDateTime(now, true)}`;
+
+            if (activeBosses.length === 0) {
+                display.innerHTML = '<p style="text-align: center; color: #a0a0c0;">目前沒有記錄中的BOSS</p>';
+                return;
+            }
+
+            const sorted = [...activeBosses].sort((a, b) => 
+                new Date(a.respawnMin) - new Date(b.respawnMin)
+            );
+
+            let html = '';
+            sorted.forEach(record => {
+                const status = getStatus(record);
+                const respawnMin = new Date(record.respawnMin);
+                const respawnMax = new Date(record.respawnMax);
+                
+                let timeInfo;
+                if (now < respawnMin) {
+                    const diff = Math.floor((respawnMin - now) / 60000);
+                    timeInfo = `剩餘: ${diff}分鐘`;
+                } else if (now >= respawnMin && now <= respawnMax) {
+                    const diff = Math.floor((respawnMax - now) / 60000);
+                    timeInfo = `已進入重生窗口，${diff}分鐘後結束`;
+                } else {
+                    const diff = Math.floor((now - respawnMax) / 60000);
+                    timeInfo = `已超過: ${diff}分鐘`;
+                }
+
+                let patrolInfo = '';
+                if (record.lastPatrolTime) {
+                    const diff = Math.floor((now - new Date(record.lastPatrolTime)) / 60000);
+                    patrolInfo = ` | 最後巡邏: ${diff}分鐘前`;
+                }
+
+                html += `
+                    <div class="boss-status-card">
+                        <h3>【${record.bossName}】頻道 ${record.channel}</h3>
+                        <p class="${status.className}">狀態: ${status.text}</p>
+                        <p>擊殺時間: ${formatDateTime(new Date(record.deathTime))}</p>
+                        <p>重生時間: ${formatTime(respawnMin)} ~ ${formatTime(respawnMax)}</p>
+                        <p>${timeInfo}${patrolInfo}</p>
+                    </div>
+                `;
+            });
+
+            display.innerHTML = html;
+        }
+
+        // 獲取BOSS狀態
+        function getStatus(record) {
+            const now = new Date();
+            const respawnMin = new Date(record.respawnMin);
+            const respawnMax = new Date(record.respawnMax);
+
+            if (now < respawnMin) {
+                const diff = Math.floor((respawnMin - now) / 60000);
+                return { text: `等待中 (${diff}分)`, className: 'status-waiting' };
+            } else if (now >= respawnMin && now <= respawnMax) {
+                return { text: '🔴 可能已重生！', className: 'status-possible' };
+            } else {
+                return { text: '⏰ 肯定已重生！', className: 'status-definite' };
+            }
+        }
+
+        // 檢查通知
+        async function checkNotifications() {
+            const now = new Date();
+            const toNotify = [];
+            
+            // 限定BOSS
+            const notifyBosses = ['蘑菇王', '殭屍蘑菇王', '巴洛古', '黑輪王', '瘋狂喵z客'];
+
+            activeBosses.forEach(record => {
+                if (record.notificationEnabled && !record.notified && 
+                    new Date(record.respawnMin) <= now &&
+                    notifyBosses.includes(record.bossName)) {
+                    record.notified = true;
+                    toNotify.push(record);
+                }
+            });
+
+            if (toNotify.length > 0) {
+                saveData();
+                for (const record of toNotify) {
+                    await sendDiscordNotification(record);
+                }
+            }
+        }
+
+        // 發送通知
+        async function sendDiscordNotification(record) {
+            const respawnMin = new Date(record.respawnMin);
+            const respawnMax = new Date(record.respawnMax);
+
+            const embed = {
+                title: '🔔 BOSS重生提醒',
+                description: `**${record.bossName}** 可能已經重生！`,
+                color: parseInt(BOSS_DATA[record.bossName]?.color?.replace('#', '') || 'FF0000', 16),
+                fields: [
+                    {
+                        name: '頻道',
+                        value: record.channel,
+                        inline: true
+                    },
+                    {
+                        name: '地圖',
+                        value: BOSS_DATA[record.bossName]?.maps.join(', ') || '未知',
+                        inline: true
+                    },
+                    {
+                        name: '重生時間範圍',
+                        value: `${formatTime(respawnMin)} ~ ${formatTime(respawnMax)}`,
+                        inline: false
+                    }
+                ],
+                timestamp: new Date().toISOString(),
+                footer: {
+                    text: '楓之谷BOSS重生時間系統'
+                }
+            };
+
+            try {
+                await fetch(DISCORD_WEBHOOK, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        embeds: [embed]
+                    })
+                });
+                // 不顯示任何錯誤或成功訊息
+            } catch (error) {
+                // 靜默處理錯誤，不在UI顯示
+            }
+        }
+
+        // 顯示通知
+        function showNotification(message, type = 'success') {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerHTML = `<p style="white-space: pre-line;">${message}</p>`;
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.remove();
+            }, 5000);
+        }
+
+        // 切換標籤
+        function switchTab(index) {
+            const tabs = document.querySelectorAll('.tab');
+            const contents = document.querySelectorAll('.tab-content');
+
+            tabs.forEach(tab => tab.classList.remove('active'));
+            contents.forEach(content => content.classList.remove('active'));
+
+            tabs[index].classList.add('active');
+            contents[index].classList.add('active');
+        }
+
+        // 格式化時間
+        function formatTime(date) {
+            return date.toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' });
+        }
+
+        function formatDateTime(date, withSeconds = false) {
+            const options = { 
+                month: '2-digit', 
+                day: '2-digit', 
+                hour: '2-digit', 
+                minute: '2-digit'
+            };
+            if (withSeconds) {
+                options.second = '2-digit';
+            }
+            return date.toLocaleString('zh-TW', options).replace(/\//g, '/');
+        }
+
+        // 提交改善建議
+        async function submitFeedback() {
+            const type = document.getElementById('feedback-type').value;
+            const content = document.getElementById('feedback-content').value.trim();
+            const contact = document.getElementById('feedback-contact').value.trim();
+
+            if (!content) {
+                showNotification('請輸入詳細說明', 'warning');
+                return;
+            }
+
+            const now = new Date();
+            const embed = {
+                title: '📝 新的改善建議',
+                color: 0x00ccff,
+                fields: [
+                    {
+                        name: '📋 建議類型',
+                        value: type,
+                        inline: true
+                    },
+                    {
+                        name: '🕒 提交時間',
+                        value: formatDateTime(now, true),
+                        inline: true
+                    },
+                    {
+                        name: '💬 詳細說明',
+                        value: content.length > 1024 ? content.substring(0, 1021) + '...' : content,
+                        inline: false
+                    }
+                ],
+                timestamp: now.toISOString(),
+                footer: {
+                    text: '楓之谷BOSS重生時間系統 - 改善建議'
+                }
+            };
+
+            if (contact) {
+                embed.fields.push({
+                    name: '📧 聯絡方式',
+                    value: contact,
+                    inline: false
+                });
+            }
+
+            try {
+                const response = await fetch(FEEDBACK_WEBHOOK, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        embeds: [embed]
+                    })
+                });
+
+                if (response.ok) {
+                    showNotification('感謝您的建議！已成功提交 ✨', 'success');
+                    clearFeedbackForm();
+                } else {
+                    showNotification('提交失敗，請稍後再試', 'error');
+                }
+            } catch (error) {
+                showNotification('提交失敗，請檢查網路連線', 'error');
+            }
+        }
+
+        // 清空改善建議表單
+        function clearFeedbackForm() {
+            document.getElementById('feedback-type').value = '功能建議';
+            document.getElementById('feedback-content').value = '';
+            document.getElementById('feedback-contact').value = '';
+        }
+
+        // 保存數據到localStorage
+        function saveData() {
+            localStorage.setItem('activeBosses', JSON.stringify(activeBosses));
+            localStorage.setItem('patrolRecords', JSON.stringify(patrolRecords));
+        }
+
+        // 載入數據
+        function loadData() {
+            const savedBosses = localStorage.getItem('activeBosses');
+            const savedPatrols = localStorage.getItem('patrolRecords');
+
+            if (savedBosses) {
+                try {
+                    activeBosses = JSON.parse(savedBosses);
+                } catch (e) {
+                    console.error('載入BOSS數據失敗:', e);
+                }
+            }
+
+            if (savedPatrols) {
+                try {
+                    patrolRecords = JSON.parse(savedPatrols);
+                } catch (e) {
+                    console.error('載入巡邏記錄失敗:', e);
+                }
+            }
+        }
+
+        // 頁面載入時初始化
+        window.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
