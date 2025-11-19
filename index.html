@@ -542,7 +542,7 @@
                     <div class="input-field">
                         <label>聯絡方式 (選填):</label>
                         <input type="text" id="feedback-contact" 
-                               placeholder="Discord ID 或其他聯絡方式"
+                               placeholder="Email、遊戲ID 或其他聯絡方式"
                                style="width: 100%;">
                     </div>
                 </div>
@@ -558,65 +558,24 @@
 
                 <div class="info-box" style="margin-top: 20px;">
                     <p style="color: #00ff99; font-size: 0.9em;">
-                        ℹ️ 您的建議將會被發送到開發團隊,我們會仔細閱讀每一條建議並持續改進系統。感謝您的支持！
+                        ℹ️ 您的建議將會送達開發團隊，我們會仔細閱讀每一條建議並持續改進系統。感謝您的支持！
                     </p>
                 </div>
             </div>
 
-            <div class="section">
-                <h2>📅 更新日記</h2>
-                <div style="max-height: 500px; overflow-y: auto;" class="scrollbar">
-                    
-                    <div style="background: #0a0a1a; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #00ccff;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                            <h3 style="color: #00ccff; font-size: 1.1em; margin: 0;">v1.2.0 - 地圖選擇功能優化</h3>
-                            <span style="color: #00ff99; font-size: 0.9em;">2025-01-19</span>
-                        </div>
-                        <ul style="color: #a0a0c0; margin-left: 20px; line-height: 1.8;">
-                            <li>✨ 新增黑輪王地圖選擇功能（7 / 7-1）</li>
-                            <li>🎨 優化地圖選擇區塊的視覺設計</li>
-                        </ul>
-                    </div>
 
-                    <div style="background: #0a0a1a; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #00ccff;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                            <h3 style="color: #00ccff; font-size: 1.1em; margin: 0;">v1.1.0 - 改善建議功能</h3>
-                            <span style="color: #00ff99; font-size: 0.9em;">2025-01-18</span>
-                        </div>
-                        <ul style="color: #a0a0c0; margin-left: 20px; line-height: 1.8;">
-                            <li>📝 新增改善建議提交功能</li>
-                            <li>🔗 建議會自動發送到Discord頻道</li>
-                            <li>📧 支援選填聯絡方式</li>
-                        </ul>
-                    </div>
-
-                    <div style="background: #0a0a1a; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #00ccff;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                            <h3 style="color: #00ccff; font-size: 1.1em; margin: 0;">v1.0.0 - 系統正式上線</h3>
-                            <span style="color: #00ff99; font-size: 0.9em;">2025-01-15</span>
-                        </div>
-                        <ul style="color: #a0a0c0; margin-left: 20px; line-height: 1.8;">
-                            <li>🎮 BOSS擊殺時間記錄功能</li>
-                            <li>⏰ 自動計算重生時間範圍</li>
-                            <li>👀 巡邏打卡記錄功能</li>
-                            <li>📊 即時重生狀態顯示</li>
-                            <li>💾 本地數據持久化保存</li>
-                            <li>📱 響應式設計支援行動裝置</li>
-                        </ul>
-                    </div>
-
-                    <div style="text-align: center; padding: 20px; color: #a0a0c0;">
-                        <p>更多更新敬請期待... 🚀</p>
-                    </div>
-
-                </div>
-            </div>
         </div>
     </div>
 
     <script>
-        // Discord Webhook URL
-        const DISCORD_WEBHOOK = 'https://discord.com/api/webhooks/1438472081003118653/4KS7P2dGU_7KF-6tIQRgUuaLQYGPf8AZD0oDhYnUNGAJFFZKY6FhAs96O1UnLYnV9TvC';
+        // Discord Webhook URLs
+        const DISCORD_WEBHOOKS = {
+            "蘑菇王": "https://discord.com/api/webhooks/1438472081003118653/4KS7P2dGU_7KF-6tIQRgUuaLQYGPf8AZD0oDhYnUNGAJFFZKY6FhAs96O1UnLYnV9TvC",
+            "殭屍蘑菇王": "https://discord.com/api/webhooks/1440712167279165441/Csi_R_VtZOCEMCxfdxJzZVnFMdb2mAZQ8ePupNFVsZSpar8Y7nlgaOmrpzcwBzNy8i2D",
+            "巴洛古": "https://discord.com/api/webhooks/1440712283356397629/Avw1nV_Gfuh8MUsMjroAVUCydVyEDDQlvPEjEk3b16uvaSxuChBGlhWwc7Mta4rRFBBn",
+            "黑輪王": "https://discord.com/api/webhooks/1440712399899328512/bkmJ2wqFZB5PRUo7wbhrt9I1dMQsEYKHfPc6bZRWfwbWle6fzosXHyEHzkFXXQickWIc",
+            "仙人娃娃": "https://discord.com/api/webhooks/1440712496410525706/hTjO-fV43ekEg7suq6tZJw5FAFC5kRYWUAhBuEMMycBLztCjem8R_720E4sSpW8IwVFA"
+        };
         const FEEDBACK_WEBHOOK = 'https://discord.com/api/webhooks/1438760814466039910/iYegYu_LoPALQokZnyEjFJKuVXU9MxBHhMKvcQpZx0Ny3sKeVvUjmob0ozV5-BBHsxsj';
 
         // BOSS 數據
@@ -1059,8 +1018,8 @@
             const now = new Date();
             const toNotify = [];
             
-            // 限定BOSS
-            const notifyBosses = ['蘑菇王', '殭屍蘑菇王', '巴洛古', '黑輪王', '瘋狂喵z客'];
+            // 限定BOSS - 所有有專屬webhook的BOSS
+            const notifyBosses = ['蘑菇王', '殭屍蘑菇王', '巴洛古', '黑輪王', '仙人娃娃'];
 
             activeBosses.forEach(record => {
                 if (record.notificationEnabled && !record.notified && 
@@ -1081,6 +1040,14 @@
 
         // 發送通知
         async function sendDiscordNotification(record) {
+            // 獲取該BOSS專屬的webhook URL
+            const webhookUrl = DISCORD_WEBHOOKS[record.bossName];
+            
+            // 如果該BOSS沒有專屬webhook，不發送通知
+            if (!webhookUrl) {
+                return;
+            }
+
             const respawnMin = new Date(record.respawnMin);
             const respawnMax = new Date(record.respawnMax);
 
@@ -1114,7 +1081,7 @@
             };
 
             try {
-                await fetch(DISCORD_WEBHOOK, {
+                await fetch(webhookUrl, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
