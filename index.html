@@ -112,6 +112,40 @@
             gap: 5px;
         }
 
+        .map-select-wrapper {
+            background: rgba(0, 204, 255, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            border: 2px solid #00ccff;
+            margin: 15px 0;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .map-select-wrapper label {
+            color: #00ccff;
+            font-size: 1em;
+            font-weight: bold;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .map-select-wrapper select {
+            width: 100%;
+            font-size: 1.05em;
+            padding: 12px;
+        }
+
         label {
             color: #a0a0c0;
             font-size: 0.9em;
@@ -397,7 +431,13 @@
                     </div>
                 </div>
 
-
+                <div class="map-select-wrapper" id="map-select-container" style="display: none;">
+                    <label>🗺️ 選擇地圖位置:</label>
+                    <select id="map-select">
+                        <option value="7">夜市徒步區7</option>
+                        <option value="7-1">夜市徒步區7-1</option>
+                    </select>
+                </div>
 
                 <div class="info-box" id="boss-info" style="display: none;">
                     <p id="map-info"></p>
@@ -407,7 +447,7 @@
                 <div class="button-group">
                     <button onclick="recordBoss()">📝 記錄擊殺時間 (Enter)</button>
                 </div>
-                <p class="hint">💡 提示: 選擇BOSS → 輸入頻道 → 按Enter或點擊按鈕記錄</p>
+                <p class="hint">💡 提示: 選擇BOSS → 輸入頻道 → (黑輪王需選擇地圖) → 按Enter或點擊按鈕記錄</p>
             </div>
 
             <div class="section">
@@ -419,6 +459,7 @@
                                 <th><input type="checkbox" id="select-all" onchange="toggleSelectAll()"></th>
                                 <th>BOSS名稱</th>
                                 <th>頻道</th>
+                                <th>地圖</th>
                                 <th>擊殺時間</th>
                                 <th>最早重生</th>
                                 <th>最晚重生</th>
@@ -517,7 +558,7 @@
 
                 <div class="info-box" style="margin-top: 20px;">
                     <p style="color: #00ff99; font-size: 0.9em;">
-                        ℹ️ 您的建議將會被發送到開發團隊，我們會仔細閱讀每一條建議並持續改進系統。感謝您的支持！
+                        ℹ️ 您的建議將會被發送到開發團隊,我們會仔細閱讀每一條建議並持續改進系統。感謝您的支持！
                     </p>
                 </div>
             </div>
@@ -548,7 +589,7 @@
             "葛雷金剛": { min: 270, max: 350, maps: ["葛雷草原"], color: "#8b4513" },
             "書生幽靈": { min: 150, max: 300, maps: ["狐狸谷"], color: "#9370db" },
             "九尾妖狐": { min: 210, max: 570, maps: ["月亮山坡"], color: "#ff69b4" },
-            "黑輪王": { min: 780, max: 1020, maps: ["夜市徒步區7"], color: "#000000" },
+            "黑輪王": { min: 780, max: 1020, maps: ["夜市徒步區7", "夜市徒步區7-1"], color: "#000000", hasMapSelect: true },
             "瘋狂喵z客": { min: 110, max: 420, maps: ["名人大道西部區域"], color: "#ffa500" },
             "仙人娃娃": { min: 158, max: 180, maps: ["上級訓練場"], color: "#98fb98" },
             "肯德熊": { min: 113, max: 128, maps: ["流浪熊的領土"], color: "#8b7355" },
@@ -612,13 +653,24 @@
         // BOSS選擇事件
         function onBossSelected() {
             const bossName = document.getElementById('boss-select').value;
+            const mapSelectContainer = document.getElementById('map-select-container');
+            
             if (bossName && BOSS_DATA[bossName]) {
                 const info = BOSS_DATA[bossName];
+                
+                // 檢查是否為黑輪王
+                if (info.hasMapSelect) {
+                    mapSelectContainer.style.display = 'block';
+                } else {
+                    mapSelectContainer.style.display = 'none';
+                }
+                
                 document.getElementById('map-info').textContent = `地圖: ${info.maps.join(', ')}`;
                 document.getElementById('time-info').textContent = `重生時間: ${formatTimeRange(info.min, info.max)}`;
                 document.getElementById('boss-info').style.display = 'block';
             } else {
                 document.getElementById('boss-info').style.display = 'none';
+                mapSelectContainer.style.display = 'none';
             }
         }
 
@@ -643,10 +695,18 @@
             const respawnMin = new Date(now.getTime() + info.min * 60000);
             const respawnMax = new Date(now.getTime() + info.max * 60000);
 
+            // 獲取地圖信息
+            let mapLocation = info.maps[0]; // 默認第一個地圖
+            if (info.hasMapSelect) {
+                const selectedMap = document.getElementById('map-select').value;
+                mapLocation = selectedMap === '7' ? '夜市徒步區7' : '夜市徒步區7-1';
+            }
+
             const record = {
                 id: Date.now(),
                 channel: channel,
                 bossName: bossName,
+                map: mapLocation,
                 deathTime: now.toISOString(),
                 respawnMin: respawnMin.toISOString(),
                 respawnMax: respawnMax.toISOString(),
@@ -660,7 +720,7 @@
             updateAllDisplays();
 
             showNotification(
-                `頻道 ${channel} - ${bossName} 擊殺時間已記錄！\n預計重生: ${formatTime(respawnMin)} ~ ${formatTime(respawnMax)}`,
+                `頻道 ${channel} - ${bossName}\n地圖: ${mapLocation}\n擊殺時間已記錄！\n預計重生: ${formatTime(respawnMin)} ~ ${formatTime(respawnMax)}`,
                 'success'
             );
 
@@ -707,6 +767,7 @@
                     timestamp: now.toISOString(),
                     bossName: record.bossName,
                     channel: record.channel,
+                    map: record.map,
                     result: '未重生',
                     note: '從BOSS記錄巡邏打卡'
                 });
@@ -714,7 +775,7 @@
                 saveData();
                 updateAllDisplays();
                 showNotification(
-                    `巡邏打卡記錄已儲存！\nBOSS: ${record.bossName}\n頻道: ${record.channel}`,
+                    `巡邏打卡記錄已儲存！\nBOSS: ${record.bossName}\n頻道: ${record.channel}\n地圖: ${record.map}`,
                     'success'
                 );
             }
@@ -779,6 +840,7 @@
                     timestamp: now.toISOString(),
                     bossName: record.bossName,
                     channel: record.channel,
+                    map: record.map,
                     result: '未重生',
                     note: '從BOSS記錄巡邏打卡'
                 });
@@ -786,7 +848,7 @@
                 saveData();
                 updateAllDisplays();
                 showNotification(
-                    `巡邏打卡記錄已儲存！\nBOSS: ${record.bossName}\n頻道: ${record.channel}\n時間: ${formatTime(now)}`,
+                    `巡邏打卡記錄已儲存！\nBOSS: ${record.bossName}\n頻道: ${record.channel}\n地圖: ${record.map}\n時間: ${formatTime(now)}`,
                     'success'
                 );
             }
@@ -848,19 +910,20 @@
 
                 row.insertCell(1).textContent = record.bossName;
                 row.insertCell(2).textContent = record.channel;
-                row.insertCell(3).textContent = formatDateTime(new Date(record.deathTime));
-                row.insertCell(4).textContent = formatDateTime(new Date(record.respawnMin));
-                row.insertCell(5).textContent = formatDateTime(new Date(record.respawnMax));
+                row.insertCell(3).textContent = record.map || '';
+                row.insertCell(4).textContent = formatDateTime(new Date(record.deathTime));
+                row.insertCell(5).textContent = formatDateTime(new Date(record.respawnMin));
+                row.insertCell(6).textContent = formatDateTime(new Date(record.respawnMax));
 
-                const statusCell = row.insertCell(6);
+                const statusCell = row.insertCell(7);
                 const status = getStatus(record);
                 statusCell.textContent = status.text;
                 statusCell.className = status.className;
 
-                row.insertCell(7).textContent = record.lastPatrolTime ? formatTime(new Date(record.lastPatrolTime)) : '';
+                row.insertCell(8).textContent = record.lastPatrolTime ? formatTime(new Date(record.lastPatrolTime)) : '';
                 
                 // 操作按鈕
-                const actionCell = row.insertCell(8);
+                const actionCell = row.insertCell(9);
                 actionCell.innerHTML = `
                     <button onclick="deleteRecord(${record.id})" style="padding: 5px 10px; margin: 2px; font-size: 0.9em;">🗑️</button>
                     <button onclick="respawnSingleBoss(${record.id})" style="padding: 5px 10px; margin: 2px; font-size: 0.9em;">🔄</button>
@@ -910,9 +973,11 @@
                     patrolInfo = ` | 最後巡邏: ${diff}分鐘前`;
                 }
 
+                const mapInfo = record.map ? ` - ${record.map}` : '';
+
                 html += `
                     <div class="boss-status-card">
-                        <h3>【${record.bossName}】頻道 ${record.channel}</h3>
+                        <h3>【${record.bossName}】頻道 ${record.channel}${mapInfo}</h3>
                         <p class="${status.className}">狀態: ${status.text}</p>
                         <p>擊殺時間: ${formatDateTime(new Date(record.deathTime))}</p>
                         <p>重生時間: ${formatTime(respawnMin)} ~ ${formatTime(respawnMax)}</p>
@@ -970,6 +1035,8 @@
             const respawnMin = new Date(record.respawnMin);
             const respawnMax = new Date(record.respawnMax);
 
+            const mapInfo = record.map || BOSS_DATA[record.bossName]?.maps.join(', ') || '未知';
+
             const embed = {
                 title: '🔔 BOSS重生提醒',
                 description: `**${record.bossName}** 可能已經重生！`,
@@ -982,7 +1049,7 @@
                     },
                     {
                         name: '地圖',
-                        value: BOSS_DATA[record.bossName]?.maps.join(', ') || '未知',
+                        value: mapInfo,
                         inline: true
                     },
                     {
