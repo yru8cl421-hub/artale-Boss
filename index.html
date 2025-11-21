@@ -701,7 +701,7 @@
         }
 
         // 記錄BOSS擊殺
-        async function recordBoss() {
+        function recordBoss() {
             const bossName = document.getElementById('boss-select').value;
             const channel = document.getElementById('channel-input').value;
             const notification = true; // 默認開啟提醒
@@ -745,8 +745,10 @@
             saveData();
             updateAllDisplays();
 
-            // 立即發送Discord通知（如果該BOSS有專屬webhook）
-            await sendKillNotification(record);
+            // 在後台發送Discord通知（不阻塞UI）
+            sendKillNotification(record).catch(err => {
+                // 靜默處理錯誤
+            });
 
             showNotification(
                 `頻道 ${channel} - ${bossName}\n地圖: ${mapLocation}\n擊殺時間已記錄！\n預計重生: ${formatTime(respawnMin)} ~ ${formatTime(respawnMax)}`,
@@ -769,7 +771,7 @@
         }
 
         // 重新計時單個BOSS
-        async function respawnSingleBoss(id) {
+        function respawnSingleBoss(id) {
             const record = activeBosses.find(b => b.id === id);
             if (record) {
                 const info = BOSS_DATA[record.bossName];
@@ -782,8 +784,10 @@
                 saveData();
                 updateAllDisplays();
                 
-                // 發送Discord通知
-                await sendKillNotification(record);
+                // 在後台發送Discord通知（不阻塞UI）
+                sendKillNotification(record).catch(err => {
+                    // 靜默處理錯誤
+                });
                 
                 showNotification(`已重新計時 ${record.bossName}！`, 'success');
             }
@@ -831,14 +835,14 @@
         }
 
         // 重新計時BOSS
-        async function respawnBoss() {
+        function respawnBoss() {
             const selected = getSelectedRecords();
             if (selected.length === 0) {
                 showNotification('請選擇要重新計時的BOSS記錄', 'warning');
                 return;
             }
 
-            for (const id of selected) {
+            selected.forEach(id => {
                 const record = activeBosses.find(b => b.id === id);
                 if (record) {
                     const info = BOSS_DATA[record.bossName];
@@ -848,10 +852,12 @@
                     record.respawnMax = new Date(now.getTime() + info.max * 60000).toISOString();
                     record.notified = false;
                     
-                    // 發送Discord通知
-                    await sendKillNotification(record);
+                    // 在後台發送Discord通知（不阻塞UI）
+                    sendKillNotification(record).catch(err => {
+                        // 靜默處理錯誤
+                    });
                 }
-            }
+            });
 
             saveData();
             updateAllDisplays();
@@ -1073,6 +1079,7 @@
             
             // 如果該BOSS沒有專屬webhook，不發送通知
             if (!webhookUrl) {
+                console.log(`${record.bossName} 沒有設定webhook，跳過通知`);
                 return;
             }
 
@@ -1088,7 +1095,7 @@
                 fields: [
                     {
                         name: '頻道',
-                        value: record.channel,
+                        value: String(record.channel),
                         inline: true
                     },
                     {
@@ -1114,7 +1121,8 @@
             };
 
             try {
-                await fetch(webhookUrl, {
+                console.log(`正在發送 ${record.bossName} 的通知到Discord...`);
+                const response = await fetch(webhookUrl, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -1123,9 +1131,14 @@
                         embeds: [embed]
                     })
                 });
-                // 不顯示任何錯誤或成功訊息
+                
+                if (response.ok) {
+                    console.log(`${record.bossName} 通知已成功發送`);
+                } else {
+                    console.error(`${record.bossName} 通知發送失敗: ${response.status}`);
+                }
             } catch (error) {
-                // 靜默處理錯誤，不在UI顯示
+                console.error(`${record.bossName} 通知發送錯誤:`, error);
             }
         }
 
