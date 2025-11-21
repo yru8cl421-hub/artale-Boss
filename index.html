@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -616,7 +617,7 @@
             populateBossSelect();
             populateBossListTable();
             updateAllDisplays();
-            setInterval(checkNotifications, 60000); // 每分鐘檢查一次
+            // setInterval(checkNotifications, 60000); // 已改為記錄擊殺時立即通知
             setInterval(updateAllDisplays, 10000); // 每10秒更新一次
 
             // 添加Enter鍵監聽
@@ -652,10 +653,28 @@
 
         // 格式化時間範圍
         function formatTimeRange(min, max) {
-            if (min >= 60) {
-                return `${Math.floor(min/60)}小時${min%60}分 ~ ${Math.floor(max/60)}小時${max%60}分`;
+            const minHour = Math.floor(min/60);
+            const minMin = min%60;
+            const maxHour = Math.floor(max/60);
+            const maxMin = max%60;
+            
+            let minStr, maxStr;
+            
+            // 格式化最小時間
+            if (minHour > 0) {
+                minStr = minMin > 0 ? `${minHour}小時${minMin}分` : `${minHour}小時`;
+            } else {
+                minStr = `${minMin}分`;
             }
-            return `${min} ~ ${max}分鐘`;
+            
+            // 格式化最大時間
+            if (maxHour > 0) {
+                maxStr = maxMin > 0 ? `${maxHour}小時${maxMin}分` : `${maxHour}小時`;
+            } else {
+                maxStr = `${maxMin}分`;
+            }
+            
+            return `${minStr} ~ ${maxStr}`;
         }
 
         // BOSS選擇事件
@@ -683,7 +702,7 @@
         }
 
         // 記錄BOSS擊殺
-        function recordBoss() {
+        async function recordBoss() {
             const bossName = document.getElementById('boss-select').value;
             const channel = document.getElementById('channel-input').value;
             const notification = true; // 默認開啟提醒
@@ -726,6 +745,9 @@
             activeBosses.push(record);
             saveData();
             updateAllDisplays();
+
+            // 立即發送Discord通知（如果該BOSS有專屬webhook）
+            await sendKillNotification(record);
 
             showNotification(
                 `頻道 ${channel} - ${bossName}\n地圖: ${mapLocation}\n擊殺時間已記錄！\n預計重生: ${formatTime(respawnMin)} ~ ${formatTime(respawnMax)}`,
@@ -1035,6 +1057,69 @@
                 for (const record of toNotify) {
                     await sendDiscordNotification(record);
                 }
+            }
+        }
+
+        // 發送擊殺記錄通知
+        async function sendKillNotification(record) {
+            // 獲取該BOSS專屬的webhook URL
+            const webhookUrl = DISCORD_WEBHOOKS[record.bossName];
+            
+            // 如果該BOSS沒有專屬webhook，不發送通知
+            if (!webhookUrl) {
+                return;
+            }
+
+            const deathTime = new Date(record.deathTime);
+            const respawnMin = new Date(record.respawnMin);
+            const respawnMax = new Date(record.respawnMax);
+            const mapInfo = record.map || BOSS_DATA[record.bossName]?.maps.join(', ') || '未知';
+
+            const embed = {
+                title: '⚔️ BOSS擊殺記錄',
+                description: `**${record.bossName}** 已被擊殺！`,
+                color: parseInt(BOSS_DATA[record.bossName]?.color?.replace('#', '') || 'FF0000', 16),
+                fields: [
+                    {
+                        name: '頻道',
+                        value: record.channel,
+                        inline: true
+                    },
+                    {
+                        name: '地圖',
+                        value: mapInfo,
+                        inline: true
+                    },
+                    {
+                        name: '擊殺時間',
+                        value: formatDateTime(deathTime),
+                        inline: false
+                    },
+                    {
+                        name: '預計重生時間',
+                        value: `${formatTime(respawnMin)} ~ ${formatTime(respawnMax)}`,
+                        inline: false
+                    }
+                ],
+                timestamp: new Date().toISOString(),
+                footer: {
+                    text: '楓之谷BOSS重生時間系統'
+                }
+            };
+
+            try {
+                await fetch(webhookUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        embeds: [embed]
+                    })
+                });
+                // 不顯示任何錯誤或成功訊息
+            } catch (error) {
+                // 靜默處理錯誤，不在UI顯示
             }
         }
 
