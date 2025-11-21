@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -770,7 +769,7 @@
         }
 
         // 重新計時單個BOSS
-        function respawnSingleBoss(id) {
+        async function respawnSingleBoss(id) {
             const record = activeBosses.find(b => b.id === id);
             if (record) {
                 const info = BOSS_DATA[record.bossName];
@@ -782,6 +781,10 @@
                 
                 saveData();
                 updateAllDisplays();
+                
+                // 發送Discord通知
+                await sendKillNotification(record);
+                
                 showNotification(`已重新計時 ${record.bossName}！`, 'success');
             }
         }
@@ -828,14 +831,14 @@
         }
 
         // 重新計時BOSS
-        function respawnBoss() {
+        async function respawnBoss() {
             const selected = getSelectedRecords();
             if (selected.length === 0) {
                 showNotification('請選擇要重新計時的BOSS記錄', 'warning');
                 return;
             }
 
-            selected.forEach(id => {
+            for (const id of selected) {
                 const record = activeBosses.find(b => b.id === id);
                 if (record) {
                     const info = BOSS_DATA[record.bossName];
@@ -844,8 +847,11 @@
                     record.respawnMin = new Date(now.getTime() + info.min * 60000).toISOString();
                     record.respawnMax = new Date(now.getTime() + info.max * 60000).toISOString();
                     record.notified = false;
+                    
+                    // 發送Discord通知
+                    await sendKillNotification(record);
                 }
-            });
+            }
 
             saveData();
             updateAllDisplays();
