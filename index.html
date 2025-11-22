@@ -50,6 +50,7 @@
             gap: 10px;
             margin-bottom: 20px;
             border-bottom: 2px solid #00ccff;
+            flex-wrap: wrap;
         }
 
         .tab {
@@ -382,6 +383,64 @@
             font-style: italic;
         }
 
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .stats-card {
+            background: #1e1e3a;
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #00ccff;
+            transition: all 0.3s;
+        }
+
+        .stats-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0, 204, 255, 0.3);
+        }
+
+        .stats-card h3 {
+            color: #00ccff;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .stats-number {
+            font-size: 2em;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .stats-label {
+            color: #a0a0c0;
+            font-size: 0.9em;
+            margin-bottom: 5px;
+        }
+
+        .stats-total {
+            color: #00ff99;
+        }
+
+        .stats-today {
+            color: #ff9800;
+        }
+
+        .stats-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
         @media (max-width: 768px) {
             .input-group {
                 grid-template-columns: 1fr;
@@ -398,6 +457,10 @@
             th, td {
                 padding: 8px;
             }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
@@ -412,7 +475,8 @@
             <div class="tab active" onclick="switchTab(0)">BOSS記錄</div>
             <div class="tab" onclick="switchTab(1)">重生狀態</div>
             <div class="tab" onclick="switchTab(2)">BOSS列表</div>
-            <div class="tab" onclick="switchTab(3)">改善建議</div>
+            <div class="tab" onclick="switchTab(3)">擊殺統計</div>
+            <div class="tab" onclick="switchTab(4)">改善建議</div>
         </div>
 
         <div class="tab-content active" id="tab-record">
@@ -507,6 +571,28 @@
             </div>
         </div>
 
+        <div class="tab-content" id="tab-statistics">
+            <div class="section">
+                <div class="stats-header">
+                    <h2>📊 BOSS擊殺統計</h2>
+                    <div class="button-group" style="margin: 0;">
+                        <button onclick="resetTodayStats()">🔄 重置今日統計</button>
+                        <button onclick="resetAllStats()" class="danger">⚠️ 清空所有統計</button>
+                    </div>
+                </div>
+                
+                <div class="info-box">
+                    <p>📅 統計日期: <span id="stats-date"></span></p>
+                    <p>🎯 今日總擊殺: <span id="total-today-kills" style="color: #ff9800; font-weight: bold; font-size: 1.2em;">0</span> 次</p>
+                    <p>🏆 累積總擊殺: <span id="total-all-kills" style="color: #00ff99; font-weight: bold; font-size: 1.2em;">0</span> 次</p>
+                </div>
+
+                <div class="stats-grid" id="stats-grid">
+                    <!-- 統計卡片將在這裡動態生成 -->
+                </div>
+            </div>
+        </div>
+
         <div class="tab-content" id="tab-feedback">
             <div class="section">
                 <h2>💡 改善建議</h2>
@@ -562,8 +648,6 @@
                     </p>
                 </div>
             </div>
-
-
         </div>
     </div>
 
@@ -600,14 +684,15 @@
         // 存儲數據
         let activeBosses = [];
         let patrolRecords = [];
+        let bossStatistics = {}; // 新增：BOSS統計數據
 
         // 初始化
         function init() {
             loadData();
             populateBossSelect();
             populateBossListTable();
+            initializeStatistics();
             updateAllDisplays();
-            // setInterval(checkNotifications, 60000); // 已改為記錄擊殺時立即通知
             setInterval(updateAllDisplays, 10000); // 每10秒更新一次
 
             // 添加Enter鍵監聽
@@ -616,6 +701,143 @@
                     recordBoss();
                 }
             });
+        }
+
+        // 初始化統計數據
+        function initializeStatistics() {
+            // 確保每個BOSS都有統計數據
+            Object.keys(BOSS_DATA).forEach(bossName => {
+                if (!bossStatistics[bossName]) {
+                    bossStatistics[bossName] = {
+                        totalKills: 0,
+                        todayKills: 0,
+                        lastResetDate: getTodayDateString()
+                    };
+                }
+            });
+            
+            // 檢查是否需要重置今日統計
+            checkAndResetDailyStats();
+            saveData();
+        }
+
+        // 獲取今天的日期字串 (YYYY-MM-DD)
+        function getTodayDateString() {
+            const now = new Date();
+            return now.toISOString().split('T')[0];
+        }
+
+        // 檢查並重置每日統計
+        function checkAndResetDailyStats() {
+            const today = getTodayDateString();
+            let needsReset = false;
+
+            Object.keys(bossStatistics).forEach(bossName => {
+                if (bossStatistics[bossName].lastResetDate !== today) {
+                    bossStatistics[bossName].todayKills = 0;
+                    bossStatistics[bossName].lastResetDate = today;
+                    needsReset = true;
+                }
+            });
+
+            if (needsReset) {
+                saveData();
+            }
+        }
+
+        // 更新BOSS統計
+        function updateBossStatistics(bossName) {
+            if (!bossStatistics[bossName]) {
+                bossStatistics[bossName] = {
+                    totalKills: 0,
+                    todayKills: 0,
+                    lastResetDate: getTodayDateString()
+                };
+            }
+
+            const today = getTodayDateString();
+            if (bossStatistics[bossName].lastResetDate !== today) {
+                bossStatistics[bossName].todayKills = 0;
+                bossStatistics[bossName].lastResetDate = today;
+            }
+
+            bossStatistics[bossName].totalKills++;
+            bossStatistics[bossName].todayKills++;
+            
+            saveData();
+        }
+
+        // 更新統計顯示
+        function updateStatisticsDisplay() {
+            const statsGrid = document.getElementById('stats-grid');
+            const today = getTodayDateString();
+            
+            // 更新日期和總計
+            document.getElementById('stats-date').textContent = new Date().toLocaleDateString('zh-TW');
+            
+            let totalToday = 0;
+            let totalAll = 0;
+
+            // 生成統計卡片
+            let html = '';
+            Object.entries(BOSS_DATA).forEach(([bossName, info]) => {
+                const stats = bossStatistics[bossName] || { totalKills: 0, todayKills: 0 };
+                
+                totalToday += stats.todayKills;
+                totalAll += stats.totalKills;
+
+                html += `
+                    <div class="stats-card">
+                        <h3>
+                            <span style="color: ${info.color}">●</span>
+                            ${bossName}
+                        </h3>
+                        <div>
+                            <p class="stats-label">今日擊殺</p>
+                            <p class="stats-number stats-today">${stats.todayKills}</p>
+                        </div>
+                        <div>
+                            <p class="stats-label">累積擊殺</p>
+                            <p class="stats-number stats-total">${stats.totalKills}</p>
+                        </div>
+                    </div>
+                `;
+            });
+
+            statsGrid.innerHTML = html;
+            
+            // 更新總計
+            document.getElementById('total-today-kills').textContent = totalToday;
+            document.getElementById('total-all-kills').textContent = totalAll;
+        }
+
+        // 重置今日統計
+        function resetTodayStats() {
+            if (confirm('確定要重置今日所有BOSS的擊殺統計嗎？')) {
+                const today = getTodayDateString();
+                Object.keys(bossStatistics).forEach(bossName => {
+                    bossStatistics[bossName].todayKills = 0;
+                    bossStatistics[bossName].lastResetDate = today;
+                });
+                saveData();
+                updateStatisticsDisplay();
+                showNotification('已重置今日統計', 'success');
+            }
+        }
+
+        // 重置所有統計
+        function resetAllStats() {
+            if (confirm('確定要清空所有BOSS的擊殺統計嗎？此操作無法復原！')) {
+                const today = getTodayDateString();
+                Object.keys(bossStatistics).forEach(bossName => {
+                    bossStatistics[bossName].totalKills = 0;
+                    bossStatistics[bossName].todayKills = 0;
+                    bossStatistics[bossName].lastResetDate = today;
+                });
+                saveData();
+                updateStatisticsDisplay();
+                showNotification('已清空所有統計數據', 'success');
+            }
         }
 
         // 填充BOSS選擇列表
@@ -733,13 +955,19 @@
             };
 
             activeBosses.push(record);
+            
+            // 更新統計
+            updateBossStatistics(bossName);
+            
             saveData();
             updateAllDisplays();
 
             // 在後台發送Discord通知（不阻塞UI）
-            sendKillNotification(record).catch(err => {
-                // 靜默處理錯誤
-            });
+            if (typeof sendKillNotification === 'function') {
+                sendKillNotification(record).catch(err => {
+                    // 靜默處理錯誤
+                });
+            }
 
             showNotification(
                 `頻道 ${channel} - ${bossName}\n地圖: ${mapLocation}\n擊殺時間已記錄！\n預計重生: ${formatTime(respawnMin)} ~ ${formatTime(respawnMax)}`,
@@ -772,13 +1000,18 @@
                 record.respawnMax = new Date(now.getTime() + info.max * 60000).toISOString();
                 record.notified = false;
                 
+                // 更新統計
+                updateBossStatistics(record.bossName);
+                
                 saveData();
                 updateAllDisplays();
                 
                 // 在後台發送Discord通知（不阻塞UI）
-                sendKillNotification(record).catch(err => {
-                    // 靜默處理錯誤
-                });
+                if (typeof sendKillNotification === 'function') {
+                    sendKillNotification(record).catch(err => {
+                        // 靜默處理錯誤
+                    });
+                }
                 
                 showNotification(`已重新計時 ${record.bossName}！`, 'success');
             }
@@ -843,10 +1076,15 @@
                     record.respawnMax = new Date(now.getTime() + info.max * 60000).toISOString();
                     record.notified = false;
                     
+                    // 更新統計
+                    updateBossStatistics(record.bossName);
+                    
                     // 在後台發送Discord通知（不阻塞UI）
-                    sendKillNotification(record).catch(err => {
-                        // 靜默處理錯誤
-                    });
+                    if (typeof sendKillNotification === 'function') {
+                        sendKillNotification(record).catch(err => {
+                            // 靜默處理錯誤
+                        });
+                    }
                 }
             });
 
@@ -902,6 +1140,31 @@
             }
         }
 
+        // 提交建議
+        function submitFeedback() {
+            const type = document.getElementById('feedback-type').value;
+            const content = document.getElementById('feedback-content').value.trim();
+            const contact = document.getElementById('feedback-contact').value.trim();
+
+            if (!content) {
+                showNotification('請填寫詳細說明', 'warning');
+                return;
+            }
+
+            // 這裡可以添加實際的提交邏輯（如發送到後端API）
+            console.log('建議提交:', { type, content, contact });
+            
+            showNotification('感謝您的建議！我們已收到您的回饋。', 'success');
+            clearFeedbackForm();
+        }
+
+        // 清空建議表單
+        function clearFeedbackForm() {
+            document.getElementById('feedback-type').value = '功能建議';
+            document.getElementById('feedback-content').value = '';
+            document.getElementById('feedback-contact').value = '';
+        }
+
         // 獲取選中的記錄ID
         function getSelectedRecords() {
             const checkboxes = document.querySelectorAll('#record-tbody input[type="checkbox"]:checked');
@@ -918,8 +1181,10 @@
 
         // 更新所有顯示
         function updateAllDisplays() {
+            checkAndResetDailyStats(); // 檢查是否需要重置每日統計
             updateRecordDisplay();
             updateStatusDisplay();
+            updateStatisticsDisplay();
         }
 
         // 更新記錄顯示
@@ -1038,31 +1303,6 @@
             }
         }
 
-        // 檢查通知
-        async function checkNotifications() {
-            const now = new Date();
-            const toNotify = [];
-            
-            // 限定BOSS - 所有有專屬webhook的BOSS
-            const notifyBosses = ['蘑菇王', '殭屍蘑菇王', '巴洛古', '黑輪王', '仙人娃娃'];
-
-            activeBosses.forEach(record => {
-                if (record.notificationEnabled && !record.notified && 
-                    new Date(record.respawnMin) <= now &&
-                    notifyBosses.includes(record.bossName)) {
-                    record.notified = true;
-                    toNotify.push(record);
-                }
-            });
-
-            if (toNotify.length > 0) {
-                saveData();
-                for (const record of toNotify) {
-                    await sendDiscordNotification(record);
-                }
-            }
-        }
-
         // 顯示通知
         function showNotification(message, type = 'success') {
             const notification = document.createElement('div');
@@ -1109,12 +1349,14 @@
         function saveData() {
             localStorage.setItem('activeBosses', JSON.stringify(activeBosses));
             localStorage.setItem('patrolRecords', JSON.stringify(patrolRecords));
+            localStorage.setItem('bossStatistics', JSON.stringify(bossStatistics));
         }
 
         // 載入數據
         function loadData() {
             const savedBosses = localStorage.getItem('activeBosses');
             const savedPatrols = localStorage.getItem('patrolRecords');
+            const savedStatistics = localStorage.getItem('bossStatistics');
 
             if (savedBosses) {
                 try {
@@ -1129,6 +1371,15 @@
                     patrolRecords = JSON.parse(savedPatrols);
                 } catch (e) {
                     console.error('載入巡邏記錄失敗:', e);
+                }
+            }
+
+            if (savedStatistics) {
+                try {
+                    bossStatistics = JSON.parse(savedStatistics);
+                } catch (e) {
+                    console.error('載入統計數據失敗:', e);
+                    bossStatistics = {};
                 }
             }
         }
