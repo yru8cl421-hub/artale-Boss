@@ -1,0 +1,210 @@
+// Discord 通知配置文件
+// 注意：此文件包含敏感的 Webhook URLs，請勿上傳到公開的 GitHub repository
+// 建議在 .gitignore 中添加此文件
+
+// Discord Webhook URLs
+const DISCORD_WEBHOOKS = {
+    "蘑菇王": "https://discord.com/api/webhooks/1438472081003118653/4KS7P2dGU_7KF-6tIQRgUuaLQYGPf8AZD0oDhYnUNGAJFFZKY6FhAs96O1UnLYnV9TvC",
+    "殭屍蘑菇王": "https://discord.com/api/webhooks/1440712167279165441/Csi_R_VtZOCEMCxfdxJzZVnFMdb2mAZQ8ePupNFVsZSpar8Y7nlgaOmrpzcwBzNy8i2D",
+    "巴洛古": "https://discord.com/api/webhooks/1440712283356397629/Avw1nV_Gfuh8MUsMjroAVUCydVyEDDQlvPEjEk3b16uvaSxuChBGlhWwc7Mta4rRFBBn",
+    "黑輪王": "https://discord.com/api/webhooks/1440712399899328512/bkmJ2wqFZB5PRUo7wbhrt9I1dMQsEYKHfPc6bZRWfwbWle6fzosXHyEHzkFXXQickWIc",
+    "仙人娃娃": "https://discord.com/api/webhooks/1440712496410525706/hTjO-fV43ekEg7suq6tZJw5FAFC5kRYWUAhBuEMMycBLztCjem8R_720E4sSpW8IwVFA"
+};
+
+const FEEDBACK_WEBHOOK = 'https://discord.com/api/webhooks/1438760814466039910/iYegYu_LoPALQokZnyEjFJKuVXU9MxBHhMKvcQpZx0Ny3sKeVvUjmob0ozV5-BBHsxsj';
+
+// 發送擊殺記錄通知
+async function sendKillNotification(record) {
+    // 獲取該BOSS專屬的webhook URL
+    const webhookUrl = DISCORD_WEBHOOKS[record.bossName];
+    
+    // 如果該BOSS沒有專屬webhook，不發送通知
+    if (!webhookUrl) {
+        return;
+    }
+
+    const deathTime = new Date(record.deathTime);
+    const respawnMin = new Date(record.respawnMin);
+    const respawnMax = new Date(record.respawnMax);
+    const mapInfo = record.map || BOSS_DATA[record.bossName]?.maps.join(', ') || '未知';
+
+    const embed = {
+        title: '⚔️ BOSS擊殺記錄',
+        description: `**${record.bossName}** 已被擊殺！`,
+        color: parseInt(BOSS_DATA[record.bossName]?.color?.replace('#', '') || 'FF0000', 16),
+        fields: [
+            {
+                name: '頻道',
+                value: String(record.channel),
+                inline: true
+            },
+            {
+                name: '地圖',
+                value: mapInfo,
+                inline: true
+            },
+            {
+                name: '擊殺時間',
+                value: formatDateTime(deathTime),
+                inline: false
+            },
+            {
+                name: '預計重生時間',
+                value: `${formatTime(respawnMin)} ~ ${formatTime(respawnMax)}`,
+                inline: false
+            }
+        ],
+        timestamp: new Date().toISOString(),
+        footer: {
+            text: '楓之谷BOSS重生時間系統'
+        }
+    };
+
+    try {
+        await fetch(webhookUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                embeds: [embed]
+            })
+        });
+        // 靜默處理，不輸出任何訊息
+    } catch (error) {
+        // 靜默處理錯誤
+    }
+}
+
+// 發送重生提醒通知（目前已停用，保留代碼以備將來使用）
+async function sendDiscordNotification(record) {
+    // 獲取該BOSS專屬的webhook URL
+    const webhookUrl = DISCORD_WEBHOOKS[record.bossName];
+    
+    // 如果該BOSS沒有專屬webhook，不發送通知
+    if (!webhookUrl) {
+        return;
+    }
+
+    const respawnMin = new Date(record.respawnMin);
+    const respawnMax = new Date(record.respawnMax);
+
+    const mapInfo = record.map || BOSS_DATA[record.bossName]?.maps.join(', ') || '未知';
+
+    const embed = {
+        title: '🔔 BOSS重生提醒',
+        description: `**${record.bossName}** 可能已經重生！`,
+        color: parseInt(BOSS_DATA[record.bossName]?.color?.replace('#', '') || 'FF0000', 16),
+        fields: [
+            {
+                name: '頻道',
+                value: record.channel,
+                inline: true
+            },
+            {
+                name: '地圖',
+                value: mapInfo,
+                inline: true
+            },
+            {
+                name: '重生時間範圍',
+                value: `${formatTime(respawnMin)} ~ ${formatTime(respawnMax)}`,
+                inline: false
+            }
+        ],
+        timestamp: new Date().toISOString(),
+        footer: {
+            text: '楓之谷BOSS重生時間系統'
+        }
+    };
+
+    try {
+        await fetch(webhookUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                embeds: [embed]
+            })
+        });
+        // 不顯示任何錯誤或成功訊息
+    } catch (error) {
+        // 靜默處理錯誤，不在UI顯示
+    }
+}
+
+// 提交改善建議
+async function submitFeedback() {
+    const type = document.getElementById('feedback-type').value;
+    const content = document.getElementById('feedback-content').value.trim();
+    const contact = document.getElementById('feedback-contact').value.trim();
+
+    if (!content) {
+        showNotification('請輸入詳細說明', 'warning');
+        return;
+    }
+
+    const now = new Date();
+    const embed = {
+        title: '📝 新的改善建議',
+        color: 0x00ccff,
+        fields: [
+            {
+                name: '📋 建議類型',
+                value: type,
+                inline: true
+            },
+            {
+                name: '🕒 提交時間',
+                value: formatDateTime(now, true),
+                inline: true
+            },
+            {
+                name: '💬 詳細說明',
+                value: content.length > 1024 ? content.substring(0, 1021) + '...' : content,
+                inline: false
+            }
+        ],
+        timestamp: now.toISOString(),
+        footer: {
+            text: '楓之谷BOSS重生時間系統 - 改善建議'
+        }
+    };
+
+    if (contact) {
+        embed.fields.push({
+            name: '📧 聯絡方式',
+            value: contact,
+            inline: false
+        });
+    }
+
+    try {
+        const response = await fetch(FEEDBACK_WEBHOOK, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                embeds: [embed]
+            })
+        });
+
+        if (response.ok) {
+            showNotification('感謝您的建議！已成功提交 ✨', 'success');
+            clearFeedbackForm();
+        } else {
+            showNotification('提交失敗，請稍後再試', 'error');
+        }
+    } catch (error) {
+        showNotification('提交失敗，請檢查網路連線', 'error');
+    }
+}
+
+// 清空改善建議表單
+function clearFeedbackForm() {
+    document.getElementById('feedback-type').value = '功能建議';
+    document.getElementById('feedback-content').value = '';
+    document.getElementById('feedback-contact').value = '';
+}
