@@ -914,70 +914,104 @@
         }
 
         // 記錄BOSS擊殺
-        function recordBoss() {
-            const bossName = document.getElementById('boss-select').value;
-            const channel = document.getElementById('channel-input').value;
-            const notification = true; // 默認開啟提醒
+function recordBoss() {
+    const bossName = document.getElementById('boss-select').value;
+    const channel = document.getElementById('channel-input').value;
+    const notification = true; // 默認開啟提醒
 
-            if (!bossName) {
-                showNotification('請選擇BOSS', 'warning');
-                return;
-            }
+    if (!bossName) {
+        showNotification('請選擇BOSS', 'warning');
+        return;
+    }
 
-            if (!channel) {
-                showNotification('請輸入頻道', 'warning');
-                return;
-            }
+    if (!channel) {
+        showNotification('請輸入頻道', 'warning');
+        return;
+    }
 
-            const info = BOSS_DATA[bossName];
-            const now = new Date();
-            const respawnMin = new Date(now.getTime() + info.min * 60000);
-            const respawnMax = new Date(now.getTime() + info.max * 60000);
+    const info = BOSS_DATA[bossName];
+    const now = new Date();
+    const respawnMin = new Date(now.getTime() + info.min * 60000);
+    const respawnMax = new Date(now.getTime() + info.max * 60000);
 
-            // 獲取地圖信息
-            let mapLocation = info.maps[0]; // 默認第一個地圖
-            if (info.hasMapSelect) {
-                const selectedMap = document.getElementById('map-select').value;
-                mapLocation = selectedMap === '7' ? '夜市徒步區7' : '夜市徒步區7-1';
-            }
+    // 獲取地圖信息
+    let mapLocation = info.maps[0]; // 默認第一個地圖
+    if (info.hasMapSelect) {
+        const selectedMap = document.getElementById('map-select').value;
+        mapLocation = selectedMap === '7' ? '夜市徒步區7' : '夜市徒步區7-1';
+    }
 
-            const record = {
-                id: Date.now(),
-                channel: channel,
-                bossName: bossName,
-                map: mapLocation,
-                deathTime: now.toISOString(),
-                respawnMin: respawnMin.toISOString(),
-                respawnMax: respawnMax.toISOString(),
-                notified: false,
-                notificationEnabled: notification,
-                lastPatrolTime: null
-            };
+    // 檢查是否已存在相同BOSS和頻道的記錄
+    const existingRecordIndex = activeBosses.findIndex(
+        b => b.bossName === bossName && b.channel === channel && b.map === mapLocation
+    );
 
-            activeBosses.push(record);
-            
-            // 更新統計
-            updateBossStatistics(bossName);
-            
-            saveData();
-            updateAllDisplays();
+    if (existingRecordIndex !== -1) {
+        // 如果存在，更新現有記錄
+        const existingRecord = activeBosses[existingRecordIndex];
+        existingRecord.deathTime = now.toISOString();
+        existingRecord.respawnMin = respawnMin.toISOString();
+        existingRecord.respawnMax = respawnMax.toISOString();
+        existingRecord.notified = false;
+        existingRecord.lastPatrolTime = null;
+        
+        // 更新統計
+        updateBossStatistics(bossName);
+        
+        saveData();
+        updateAllDisplays();
 
-            // 在後台發送Discord通知（不阻塞UI）
-            if (typeof sendKillNotification === 'function') {
-                sendKillNotification(record).catch(err => {
-                    // 靜默處理錯誤
-                });
-            }
-
-            showNotification(
-                `頻道 ${channel} - ${bossName}\n地圖: ${mapLocation}\n擊殺時間已記錄！\n預計重生: ${formatTime(respawnMin)} ~ ${formatTime(respawnMax)}`,
-                'success'
-            );
-
-            // 清空輸入
-            document.getElementById('channel-input').value = '';
-            document.getElementById('channel-input').focus();
+        // 在後台發送Discord通知（不阻塞UI）
+        if (typeof sendKillNotification === 'function') {
+            sendKillNotification(existingRecord).catch(err => {
+                // 靜默處理錯誤
+            });
         }
+
+        showNotification(
+            `頻道 ${channel} - ${bossName}\n地圖: ${mapLocation}\n已更新擊殺時間！\n預計重生: ${formatTime(respawnMin)} ~ ${formatTime(respawnMax)}`,
+            'success'
+        );
+    } else {
+        // 如果不存在，新增記錄
+        const record = {
+            id: Date.now(),
+            channel: channel,
+            bossName: bossName,
+            map: mapLocation,
+            deathTime: now.toISOString(),
+            respawnMin: respawnMin.toISOString(),
+            respawnMax: respawnMax.toISOString(),
+            notified: false,
+            notificationEnabled: notification,
+            lastPatrolTime: null
+        };
+
+        activeBosses.push(record);
+        
+        // 更新統計
+        updateBossStatistics(bossName);
+        
+        saveData();
+        updateAllDisplays();
+
+        // 在後台發送Discord通知（不阻塞UI）
+        if (typeof sendKillNotification === 'function') {
+            sendKillNotification(record).catch(err => {
+                // 靜默處理錯誤
+            });
+        }
+
+        showNotification(
+            `頻道 ${channel} - ${bossName}\n地圖: ${mapLocation}\n擊殺時間已記錄！\n預計重生: ${formatTime(respawnMin)} ~ ${formatTime(respawnMax)}`,
+            'success'
+        );
+    }
+
+    // 清空輸入
+    document.getElementById('channel-input').value = '';
+    document.getElementById('channel-input').focus();
+}
 
         // 刪除單個記錄
         function deleteRecord(id) {
