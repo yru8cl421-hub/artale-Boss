@@ -13,6 +13,15 @@ const DISCORD_WEBHOOKS = {
 
 const FEEDBACK_WEBHOOK = 'https://discord.com/api/webhooks/1438760814466039910/iYegYu_LoPALQokZnyEjFJKuVXU9MxBHhMKvcQpZx0Ny3sKeVvUjmob0ozV5-BBHsxsj';
 
+// 格式化日期時間為 月/日 24小時制
+function formatDiscordDateTime(date) {
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    return `${month}/${day} ${hours}:${minutes}`;
+}
+
 // 發送擊殺記錄通知
 async function sendKillNotification(record) {
     // 獲取該BOSS專屬的webhook URL
@@ -26,7 +35,6 @@ async function sendKillNotification(record) {
     const deathTime = new Date(record.deathTime);
     const respawnMin = new Date(record.respawnMin);
     const respawnMax = new Date(record.respawnMax);
-    const mapInfo = record.map || BOSS_DATA[record.bossName]?.maps.join(', ') || '未知';
 
     const embed = {
         title: '⚔️ BOSS擊殺記錄',
@@ -39,18 +47,13 @@ async function sendKillNotification(record) {
                 inline: true
             },
             {
-                name: '地圖',
-                value: mapInfo,
+                name: '擊殺時間',
+                value: formatDateTime(deathTime),
                 inline: true
             },
             {
-                name: '擊殺時間',
-                value: formatDateTime(deathTime),
-                inline: false
-            },
-            {
-                name: '預計重生時間',
-                value: `${formatTime(respawnMin)} ~ ${formatTime(respawnMax)}`,
+                name: '⏰ 預計重生時間',
+                value: `**${formatDiscordDateTime(respawnMin)} ~ ${formatDiscordDateTime(respawnMax)}**`,
                 inline: false
             }
         ],
@@ -73,64 +76,6 @@ async function sendKillNotification(record) {
         // 靜默處理，不輸出任何訊息
     } catch (error) {
         // 靜默處理錯誤
-    }
-}
-
-// 發送重生提醒通知（目前已停用，保留代碼以備將來使用）
-async function sendDiscordNotification(record) {
-    // 獲取該BOSS專屬的webhook URL
-    const webhookUrl = DISCORD_WEBHOOKS[record.bossName];
-    
-    // 如果該BOSS沒有專屬webhook，不發送通知
-    if (!webhookUrl) {
-        return;
-    }
-
-    const respawnMin = new Date(record.respawnMin);
-    const respawnMax = new Date(record.respawnMax);
-
-    const mapInfo = record.map || BOSS_DATA[record.bossName]?.maps.join(', ') || '未知';
-
-    const embed = {
-        title: '🔔 BOSS重生提醒',
-        description: `**${record.bossName}** 可能已經重生！`,
-        color: parseInt(BOSS_DATA[record.bossName]?.color?.replace('#', '') || 'FF0000', 16),
-        fields: [
-            {
-                name: '頻道',
-                value: record.channel,
-                inline: true
-            },
-            {
-                name: '地圖',
-                value: mapInfo,
-                inline: true
-            },
-            {
-                name: '重生時間範圍',
-                value: `${formatTime(respawnMin)} ~ ${formatTime(respawnMax)}`,
-                inline: false
-            }
-        ],
-        timestamp: new Date().toISOString(),
-        footer: {
-            text: '楓之谷BOSS重生時間系統'
-        }
-    };
-
-    try {
-        await fetch(webhookUrl, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                embeds: [embed]
-            })
-        });
-        // 不顯示任何錯誤或成功訊息
-    } catch (error) {
-        // 靜默處理錯誤，不在UI顯示
     }
 }
 
