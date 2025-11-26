@@ -362,7 +362,6 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 12px;
             flex-wrap: nowrap;
             gap: 20px;
         }
@@ -397,7 +396,7 @@
 
         .boss-name-main {
             color: #ffffff;
-            font-size: 1.15em;
+            font-size: 1.2em;
             font-weight: 600;
             margin-bottom: 4px;
         }
@@ -468,38 +467,66 @@
             box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
         }
 
-        .boss-card-actions {
-            display: flex;
-            gap: 8px;
-            padding-top: 10px;
-            border-top: 1px solid rgba(100, 116, 139, 0.2);
+        .boss-status-badge {
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.9em;
+            font-weight: 600;
+            white-space: nowrap;
+            flex-shrink: 0;
         }
 
-        .boss-action-btn {
-            flex: 1;
-            padding: 8px 12px;
+        .boss-status-badge.waiting {
+            background: rgba(59, 130, 246, 0.2);
+            color: #60a5fa;
+        }
+
+        .boss-status-badge.possible {
+            background: rgba(249, 115, 22, 0.2);
+            color: #fb923c;
+        }
+
+        .boss-status-badge.confirmed {
+            background: rgba(220, 38, 38, 0.2);
+            color: #f87171;
+        }
+
+        .boss-action-btns {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .boss-icon-btn {
+            width: 36px;
+            height: 36px;
+            padding: 0;
             background: rgba(30, 41, 59, 0.8);
             border: 1px solid rgba(100, 116, 139, 0.3);
             border-radius: 6px;
             color: #cbd5e1;
             cursor: pointer;
-            font-size: 0.85em;
+            font-size: 1.2em;
             transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        .boss-action-btn:hover {
+        .boss-icon-btn:hover {
             background: rgba(51, 65, 85, 0.8);
             border-color: rgba(100, 116, 139, 0.5);
             transform: translateY(-1px);
         }
 
-        .boss-action-btn.delete {
+        .boss-icon-btn.delete {
             background: rgba(220, 38, 38, 0.1);
             border-color: rgba(220, 38, 38, 0.3);
             color: #fca5a5;
         }
 
-        .boss-action-btn.delete:hover {
+        .boss-icon-btn.delete:hover {
             background: rgba(220, 38, 38, 0.2);
             border-color: rgba(220, 38, 38, 0.5);
         }
@@ -746,12 +773,9 @@
                 width: 100%;
             }
 
-            .boss-card-actions {
-                flex-direction: column;
-            }
-
-            .boss-action-btn {
+            .boss-action-btns {
                 width: 100%;
+                justify-content: flex-start;
             }
         }
     </style>
@@ -1503,32 +1527,46 @@ function recordBoss() {
                 const bossInfo = BOSS_DATA[record.bossName];
                 const bossColor = bossInfo ? bossInfo.color : '#0099cc';
                 
-                // 計算倒數時間和狀態文字
+                // 計算狀態和倒數時間
+                let statusText = '';
+                let statusClass = '';
                 let countdownText = '';
-                let countdownClass = '';
-                let statusText = '即將重生';
+                let showRespawnBtn = false;
+                let showPatrolBtn = false;
                 
                 if (now < respawnMin) {
+                    statusText = '即將重生';
+                    statusClass = 'waiting';
+                    showRespawnBtn = false;
+                    showPatrolBtn = false;
+                    
+                    // 計算倒數時間
                     const totalSeconds = Math.floor((respawnMin - now) / 1000);
                     const hours = Math.floor(totalSeconds / 3600);
                     const minutes = Math.floor((totalSeconds % 3600) / 60);
                     const seconds = totalSeconds % 60;
                     countdownText = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-                    countdownClass = '';
-                    statusText = '即將重生';
                 } else if (now >= respawnMin && now <= respawnMax) {
+                    statusText = '可能重生';
+                    statusClass = 'possible';
+                    showRespawnBtn = true;
+                    showPatrolBtn = true;
+                    
+                    // 計算窗口期剩餘時間
                     const totalSeconds = Math.floor((respawnMax - now) / 1000);
                     const hours = Math.floor(totalSeconds / 3600);
                     const minutes = Math.floor((totalSeconds % 3600) / 60);
                     const seconds = totalSeconds % 60;
                     countdownText = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-                    countdownClass = 'in-window';
-                    statusText = '可能重生';
                 } else {
+                    statusText = '確定重生';
+                    statusClass = 'confirmed';
+                    showRespawnBtn = true;
+                    showPatrolBtn = false;
+                    
+                    // 計算超過時間
                     const diffMin = Math.floor((now - respawnMax) / 60000);
                     countdownText = `+${diffMin}分`;
-                    countdownClass = 'expired';
-                    statusText = '確定重生';
                 }
 
                 const mapInfo = record.map ? ` | ${record.map}` : '';
@@ -1546,6 +1584,10 @@ function recordBoss() {
                     `;
                 }
 
+                // 按鈕HTML
+                const respawnBtnHtml = showRespawnBtn ? `<button class="boss-icon-btn" onclick="respawnSingleBoss(${record.id})" title="重新計時">🔄</button>` : '';
+                const patrolBtnHtml = showPatrolBtn ? `<button class="boss-icon-btn" onclick="patrolSingleBoss(${record.id})" title="巡邏打卡">👀</button>` : '';
+
                 html += `
                     <div class="boss-status-card" style="--boss-color: ${bossColor};">
                         <div class="boss-card-header">
@@ -1562,18 +1604,19 @@ function recordBoss() {
                                             <span>⚔️ 擊殺: ${killTime}</span>
                                         </div>
                                         ${patrolInfo}
+                                        <div class="boss-info-item">
+                                            <span style="color: #64748b;">|</span>
+                                            <span class="boss-status-badge ${statusClass}">${statusText}</span>
+                                            <span style="font-family: 'Courier New', monospace; font-weight: 600;">${countdownText}</span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                            <div class="countdown-badge ${countdownClass}">
-                                <span class="status-text">${statusText}</span>
-                                <span class="time-text">${countdownText}</span>
+                            <div class="boss-action-btns">
+                                ${respawnBtnHtml}
+                                ${patrolBtnHtml}
+                                <button class="boss-icon-btn delete" onclick="deleteRecord(${record.id})" title="刪除">🗑️</button>
                             </div>
-                        </div>
-                        <div class="boss-card-actions">
-                            <button class="boss-action-btn" onclick="respawnSingleBoss(${record.id})">🔄 重新計時</button>
-                            <button class="boss-action-btn" onclick="patrolSingleBoss(${record.id})">👀 巡邏打卡</button>
-                            <button class="boss-action-btn delete" onclick="deleteRecord(${record.id})">🗑️ 刪除</button>
                         </div>
                     </div>
                 `;
