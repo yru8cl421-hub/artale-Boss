@@ -47,8 +47,8 @@ async function sendKillNotification(record) {
                 inline: true
             },
             {
-                name: '擊殺時間',
-                value: formatDateTime(deathTime),
+                name: '地圖',
+                value: record.map || BOSS_DATA[record.bossName]?.map || '未知',
                 inline: true
             },
             {
