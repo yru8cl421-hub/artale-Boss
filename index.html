@@ -14,7 +14,7 @@
         body {
             font-family: 'Segoe UI', Arial, sans-serif;
             background: linear-gradient(135deg, #0a0a1a 0%, #15152b 100%);
-            color: #ffffff;
+            color: #e2e8f0;
             min-height: 100vh;
             padding: 20px;
         }
@@ -30,18 +30,18 @@
             padding: 20px;
             background: rgba(21, 21, 43, 0.5);
             border-radius: 15px;
-            border: 1px solid #00ccff;
+            border: 1px solid rgba(0, 153, 204, 0.3);
         }
 
         .header h1 {
-            color: #00ccff;
+            color: #0099cc;
             font-size: 2em;
             margin-bottom: 10px;
-            text-shadow: 0 0 10px rgba(0, 204, 255, 0.5);
+            text-shadow: 0 0 10px rgba(0, 153, 204, 0.3);
         }
 
         .header p {
-            color: #00ff99;
+            color: #66ddee;
             font-size: 1.1em;
         }
 
@@ -49,27 +49,41 @@
             display: flex;
             gap: 10px;
             margin-bottom: 20px;
-            border-bottom: 2px solid #00ccff;
-            flex-wrap: wrap;
+            border-bottom: 2px solid rgba(0, 153, 204, 0.3);
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            white-space: nowrap;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .tabs::-webkit-scrollbar {
+            height: 4px;
+        }
+
+        .tabs::-webkit-scrollbar-thumb {
+            background: rgba(0, 153, 204, 0.5);
+            border-radius: 2px;
         }
 
         .tab {
             padding: 12px 24px;
             background: #1e1e3a;
-            border: 1px solid #00ccff;
+            border: 1px solid rgba(0, 153, 204, 0.3);
             border-bottom: none;
             border-radius: 8px 8px 0 0;
             cursor: pointer;
-            color: #a0a0c0;
+            color: #94a3b8;
             transition: all 0.3s;
+            flex-shrink: 0;
         }
 
         .tab:hover {
             background: #2a2a4a;
+            color: #cbd5e1;
         }
 
         .tab.active {
-            background: #00ccff;
+            background: #0099cc;
             color: #0a0a1a;
             font-weight: bold;
         }
@@ -87,15 +101,15 @@
         }
 
         .section {
-            background: #1e1e3a;
+            background: rgba(30, 41, 59, 0.6);
             padding: 20px;
             border-radius: 10px;
             margin-bottom: 20px;
-            border: 1px solid #00ccff;
+            border: 1px solid rgba(100, 116, 139, 0.3);
         }
 
         .section h2 {
-            color: #00ccff;
+            color: #0099cc;
             margin-bottom: 15px;
             font-size: 1.3em;
         }
@@ -114,10 +128,10 @@
         }
 
         .map-select-wrapper {
-            background: rgba(0, 204, 255, 0.1);
+            background: rgba(0, 153, 204, 0.1);
             padding: 15px;
             border-radius: 8px;
-            border: 2px solid #00ccff;
+            border: 2px solid rgba(0, 153, 204, 0.3);
             margin: 15px 0;
             animation: fadeIn 0.3s ease-in;
         }
@@ -134,7 +148,7 @@
         }
 
         .map-select-wrapper label {
-            color: #00ccff;
+            color: #0099cc;
             font-size: 1em;
             font-weight: bold;
             margin-bottom: 8px;
@@ -154,17 +168,17 @@
 
         select, input[type="text"], input[type="number"] {
             padding: 10px;
-            background: #0a0a1a;
-            border: 1px solid #00ccff;
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(100, 116, 139, 0.4);
             border-radius: 5px;
-            color: #ffffff;
+            color: #e2e8f0;
             font-size: 1em;
         }
 
         select:focus, input:focus {
             outline: none;
-            border-color: #00ff99;
-            box-shadow: 0 0 5px rgba(0, 255, 153, 0.5);
+            border-color: #0099cc;
+            box-shadow: 0 0 0 2px rgba(0, 153, 204, 0.2);
         }
 
         .checkbox-group {
@@ -180,16 +194,23 @@
             cursor: pointer;
         }
 
+        .boss-checkbox {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: #00ccff;
+        }
+
         .info-box {
-            background: rgba(0, 204, 255, 0.1);
+            background: rgba(0, 153, 204, 0.1);
             padding: 15px;
             border-radius: 5px;
             margin: 15px 0;
-            border-left: 4px solid #00ccff;
+            border-left: 4px solid #0099cc;
         }
 
         .info-box p {
-            color: #00ff99;
+            color: #66ddee;
             margin: 5px 0;
         }
 
@@ -202,20 +223,21 @@
 
         button {
             padding: 12px 24px;
-            background: #1e1e3a;
-            border: 1px solid #00ccff;
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(100, 116, 139, 0.4);
             border-radius: 5px;
-            color: #ffffff;
+            color: #e2e8f0;
             cursor: pointer;
             font-size: 1em;
             transition: all 0.3s;
         }
 
         button:hover {
-            background: #00ccff;
+            background: #0099cc;
             color: #0a0a1a;
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 204, 255, 0.3);
+            box-shadow: 0 5px 15px rgba(0, 153, 204, 0.3);
+            border-color: #0099cc;
         }
 
         button:active {
@@ -223,12 +245,14 @@
         }
 
         button.danger {
-            border-color: #ff3366;
+            border-color: rgba(239, 68, 68, 0.4);
+            color: #fca5a5;
         }
 
         button.danger:hover {
-            background: #ff3366;
+            background: #ef4444;
             color: #ffffff;
+            border-color: #ef4444;
         }
 
         table {
@@ -289,11 +313,242 @@
         }
 
         .boss-status-card {
-            background: #1e1e3a;
-            padding: 15px;
-            margin-bottom: 15px;
-            border-radius: 8px;
-            border-left: 4px solid #00ccff;
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.95) 100%);
+            padding: 16px 20px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            border: 1px solid rgba(100, 116, 139, 0.3);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .boss-status-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, rgba(0, 153, 204, 0.3) 0%, rgba(102, 221, 238, 0.3) 50%, rgba(0, 153, 204, 0.3) 100%);
+            background-size: 200% 100%;
+            animation: borderGlow 3s ease infinite;
+        }
+
+        .boss-status-card::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: var(--boss-color, #0099cc);
+            border-radius: 12px 0 0 12px;
+        }
+
+        @keyframes borderGlow {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .boss-status-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 153, 204, 0.15);
+            border-color: rgba(0, 153, 204, 0.4);
+        }
+
+        .boss-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            flex-wrap: nowrap;
+            gap: 20px;
+        }
+
+        .boss-info-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .boss-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #fbbf24;
+            box-shadow: 0 0 10px #fbbf24;
+            flex-shrink: 0;
+            animation: pulseIndicator 2s ease-in-out infinite;
+        }
+
+        @keyframes pulseIndicator {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.1); }
+        }
+
+        .boss-name-section {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .boss-name-main {
+            color: #ffffff;
+            font-size: 1.15em;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .boss-channel {
+            color: #94a3b8;
+            font-size: 0.9em;
+        }
+
+        .boss-info-row {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            color: #cbd5e1;
+            font-size: 1.2em;
+            flex-wrap: wrap;
+        }
+
+        .boss-info-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+        }
+
+        .countdown-badge {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: #ffffff;
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 1.1em;
+            white-space: nowrap;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+            min-width: 120px;
+            text-align: center;
+            line-height: 1.4;
+        }
+
+        .countdown-badge .status-text {
+            font-size: 0.75em;
+            font-weight: 500;
+            opacity: 0.9;
+            display: block;
+            margin-bottom: 2px;
+        }
+
+        .countdown-badge .time-text {
+            font-size: 1.3em;
+            font-weight: 700;
+            font-family: 'Courier New', monospace;
+            letter-spacing: 1px;
+        }
+
+        .countdown-badge.in-window {
+            background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+            animation: blinkBadge 1.5s ease-in-out infinite;
+            box-shadow: 0 4px 12px rgba(249, 115, 22, 0.4);
+        }
+
+        @keyframes blinkBadge {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.85; }
+        }
+
+        .countdown-badge.expired {
+            background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+            box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
+        }
+
+        .boss-card-actions {
+            display: flex;
+            gap: 8px;
+            padding-top: 10px;
+            border-top: 1px solid rgba(100, 116, 139, 0.2);
+        }
+
+        .boss-action-btn {
+            flex: 1;
+            padding: 8px 12px;
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(100, 116, 139, 0.3);
+            border-radius: 6px;
+            color: #cbd5e1;
+            cursor: pointer;
+            font-size: 0.85em;
+            transition: all 0.2s;
+        }
+
+        .boss-action-btn:hover {
+            background: rgba(51, 65, 85, 0.8);
+            border-color: rgba(100, 116, 139, 0.5);
+            transform: translateY(-1px);
+        }
+
+        .boss-action-btn.delete {
+            background: rgba(220, 38, 38, 0.1);
+            border-color: rgba(220, 38, 38, 0.3);
+            color: #fca5a5;
+        }
+
+        .boss-action-btn.delete:hover {
+            background: rgba(220, 38, 38, 0.2);
+            border-color: rgba(220, 38, 38, 0.5);
+        }
+
+        .quick-input-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr auto;
+            gap: 15px;
+            align-items: end;
+        }
+
+        .quick-input-row .input-field {
+            margin: 0;
+        }
+
+        .quick-input-row button {
+            padding: 12px 32px;
+            height: fit-content;
+            font-size: 1.05em;
+            font-weight: 600;
+        }
+
+        .boss-action-btn {
+            flex: 1;
+            padding: 8px 12px;
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(100, 116, 139, 0.3);
+            border-radius: 6px;
+            color: #cbd5e1;
+            cursor: pointer;
+            font-size: 0.85em;
+            transition: all 0.2s;
+        }
+
+        .boss-action-btn:hover {
+            background: rgba(51, 65, 85, 0.8);
+            border-color: rgba(100, 116, 139, 0.5);
+            transform: translateY(-1px);
+        }
+
+        .boss-action-btn.delete {
+            background: rgba(220, 38, 38, 0.1);
+            border-color: rgba(220, 38, 38, 0.3);
+            color: #fca5a5;
+        }
+
+        .boss-action-btn.delete:hover {
+            background: rgba(220, 38, 38, 0.2);
+            border-color: rgba(220, 38, 38, 0.5);
         }
 
         .boss-status-card h3 {
@@ -332,15 +587,15 @@
         }
 
         .notification.success {
-            border-color: #00ff99;
+            border-color: rgba(16, 185, 129, 0.5);
         }
 
         .notification.error {
-            border-color: #ff3366;
+            border-color: rgba(239, 68, 68, 0.5);
         }
 
         .notification.warning {
-            border-color: #ff9800;
+            border-color: rgba(245, 158, 11, 0.5);
         }
 
         .scrollbar::-webkit-scrollbar {
@@ -461,6 +716,43 @@
             .stats-grid {
                 grid-template-columns: 1fr;
             }
+
+            .quick-input-row {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+
+            .quick-input-row button {
+                width: 100%;
+            }
+
+            .boss-card-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+
+            .boss-info-left {
+                width: 100%;
+            }
+
+            .boss-info-row {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+
+            .countdown-badge {
+                width: 100%;
+            }
+
+            .boss-card-actions {
+                flex-direction: column;
+            }
+
+            .boss-action-btn {
+                width: 100%;
+            }
         }
     </style>
 </head>
@@ -473,16 +765,15 @@
 
         <div class="tabs">
             <div class="tab active" onclick="switchTab(0)">BOSS記錄</div>
-            <div class="tab" onclick="switchTab(1)">重生狀態</div>
-            <div class="tab" onclick="switchTab(2)">BOSS列表</div>
-            <div class="tab" onclick="switchTab(3)">擊殺統計</div>
-            <div class="tab" onclick="switchTab(4)">改善建議</div>
+            <div class="tab" onclick="switchTab(1)">BOSS列表</div>
+            <div class="tab" onclick="switchTab(2)">擊殺統計</div>
+            <div class="tab" onclick="switchTab(3)">改善建議</div>
         </div>
 
         <div class="tab-content active" id="tab-record">
             <div class="section">
-                <h2>記錄新BOSS擊殺</h2>
-                <div class="input-group">
+                <h2>快速記錄 BOSS 擊殺</h2>
+                <div class="quick-input-row">
                     <div class="input-field">
                         <label>選擇BOSS:</label>
                         <select id="boss-select" onchange="onBossSelected()">
@@ -493,6 +784,9 @@
                         <label>頻道:</label>
                         <input type="number" id="channel-input" value="1" min="1" max="20">
                     </div>
+                    <button onclick="recordBoss()" style="background: linear-gradient(135deg, #0099cc 0%, #0077aa 100%); border-color: #0099cc;">
+                        📝 記錄擊殺
+                    </button>
                 </div>
 
                 <div class="map-select-wrapper" id="map-select-container" style="display: none;">
@@ -507,48 +801,16 @@
                     <p id="map-info"></p>
                     <p id="time-info"></p>
                 </div>
-
-                <div class="button-group">
-                    <button onclick="recordBoss()">📝 記錄擊殺時間 (Enter)</button>
-                </div>
-                <p class="hint">💡 提示: 選擇BOSS → 輸入頻道 → (黑輪王需選擇地圖) → 按Enter或點擊按鈕記錄</p>
             </div>
 
             <div class="section">
-                <h2>當前記錄中的BOSS</h2>
-                <div style="overflow-x: auto;">
-                    <table id="record-table">
-                        <thead>
-                            <tr>
-                                <th><input type="checkbox" id="select-all" onchange="toggleSelectAll()"></th>
-                                <th>BOSS名稱</th>
-                                <th>頻道</th>
-                                <th>地圖</th>
-                                <th>擊殺時間</th>
-                                <th>最早重生</th>
-                                <th>最晚重生</th>
-                                <th>狀態</th>
-                                <th>最後巡邏</th>
-                                <th>操作</th>
-                            </tr>
-                        </thead>
-                        <tbody id="record-tbody">
-                        </tbody>
-                    </table>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h2 style="margin: 0;">當前記錄中的BOSS (<span id="boss-count">0</span>)</h2>
+                    <button onclick="clearAll()" class="danger" style="margin: 0;">⚠️ 清空所有記錄</button>
                 </div>
-                <div class="action-buttons">
-                    <button onclick="deleteRecords()">🗑️ 刪除選取記錄</button>
-                    <button onclick="respawnBoss()">🔄 完成擊殺重新計時</button>
-                    <button onclick="patrolBoss()">👀 巡邏打卡</button>
-                    <button onclick="clearAll()" class="danger">⚠️ 清空所有記錄</button>
+                <div id="record-container" style="display: grid; gap: 16px;">
+                    <!-- 卡片將通過JavaScript動態生成 -->
                 </div>
-            </div>
-        </div>
-
-        <div class="tab-content" id="tab-status">
-            <div class="current-time" id="current-time"></div>
-            <div class="status-display scrollbar" id="status-display">
-                <p style="text-align: center; color: #a0a0c0;">目前沒有記錄中的BOSS</p>
             </div>
         </div>
 
@@ -693,7 +955,7 @@
             populateBossListTable();
             initializeStatistics();
             updateAllDisplays();
-            setInterval(updateAllDisplays, 10000); // 每10秒更新一次
+            setInterval(updateAllDisplays, 1000); // 每秒更新一次以支持倒數計時
 
             // 添加Enter鍵監聽
             document.getElementById('channel-input').addEventListener('keypress', function(e) {
@@ -1201,79 +1463,32 @@ function recordBoss() {
 
         // 獲取選中的記錄ID
         function getSelectedRecords() {
-            const checkboxes = document.querySelectorAll('#record-tbody input[type="checkbox"]:checked');
+            const checkboxes = document.querySelectorAll('.boss-checkbox:checked');
             return Array.from(checkboxes).map(cb => parseInt(cb.dataset.id));
         }
 
-        // 切換全選
+        // 切換全選（已移除全選按鈕，保留函數以防其他地方使用）
         function toggleSelectAll() {
-            const selectAll = document.getElementById('select-all').checked;
-            document.querySelectorAll('#record-tbody input[type="checkbox"]').forEach(cb => {
-                cb.checked = selectAll;
-            });
+            // 此功能已移除，保留空函數以防止錯誤
         }
 
         // 更新所有顯示
         function updateAllDisplays() {
             checkAndResetDailyStats(); // 檢查是否需要重置每日統計
             updateRecordDisplay();
-            updateStatusDisplay();
             updateStatisticsDisplay();
         }
 
         // 更新記錄顯示
         function updateRecordDisplay() {
-            const tbody = document.getElementById('record-tbody');
-            tbody.innerHTML = '';
-
-            const sorted = [...activeBosses].sort((a, b) => 
-                new Date(a.respawnMin) - new Date(b.respawnMin)
-            );
-
-            sorted.forEach(record => {
-                const row = tbody.insertRow();
-                
-                // 複選框
-                const checkCell = row.insertCell(0);
-                const checkbox = document.createElement('input');
-                checkbox.type = 'checkbox';
-                checkbox.dataset.id = record.id;
-                checkCell.appendChild(checkbox);
-
-                row.insertCell(1).textContent = record.bossName;
-                row.insertCell(2).textContent = record.channel;
-                row.insertCell(3).textContent = record.map || '';
-                row.insertCell(4).textContent = formatDateTime(new Date(record.deathTime));
-                row.insertCell(5).textContent = formatDateTime(new Date(record.respawnMin));
-                row.insertCell(6).textContent = formatDateTime(new Date(record.respawnMax));
-
-                const statusCell = row.insertCell(7);
-                const status = getStatus(record);
-                statusCell.textContent = status.text;
-                statusCell.className = status.className;
-
-                row.insertCell(8).textContent = record.lastPatrolTime ? formatTime(new Date(record.lastPatrolTime)) : '';
-                
-                // 操作按鈕
-                const actionCell = row.insertCell(9);
-                actionCell.innerHTML = `
-                    <button onclick="deleteRecord(${record.id})" style="padding: 5px 10px; margin: 2px; font-size: 0.9em;">🗑️</button>
-                    <button onclick="respawnSingleBoss(${record.id})" style="padding: 5px 10px; margin: 2px; font-size: 0.9em;">🔄</button>
-                    <button onclick="patrolSingleBoss(${record.id})" style="padding: 5px 10px; margin: 2px; font-size: 0.9em;">👀</button>
-                `;
-            });
-        }
-
-        // 更新狀態顯示
-        function updateStatusDisplay() {
-            const display = document.getElementById('status-display');
+            const container = document.getElementById('record-container');
             const now = new Date();
             
-            document.getElementById('current-time').textContent = 
-                `當前時間: ${formatDateTime(now, true)}`;
+            // 更新BOSS計數
+            document.getElementById('boss-count').textContent = activeBosses.length;
 
             if (activeBosses.length === 0) {
-                display.innerHTML = '<p style="text-align: center; color: #a0a0c0;">目前沒有記錄中的BOSS</p>';
+                container.innerHTML = '<p style="text-align: center; color: #a0a0c0; padding: 40px 0;">目前沒有記錄中的BOSS</p>';
                 return;
             }
 
@@ -1283,42 +1498,88 @@ function recordBoss() {
 
             let html = '';
             sorted.forEach(record => {
-                const status = getStatus(record);
                 const respawnMin = new Date(record.respawnMin);
                 const respawnMax = new Date(record.respawnMax);
+                const bossInfo = BOSS_DATA[record.bossName];
+                const bossColor = bossInfo ? bossInfo.color : '#0099cc';
                 
-                let timeInfo;
+                // 計算倒數時間和狀態文字
+                let countdownText = '';
+                let countdownClass = '';
+                let statusText = '即將重生';
+                
                 if (now < respawnMin) {
-                    const diff = Math.floor((respawnMin - now) / 60000);
-                    timeInfo = `剩餘: ${diff}分鐘`;
+                    const totalSeconds = Math.floor((respawnMin - now) / 1000);
+                    const hours = Math.floor(totalSeconds / 3600);
+                    const minutes = Math.floor((totalSeconds % 3600) / 60);
+                    const seconds = totalSeconds % 60;
+                    countdownText = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+                    countdownClass = '';
+                    statusText = '即將重生';
                 } else if (now >= respawnMin && now <= respawnMax) {
-                    const diff = Math.floor((respawnMax - now) / 60000);
-                    timeInfo = `已進入重生窗口，${diff}分鐘後結束`;
+                    const totalSeconds = Math.floor((respawnMax - now) / 1000);
+                    const hours = Math.floor(totalSeconds / 3600);
+                    const minutes = Math.floor((totalSeconds % 3600) / 60);
+                    const seconds = totalSeconds % 60;
+                    countdownText = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+                    countdownClass = 'in-window';
+                    statusText = '可能重生';
                 } else {
-                    const diff = Math.floor((now - respawnMax) / 60000);
-                    timeInfo = `已超過: ${diff}分鐘`;
+                    const diffMin = Math.floor((now - respawnMax) / 60000);
+                    countdownText = `+${diffMin}分`;
+                    countdownClass = 'expired';
+                    statusText = '確定重生';
                 }
 
+                const mapInfo = record.map ? ` | ${record.map}` : '';
+                const killTime = formatDateTime(new Date(record.deathTime));
+                
+                // 巡邏時間資訊
                 let patrolInfo = '';
                 if (record.lastPatrolTime) {
                     const diff = Math.floor((now - new Date(record.lastPatrolTime)) / 60000);
-                    patrolInfo = ` | 最後巡邏: ${diff}分鐘前`;
+                    patrolInfo = `
+                        <div class="boss-info-item">
+                            <span style="color: #64748b;">|</span>
+                            <span>👀 巡邏: ${diff}分鐘前</span>
+                        </div>
+                    `;
                 }
 
-                const mapInfo = record.map ? ` - ${record.map}` : '';
-
                 html += `
-                    <div class="boss-status-card">
-                        <h3>【${record.bossName}】頻道 ${record.channel}${mapInfo}</h3>
-                        <p class="${status.className}">狀態: ${status.text}</p>
-                        <p>擊殺時間: ${formatDateTime(new Date(record.deathTime))}</p>
-                        <p>重生時間: ${formatTime(respawnMin)} ~ ${formatTime(respawnMax)}</p>
-                        <p>${timeInfo}${patrolInfo}</p>
+                    <div class="boss-status-card" style="--boss-color: ${bossColor};">
+                        <div class="boss-card-header">
+                            <div class="boss-info-left">
+                                <div class="boss-indicator"></div>
+                                <div class="boss-name-section">
+                                    <div class="boss-name-main">${record.bossName}</div>
+                                    <div class="boss-info-row">
+                                        <div class="boss-info-item">
+                                            <span>頻道 ${record.channel}${mapInfo}</span>
+                                        </div>
+                                        <div class="boss-info-item">
+                                            <span style="color: #64748b;">|</span>
+                                            <span>⚔️ 擊殺: ${killTime}</span>
+                                        </div>
+                                        ${patrolInfo}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="countdown-badge ${countdownClass}">
+                                <span class="status-text">${statusText}</span>
+                                <span class="time-text">${countdownText}</span>
+                            </div>
+                        </div>
+                        <div class="boss-card-actions">
+                            <button class="boss-action-btn" onclick="respawnSingleBoss(${record.id})">🔄 重新計時</button>
+                            <button class="boss-action-btn" onclick="patrolSingleBoss(${record.id})">👀 巡邏打卡</button>
+                            <button class="boss-action-btn delete" onclick="deleteRecord(${record.id})">🗑️ 刪除</button>
+                        </div>
                     </div>
                 `;
             });
 
-            display.innerHTML = html;
+            container.innerHTML = html;
         }
 
         // 獲取BOSS狀態
@@ -1363,7 +1624,7 @@ function recordBoss() {
 
         // 格式化時間
         function formatTime(date) {
-            return date.toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' });
+            return date.toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', hour12: false });
         }
 
         function formatDateTime(date, withSeconds = false) {
@@ -1371,7 +1632,8 @@ function recordBoss() {
                 month: '2-digit', 
                 day: '2-digit', 
                 hour: '2-digit', 
-                minute: '2-digit'
+                minute: '2-digit',
+                hour12: false
             };
             if (withSeconds) {
                 options.second = '2-digit';
