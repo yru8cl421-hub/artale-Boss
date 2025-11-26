@@ -1461,21 +1461,98 @@ function recordBoss() {
         }
 
         // 提交建議
-        function submitFeedback() {
+        async function submitFeedback() {
+            console.log('[DEBUG] submitFeedback 函數被調用');
+            
             const type = document.getElementById('feedback-type').value;
             const content = document.getElementById('feedback-content').value.trim();
             const contact = document.getElementById('feedback-contact').value.trim();
 
+            console.log('[DEBUG] 表單數據:', { type, content, contact });
+
             if (!content) {
+                console.log('[DEBUG] 內容為空，顯示警告');
                 showNotification('請填寫詳細說明', 'warning');
                 return;
             }
 
-            // 這裡可以添加實際的提交邏輯（如發送到後端API）
-            console.log('建議提交:', { type, content, contact });
-            
-            showNotification('感謝您的建議！我們已收到您的回饋。', 'success');
-            clearFeedbackForm();
+            const FEEDBACK_WEBHOOK = 'https://discord.com/api/webhooks/1438760814466039910/iYegYu_LoPALQokZnyEjFJKuVXU9MxBHhMKvcQpZx0Ny3sKeVvUjmob0ozV5-BBHsxsj';
+
+            const now = new Date();
+            const month = now.getMonth() + 1;
+            const day = now.getDate();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const formattedTime = `${month}/${day} ${hours}:${minutes}`;
+
+            const embed = {
+                title: '📝 新的改善建議',
+                color: 0x00ccff,
+                fields: [
+                    {
+                        name: '📋 建議類型',
+                        value: type,
+                        inline: true
+                    },
+                    {
+                        name: '🕒 提交時間',
+                        value: formattedTime,
+                        inline: true
+                    },
+                    {
+                        name: '💬 詳細說明',
+                        value: content.length > 1024 ? content.substring(0, 1021) + '...' : content,
+                        inline: false
+                    }
+                ],
+                timestamp: now.toISOString(),
+                footer: {
+                    text: '楓之谷BOSS重生時間系統 - 改善建議'
+                }
+            };
+
+            if (contact) {
+                embed.fields.push({
+                    name: '📧 聯絡方式',
+                    value: contact,
+                    inline: false
+                });
+            }
+
+            console.log('[DEBUG] 準備發送的 embed:', JSON.stringify(embed, null, 2));
+            console.log('[DEBUG] Webhook URL:', FEEDBACK_WEBHOOK);
+
+            try {
+                console.log('[DEBUG] 開始發送請求...');
+                const response = await fetch(FEEDBACK_WEBHOOK, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        embeds: [embed]
+                    })
+                });
+
+                console.log('[DEBUG] 回應狀態:', response.status, response.statusText);
+                
+                const responseText = await response.text();
+                console.log('[DEBUG] 回應內容:', responseText);
+
+                if (response.ok) {
+                    console.log('[DEBUG] 提交成功！');
+                    showNotification('感謝您的建議！已成功提交 ✨', 'success');
+                    clearFeedbackForm();
+                } else {
+                    console.error('[ERROR] 提交失敗 - 狀態碼:', response.status);
+                    console.error('[ERROR] 錯誤訊息:', responseText);
+                    showNotification('提交失敗，請稍後再試', 'error');
+                }
+            } catch (error) {
+                console.error('[ERROR] 發生異常:', error);
+                console.error('[ERROR] 錯誤堆疊:', error.stack);
+                showNotification('提交失敗，請檢查網路連線', 'error');
+            }
         }
 
         // 清空建議表單
