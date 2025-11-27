@@ -978,6 +978,7 @@
             populateBossSelect();
             populateBossListTable();
             initializeStatistics();
+            initUserStats(); // 初始化使用者統計
             updateAllDisplays();
             setInterval(updateAllDisplays, 1000); // 每秒更新一次以支持倒數計時
 
@@ -1001,11 +1002,223 @@
                     };
                 }
             });
-            
-            // 檢查是否需要重置今日統計
-            checkAndResetDailyStats();
-            saveData();
         }
+
+        // ============= 使用者統計系統 =============
+        
+        // 使用者統計數據結構
+        let userStats = {
+            totalUsers: 0,
+            todayLogins: 0,
+            sessionStart: null,
+            totalSessionTime: 0,
+            todayBossRecords: {},
+            lastReportDate: null
+        };
+
+        // 初始化使用者統計
+        function initUserStats() {
+            // 載入保存的統計數據
+            const savedStats = localStorage.getItem('userStats');
+            if (savedStats) {
+                try {
+                    const loaded = JSON.parse(savedStats);
+                    // 檢查是否是新的一天
+                    const today = getTodayDateString();
+                    if (loaded.lastReportDate !== today) {
+                        // 新的一天，重置每日統計
+                        userStats.todayLogins = 1;
+                        userStats.todayBossRecords = {};
+                        userStats.lastReportDate = today;
+                    } else {
+                        // 同一天，累加登入次數
+                        userStats = { ...loaded };
+                        userStats.todayLogins++;
+                    }
+                    
+                    // 更新總使用者數（簡化處理）
+                    if (!userStats.totalUsers) {
+                        userStats.totalUsers = 1;
+                    }
+                } catch (e) {
+                    console.error('載入使用者統計失敗:', e);
+                    initDefaultUserStats();
+                }
+            } else {
+                initDefaultUserStats();
+            }
+
+            // 記錄會話開始時間
+            userStats.sessionStart = Date.now();
+            
+            // 保存統計
+            saveUserStats();
+
+            // 設置每日報表定時器
+            scheduleDailyReport();
+
+            // 監聽頁面關閉事件，保存停留時間
+            window.addEventListener('beforeunload', () => {
+                updateSessionTime();
+                saveUserStats();
+            });
+
+            // 每分鐘更新一次停留時間
+            setInterval(() => {
+                updateSessionTime();
+                saveUserStats();
+            }, 60000);
+        }
+
+        // 初始化預設統計數據
+        function initDefaultUserStats() {
+            userStats = {
+                totalUsers: 1,
+                todayLogins: 1,
+                sessionStart: Date.now(),
+                totalSessionTime: 0,
+                todayBossRecords: {},
+                lastReportDate: getTodayDateString()
+            };
+        }
+
+        // 更新會話時間
+        function updateSessionTime() {
+            if (userStats.sessionStart) {
+                const sessionDuration = Date.now() - userStats.sessionStart;
+                userStats.totalSessionTime += sessionDuration;
+                userStats.sessionStart = Date.now();
+            }
+        }
+
+        // 追蹤 BOSS 記錄
+        function trackBossRecord(bossName) {
+            if (!userStats.todayBossRecords[bossName]) {
+                userStats.todayBossRecords[bossName] = 0;
+            }
+            userStats.todayBossRecords[bossName]++;
+            saveUserStats();
+        }
+
+        // 保存使用者統計
+        function saveUserStats() {
+            localStorage.setItem('userStats', JSON.stringify(userStats));
+        }
+
+        // 取得今日最多記錄的 BOSS
+        function getMostRecordedBoss() {
+            let maxCount = 0;
+            let mostRecordedBoss = '無';
+            
+            for (const [boss, count] of Object.entries(userStats.todayBossRecords)) {
+                if (count > maxCount) {
+                    maxCount = count;
+                    mostRecordedBoss = boss;
+                }
+            }
+            
+            return { boss: mostRecordedBoss, count: maxCount };
+        }
+
+        // 發送每小時使用者報表
+        async function sendDailyReport() {
+            const FEEDBACK_WEBHOOK = 'https://discord.com/api/webhooks/1438760814466039910/iYegYu_LoPALQokZnyEjFJKuVXU9MxBHhMKvcQpZx0Ny3sKeVvUjmob0ozV5-BBHsxsj';
+            
+            // 計算平均停留時間（分鐘）
+            const avgSessionTime = userStats.todayLogins > 0 
+                ? Math.round(userStats.totalSessionTime / userStats.todayLogins / 60000)
+                : 0;
+            
+            // 取得今日最多記錄的 BOSS
+            const { boss, count } = getMostRecordedBoss();
+
+            const now = new Date();
+            const month = now.getMonth() + 1;
+            const day = now.getDate();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const reportTime = `${month}/${day} ${hours}:00`;
+
+            const embed = {
+                title: '🔵 每小時使用者報表',
+                description: `**${reportTime} 統計**`,
+                color: 0x0099ff,
+                fields: [
+                    {
+                        name: '📊 使用者統計',
+                        value: '━━━━━━━━━━━━━━━━',
+                        inline: false
+                    },
+                    {
+                        name: '👤 總使用者',
+                        value: `${userStats.totalUsers} 人`,
+                        inline: true
+                    },
+                    {
+                        name: '📥 今日登入',
+                        value: `${userStats.todayLogins} 次`,
+                        inline: true
+                    },
+                    {
+                        name: '⏱ 平均停留時間',
+                        value: `${avgSessionTime} 分鐘`,
+                        inline: true
+                    },
+                    {
+                        name: '🦀 今天記錄最多的 BOSS',
+                        value: `${boss}（${count} 次）`,
+                        inline: true
+                    }
+                ],
+                timestamp: now.toISOString(),
+                footer: {
+                    text: '楓之谷BOSS重生時間系統 - 每小時報表'
+                }
+            };
+
+            try {
+                const response = await fetch(FEEDBACK_WEBHOOK, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        embeds: [embed]
+                    })
+                });
+
+                if (response.ok) {
+                    // 每小時報表不重置統計，繼續累積
+                    saveUserStats();
+                } else {
+                    // 發送失敗，靜默處理
+                }
+            } catch (error) {
+                // 發送異常，靜默處理
+            }
+        }
+
+        // 設置每小時報表定時器
+        function scheduleDailyReport() {
+            // 立即發送第一次報表（可選，或等待第一個整點）
+            // sendDailyReport();
+            
+            // 計算距離下一個整點的時間
+            const now = new Date();
+            const nextHour = new Date(now);
+            nextHour.setHours(nextHour.getHours() + 1);
+            nextHour.setMinutes(0, 0, 0);
+            
+            const timeUntilNextHour = nextHour.getTime() - now.getTime();
+            
+            // 設置定時器，在下一個整點發送報表
+            setTimeout(() => {
+                sendDailyReport();
+                // 之後每小時發送一次
+                setInterval(sendDailyReport, 60 * 60 * 1000);
+            }, timeUntilNextHour);
+        }
+
+        // ============= 使用者統計系統結束 =============
 
         // 獲取今天的日期字串 (YYYY-MM-DD)
         function getTodayDateString() {
@@ -1200,104 +1413,106 @@
         }
 
         // 記錄BOSS擊殺
-function recordBoss() {
-    const bossName = document.getElementById('boss-select').value;
-    const channel = document.getElementById('channel-input').value;
-    const notification = true; // 默認開啟提醒
+        function recordBoss() {
+            const bossName = document.getElementById('boss-select').value;
+            const channel = document.getElementById('channel-input').value;
+            const notification = true; // 默認開啟提醒
 
-    if (!bossName) {
-        showNotification('請選擇BOSS', 'warning');
-        return;
-    }
+            if (!bossName) {
+                showNotification('請選擇BOSS', 'warning');
+                return;
+            }
 
-    if (!channel) {
-        showNotification('請輸入頻道', 'warning');
-        return;
-    }
+            if (!channel) {
+                showNotification('請輸入頻道', 'warning');
+                return;
+            }
 
-    const info = BOSS_DATA[bossName];
-    const now = new Date();
-    const respawnMin = new Date(now.getTime() + info.min * 60000);
-    const respawnMax = new Date(now.getTime() + info.max * 60000);
+            const info = BOSS_DATA[bossName];
+            const now = new Date();
+            const respawnMin = new Date(now.getTime() + info.min * 60000);
+            const respawnMax = new Date(now.getTime() + info.max * 60000);
 
-    // 獲取地圖信息
-    let mapLocation = info.maps[0]; // 默認第一個地圖
-    if (info.hasMapSelect) {
-        const selectedMap = document.getElementById('map-select').value;
-        mapLocation = selectedMap === '7' ? '夜市徒步區7' : '夜市徒步區7-1';
-    }
+            // 獲取地圖信息
+            let mapLocation = info.maps[0]; // 默認第一個地圖
+            if (info.hasMapSelect) {
+                const selectedMap = document.getElementById('map-select').value;
+                mapLocation = selectedMap === '7' ? '夜市徒步區7' : '夜市徒步區7-1';
+            }
 
-    // 檢查是否已存在相同BOSS和頻道的記錄
-    const existingRecordIndex = activeBosses.findIndex(
-        b => b.bossName === bossName && b.channel === channel && b.map === mapLocation
-    );
+            // 檢查是否已存在相同BOSS和頻道的記錄
+            const existingRecordIndex = activeBosses.findIndex(
+                b => b.bossName === bossName && b.channel === channel && b.map === mapLocation
+            );
 
-    if (existingRecordIndex !== -1) {
-        // 如果存在，更新現有記錄
-        const existingRecord = activeBosses[existingRecordIndex];
-        existingRecord.deathTime = now.toISOString();
-        existingRecord.respawnMin = respawnMin.toISOString();
-        existingRecord.respawnMax = respawnMax.toISOString();
-        existingRecord.notified = false;
-        existingRecord.lastPatrolTime = null;
-        
-        // 更新統計
-        updateBossStatistics(bossName);
-        
-        saveData();
-        updateAllDisplays();
+            if (existingRecordIndex !== -1) {
+                // 如果存在，更新現有記錄
+                const existingRecord = activeBosses[existingRecordIndex];
+                existingRecord.deathTime = now.toISOString();
+                existingRecord.respawnMin = respawnMin.toISOString();
+                existingRecord.respawnMax = respawnMax.toISOString();
+                existingRecord.notified = false;
+                existingRecord.lastPatrolTime = null;
+                
+                // 更新統計
+                updateBossStatistics(bossName);
+                trackBossRecord(bossName); // 追蹤使用者統計
+                
+                saveData();
+                updateAllDisplays();
 
-        // 在後台發送Discord通知（不阻塞UI）
-        if (typeof sendKillNotification === 'function') {
-            sendKillNotification(existingRecord).catch(err => {
-                // 靜默處理錯誤
-            });
+                // 在後台發送Discord通知（不阻塞UI）
+                if (typeof sendKillNotification === 'function') {
+                    sendKillNotification(existingRecord).catch(err => {
+                        // 靜默處理錯誤
+                    });
+                }
+
+                showNotification(
+                    `頻道 ${channel} - ${bossName}\n地圖: ${mapLocation}\n已更新擊殺時間！\n預計重生: ${formatTime(respawnMin)} ~ ${formatTime(respawnMax)}`,
+                    'success'
+                );
+            } else {
+                // 如果不存在，新增記錄
+                const record = {
+                    id: Date.now(),
+                    channel: channel,
+                    bossName: bossName,
+                    map: mapLocation,
+                    deathTime: now.toISOString(),
+                    respawnMin: respawnMin.toISOString(),
+                    respawnMax: respawnMax.toISOString(),
+                    notified: false,
+                    notificationEnabled: notification,
+                    lastPatrolTime: null
+                };
+
+                activeBosses.push(record);
+                
+                // 更新統計
+                updateBossStatistics(bossName);
+                trackBossRecord(bossName); // 追蹤使用者統計
+                
+                saveData();
+                updateAllDisplays();
+
+                // 在後台發送Discord通知（不阻塞UI）
+                if (typeof sendKillNotification === 'function') {
+                    sendKillNotification(record).catch(err => {
+                        // 靜默處理錯誤
+                    });
+                }
+
+                showNotification(
+                    `頻道 ${channel} - ${bossName}\n地圖: ${mapLocation}\n擊殺時間已記錄！\n預計重生: ${formatTime(respawnMin)} ~ ${formatTime(respawnMax)}`,
+                    'success'
+                );
+            }
+
+            // 清空輸入
+            document.getElementById('channel-input').value = '';
+            document.getElementById('channel-input').focus();
         }
-
-        showNotification(
-            `頻道 ${channel} - ${bossName}\n地圖: ${mapLocation}\n已更新擊殺時間！\n預計重生: ${formatTime(respawnMin)} ~ ${formatTime(respawnMax)}`,
-            'success'
-        );
-    } else {
-        // 如果不存在，新增記錄
-        const record = {
-            id: Date.now(),
-            channel: channel,
-            bossName: bossName,
-            map: mapLocation,
-            deathTime: now.toISOString(),
-            respawnMin: respawnMin.toISOString(),
-            respawnMax: respawnMax.toISOString(),
-            notified: false,
-            notificationEnabled: notification,
-            lastPatrolTime: null
-        };
-
-        activeBosses.push(record);
-        
-        // 更新統計
-        updateBossStatistics(bossName);
-        
-        saveData();
-        updateAllDisplays();
-
-        // 在後台發送Discord通知（不阻塞UI）
-        if (typeof sendKillNotification === 'function') {
-            sendKillNotification(record).catch(err => {
-                // 靜默處理錯誤
-            });
-        }
-
-        showNotification(
-            `頻道 ${channel} - ${bossName}\n地圖: ${mapLocation}\n擊殺時間已記錄！\n預計重生: ${formatTime(respawnMin)} ~ ${formatTime(respawnMax)}`,
-            'success'
-        );
-    }
-
-    // 清空輸入
-    document.getElementById('channel-input').value = '';
-    document.getElementById('channel-input').focus();
-}
 
         // 刪除單個記錄
         function deleteRecord(id) {
