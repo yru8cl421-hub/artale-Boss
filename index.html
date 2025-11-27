@@ -588,6 +588,52 @@
             color: #a0a0c0;
         }
 
+        /* BOSS 圖片樣式 */
+        .boss-image {
+            width: 50px;
+            height: 50px;
+            object-fit: contain;
+            flex-shrink: 0;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+        }
+
+        .boss-image-large {
+            width: 80px;
+            height: 80px;
+            object-fit: contain;
+            filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.4));
+        }
+
+        .boss-select-preview {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-top: 10px;
+            padding: 10px;
+            background: rgba(0, 153, 204, 0.1);
+            border-radius: 8px;
+        }
+
+        .boss-select-preview img {
+            width: 60px;
+            height: 60px;
+            object-fit: contain;
+        }
+
+        .stats-card-image {
+            width: 45px;
+            height: 45px;
+            object-fit: contain;
+            margin-right: 10px;
+        }
+
+        .boss-list-image {
+            width: 40px;
+            height: 40px;
+            object-fit: contain;
+            vertical-align: middle;
+        }
+
         .notification {
             position: fixed;
             top: 20px;
@@ -822,8 +868,13 @@
                 </div>
 
                 <div class="info-box" id="boss-info" style="display: none;">
-                    <p id="map-info"></p>
-                    <p id="time-info"></p>
+                    <div class="boss-select-preview">
+                        <img id="boss-preview-image" src="" alt="BOSS預覽" style="display: none;">
+                        <div>
+                            <p id="map-info"></p>
+                            <p id="time-info"></p>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -845,6 +896,7 @@
                     <table id="boss-list-table">
                         <thead>
                             <tr>
+                                <th style="width: 60px;">圖片</th>
                                 <th>BOSS名稱</th>
                                 <th>重生時間範圍</th>
                                 <th>地圖</th>
@@ -941,30 +993,30 @@
     <script>
         // BOSS 數據
         const BOSS_DATA = {
-            "紅寶王": { min: 23, max: 30, maps: ["海岸草叢3"], color: "#ff4444" },
-            "樹妖王": { min: 23, max: 30, maps: ["東方岩石山5"], color: "#8bc34a" },
-            "冥界幽靈": { min: 45, max: 60, maps: ["1號線<4區>", "2號線<3區>"], color: "#9c27b0" },
-            "巨居蟹": { min: 45, max: 60, maps: ["海龜沙灘"], color: "#ff9800" },
-            "殭屍猴王": { min: 38, max: 45, maps: ["巫婆森林1"], color: "#795548" },
-            "蘑菇王": { min: 210, max: 240, maps: ["鋼之肥肥公園3"], color: "#ff5722" },
-            "沼澤巨鱷": { min: 90, max: 105, maps: ["危險的黑鱷魚1"], color: "#4caf50" },
-            "殭屍蘑菇王": { min: 195, max: 225, maps: ["蘑菇王之墓"], color: "#e91e63" },
-            "巴洛古": { min: 405, max: 540, maps: ["受詛咒的神殿"], color: "#ff0000" },
-            "艾利傑": { min: 118, max: 128, maps: ["天空階梯2"], color: "#00bcd4" },
-            "雪山女巫": { min: 158, max: 180, maps: ["冰面1"], color: "#87ceeb" },
-            "雪毛怪人": { min: 45, max: 68, maps: ["雪人之谷"], color: "#f0f8ff" },
-            "厄運死神": { min: 45, max: 105, maps: ["死亡森林4"], color: "#2f4f4f" },
-            "咕咕鐘": { min: 68, max: 90, maps: ["時間之路<3>"], color: "#daa520" },
-            "葛雷金剛": { min: 270, max: 350, maps: ["葛雷草原"], color: "#8b4513" },
-            "書生幽靈": { min: 150, max: 300, maps: ["狐狸谷"], color: "#9370db" },
-            "九尾妖狐": { min: 210, max: 570, maps: ["月亮山坡"], color: "#ff69b4" },
-            "黑輪王": { min: 780, max: 1020, maps: ["夜市徒步區7", "夜市徒步區7-1"], color: "#000000", hasMapSelect: true },
-            "瘋狂喵z客": { min: 120, max: 420, maps: ["名人大道西部區域"], color: "#ffa500" },
-            "仙人娃娃": { min: 158, max: 180, maps: ["上級訓練場"], color: "#98fb98" },
-            "肯德熊": { min: 113, max: 128, maps: ["流浪熊的領土"], color: "#8b7355" },
-            "喵怪仙人": { min: 150, max: 170, maps: ["喵怪仙人的領域"], color: "#ffb6c1" },
-            "巨大深山人蔘": { min: 60, max: 135, maps: ["豐饒的藥草田"], color: "#ffd700" },
-            "海怒斯": { min: 180, max: 300, maps: ["海怒斯洞穴"], color: "#1e90ff" }
+            "紅寶王": { min: 23, max: 30, maps: ["海岸草叢3"], color: "#ff4444", image: "images/紅寶王.gif" },
+            "樹妖王": { min: 23, max: 30, maps: ["東方岩石山5"], color: "#8bc34a", image: "images/樹妖王.gif" },
+            "冥界幽靈": { min: 45, max: 60, maps: ["1號線<4區>", "2號線<3區>"], color: "#9c27b0", image: "images/冥界幽靈.gif" },
+            "巨居蟹": { min: 45, max: 60, maps: ["海龜沙灘"], color: "#ff9800", image: "images/巨居蟹.gif" },
+            "殭屍猴王": { min: 38, max: 45, maps: ["巫婆森林1"], color: "#795548", image: "images/殭屍猴王.gif" },
+            "蘑菇王": { min: 210, max: 240, maps: ["鋼之肥肥公園3"], color: "#ff5722", image: "images/蘑菇王.gif" },
+            "沼澤巨鱷": { min: 90, max: 105, maps: ["危險的黑鱷魚1"], color: "#4caf50", image: "images/沼澤巨鱷.gif" },
+            "殭屍蘑菇王": { min: 195, max: 225, maps: ["蘑菇王之墓"], color: "#e91e63", image: "images/殭屍蘑菇王.gif" },
+            "巴洛古": { min: 405, max: 540, maps: ["受詛咒的神殿"], color: "#ff0000", image: "images/巴洛古.gif" },
+            "艾利傑": { min: 118, max: 128, maps: ["天空階梯2"], color: "#00bcd4", image: "images/艾利傑.gif" },
+            "雪山女巫": { min: 158, max: 180, maps: ["冰面1"], color: "#87ceeb", image: "images/雪山女巫.gif" },
+            "雪毛怪人": { min: 45, max: 68, maps: ["雪人之谷"], color: "#f0f8ff", image: "images/雪毛怪人.gif" },
+            "厄運死神": { min: 45, max: 105, maps: ["死亡森林4"], color: "#2f4f4f", image: "images/厄運死神.gif" },
+            "咕咕鐘": { min: 68, max: 90, maps: ["時間之路<3>"], color: "#daa520", image: "images/咕咕鐘.gif" },
+            "葛雷金剛": { min: 270, max: 350, maps: ["葛雷草原"], color: "#8b4513", image: "images/葛雷金剛.gif" },
+            "書生幽靈": { min: 150, max: 300, maps: ["狐狸谷"], color: "#9370db", image: "images/書生幽靈.gif" },
+            "九尾妖狐": { min: 210, max: 570, maps: ["月亮山坡"], color: "#ff69b4", image: "images/九尾妖狐.gif" },
+            "黑輪王": { min: 780, max: 1020, maps: ["夜市徒步區7", "夜市徒步區7-1"], color: "#000000", hasMapSelect: true, image: "images/黑輪王.gif" },
+            "瘋狂喵z客": { min: 120, max: 420, maps: ["名人大道西部區域"], color: "#ffa500", image: "images/瘋狂喵z客.gif" },
+            "仙人娃娃": { min: 158, max: 180, maps: ["上級訓練場"], color: "#98fb98", image: "images/仙人娃娃.gif" },
+            "肯德熊": { min: 113, max: 128, maps: ["流浪熊的領土"], color: "#8b7355", image: "images/肯德熊.gif" },
+            "喵怪仙人": { min: 150, max: 170, maps: ["喵怪仙人的領域"], color: "#ffb6c1", image: "images/喵怪仙人.gif" },
+            "巨大深山人蔘": { min: 60, max: 135, maps: ["豐饒的藥草田"], color: "#ffd700", image: "images/巨大深山人蔘.gif" },
+            "海怒斯": { min: 180, max: 300, maps: ["海怒斯洞穴"], color: "#1e90ff", image: "images/海怒斯.gif" }
         };
 
         // 存儲數據
@@ -1068,10 +1120,12 @@
                 totalToday += stats.todayKills;
                 totalAll += stats.totalKills;
 
+                const bossImageHtml = info.image ? `<img src="${info.image}" alt="${bossName}" class="stats-card-image">` : `<span style="color: ${info.color}">●</span>`;
+
                 html += `
                     <div class="stats-card">
-                        <h3>
-                            <span style="color: ${info.color}">●</span>
+                        <h3 style="display: flex; align-items: center;">
+                            ${bossImageHtml}
                             ${bossName}
                         </h3>
                         <div>
@@ -1139,9 +1193,16 @@
             tbody.innerHTML = '';
             Object.entries(BOSS_DATA).forEach(([name, info]) => {
                 const row = tbody.insertRow();
-                row.insertCell(0).textContent = name;
-                row.insertCell(1).textContent = formatTimeRange(info.min, info.max);
-                row.insertCell(2).textContent = info.maps.join(', ');
+                
+                // 圖片列
+                const imgCell = row.insertCell(0);
+                if (info.image) {
+                    imgCell.innerHTML = `<img src="${info.image}" alt="${name}" class="boss-list-image">`;
+                }
+                
+                row.insertCell(1).textContent = name;
+                row.insertCell(2).textContent = formatTimeRange(info.min, info.max);
+                row.insertCell(3).textContent = info.maps.join(', ');
             });
         }
 
@@ -1175,6 +1236,7 @@
         function onBossSelected() {
             const bossName = document.getElementById('boss-select').value;
             const mapSelectContainer = document.getElementById('map-select-container');
+            const previewImage = document.getElementById('boss-preview-image');
             
             if (bossName && BOSS_DATA[bossName]) {
                 const info = BOSS_DATA[bossName];
@@ -1186,12 +1248,22 @@
                     mapSelectContainer.style.display = 'none';
                 }
                 
+                // 顯示BOSS圖片
+                if (info.image) {
+                    previewImage.src = info.image;
+                    previewImage.alt = bossName;
+                    previewImage.style.display = 'block';
+                } else {
+                    previewImage.style.display = 'none';
+                }
+                
                 document.getElementById('map-info').textContent = `地圖: ${info.maps.join(', ')}`;
                 document.getElementById('time-info').textContent = `重生時間: ${formatTimeRange(info.min, info.max)}`;
                 document.getElementById('boss-info').style.display = 'block';
             } else {
                 document.getElementById('boss-info').style.display = 'none';
                 mapSelectContainer.style.display = 'none';
+                previewImage.style.display = 'none';
             }
         }
 
@@ -1661,11 +1733,14 @@
                 const respawnBtnHtml = showRespawnBtn ? `<button class="boss-icon-btn" onclick="respawnSingleBoss(${record.id})" title="重新計時">🔄</button>` : '';
                 const patrolBtnHtml = showPatrolBtn ? `<button class="boss-icon-btn" onclick="patrolSingleBoss(${record.id})" title="巡邏打卡">👀</button>` : '';
 
+                // BOSS圖片
+                const bossImage = bossInfo && bossInfo.image ? `<img src="${bossInfo.image}" alt="${record.bossName}" class="boss-image">` : '';
+
                 html += `
                     <div class="boss-status-card" style="--boss-color: ${bossColor};">
                         <div class="boss-card-header">
                             <div class="boss-info-left">
-                                <div class="boss-indicator"></div>
+                                ${bossImage}
                                 <div class="boss-name-section">
                                     <div class="boss-name-main">${record.bossName}</div>
                                     <div class="boss-info-row">
