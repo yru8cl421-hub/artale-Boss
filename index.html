@@ -921,14 +921,6 @@
                             <img id="preview-img" style="max-width:100%; border:2px solid #10b981; border-radius:4px;">
                         </div>
                     </div>
-
-                    <!-- 區域選擇覆蓋層 -->
-                    <div id="area-selector-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 10000; cursor: crosshair;">
-                        <div style="position: absolute; top: 10px; left: 50%; transform: translateX(-50%); background: #1a1a2e; color: white; padding: 15px 25px; border-radius: 10px; font-size: 16px;">
-                            請在畫面上拖曳選擇「頻道 XXXX」的位置，然後放開滑鼠
-                        </div>
-                        <div id="selection-box" style="display: none; position: absolute; border: 3px dashed #10b981; background: rgba(16, 185, 129, 0.2);"></div>
-                    </div>
                     <button type="button" onclick="recordBoss()" style="background: linear-gradient(135deg, #0099cc 0%, #0077aa 100%); border-color: #0099cc;">
                         📝 記錄擊殺
                     </button>
@@ -1123,20 +1115,6 @@
         let monitorInterval = null;
         let isMonitoring = false;
         let videoElement = null;
-        
-        // 自訂辨識區域（比例值 0~1）
-        let captureArea = {
-            x: 0.25,      // 起始X (25%)
-            y: 0.20,      // 起始Y (20%)
-            width: 0.50,  // 寬度 (50%)
-            height: 0.06  // 高度 (6%)
-        };
-        
-        // 載入儲存的區域設定
-        const savedArea = localStorage.getItem('captureArea');
-        if (savedArea) {
-            captureArea = JSON.parse(savedArea);
-        }
 
         // 掃描區域設定（百分比）
         let scanArea = {
@@ -1255,7 +1233,7 @@
 📌 使用步驟：
 1️⃣ 在遊戲中打開「選擇頻道」視窗
 2️⃣ 點擊 👁️ 預覽，選擇遊戲視窗
-3️⃣ 確認預覽圖片只剩下「頻道 XXXX」區域
+3️⃣ 確認預覽圖片是「頻道 XXXX」區域
 4️⃣ 如果位置不對，點 ⚙️ 調整掃描位置
 5️⃣ 點擊 🎯 開始監控
 6️⃣ 再次點擊 🎯 停止監控
@@ -1278,107 +1256,6 @@
             `.trim();
             
             alert(helpText);
-        }
-
-        // 選擇辨識區域
-        async function selectCaptureArea() {
-            try {
-                // 先取得螢幕分享
-                const stream = await navigator.mediaDevices.getDisplayMedia({
-                    video: { mediaSource: 'screen' }
-                });
-                
-                // 建立video元素
-                const video = document.createElement('video');
-                video.srcObject = stream;
-                video.muted = true;
-                await video.play();
-                await new Promise(resolve => setTimeout(resolve, 300));
-                
-                // 擷取一幀作為背景
-                const canvas = document.createElement('canvas');
-                canvas.width = video.videoWidth;
-                canvas.height = video.videoHeight;
-                const ctx = canvas.getContext('2d');
-                ctx.drawImage(video, 0, 0);
-                
-                // 停止串流
-                stream.getTracks().forEach(track => track.stop());
-                
-                // 建立全螢幕選擇介面
-                const overlay = document.createElement('div');
-                overlay.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:99999;cursor:crosshair;';
-                overlay.style.backgroundImage = `url(${canvas.toDataURL()})`;
-                overlay.style.backgroundSize = '100vw 100vh';
-                
-                const hint = document.createElement('div');
-                hint.style.cssText = 'position:absolute;top:10px;left:50%;transform:translateX(-50%);background:#1a1a2e;color:white;padding:15px 25px;border-radius:10px;font-size:16px;z-index:100000;';
-                hint.textContent = '請拖曳框選「頻道 XXXX」數字的位置';
-                overlay.appendChild(hint);
-                
-                const box = document.createElement('div');
-                box.style.cssText = 'position:absolute;border:3px dashed #10b981;background:rgba(16,185,129,0.3);display:none;pointer-events:none;';
-                overlay.appendChild(box);
-                
-                document.body.appendChild(overlay);
-                
-                let startX, startY, isDrawing = false;
-                
-                overlay.onmousedown = (e) => {
-                    isDrawing = true;
-                    startX = e.clientX;
-                    startY = e.clientY;
-                    box.style.left = startX + 'px';
-                    box.style.top = startY + 'px';
-                    box.style.width = '0';
-                    box.style.height = '0';
-                    box.style.display = 'block';
-                };
-                
-                overlay.onmousemove = (e) => {
-                    if (!isDrawing) return;
-                    const w = e.clientX - startX;
-                    const h = e.clientY - startY;
-                    box.style.left = (w > 0 ? startX : e.clientX) + 'px';
-                    box.style.top = (h > 0 ? startY : e.clientY) + 'px';
-                    box.style.width = Math.abs(w) + 'px';
-                    box.style.height = Math.abs(h) + 'px';
-                };
-                
-                overlay.onmouseup = (e) => {
-                    if (!isDrawing) return;
-                    isDrawing = false;
-                    
-                    // 取得框選的像素座標
-                    const boxRect = box.getBoundingClientRect();
-                    
-                    // 視窗大小
-                    const winW = window.innerWidth;
-                    const winH = window.innerHeight;
-                    
-                    // 計算比例 (0~1)
-                    captureArea = {
-                        x: boxRect.left / winW,
-                        y: boxRect.top / winH,
-                        width: boxRect.width / winW,
-                        height: boxRect.height / winH
-                    };
-                    
-                    console.log('選擇區域比例:', captureArea);
-                    console.log('視窗大小:', { winW, winH });
-                    
-                    // 儲存
-                    localStorage.setItem('captureArea', JSON.stringify(captureArea));
-                    
-                    // 移除覆蓋層
-                    document.body.removeChild(overlay);
-                    
-                    showNotification(`區域已設定！\n請點 🎯 開始監控`, 'success');
-                };
-                
-            } catch (error) {
-                console.error('選擇區域失敗:', error);
-            }
         }
 
         // 切換螢幕監控
