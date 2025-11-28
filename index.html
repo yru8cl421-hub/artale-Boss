@@ -314,9 +314,9 @@
 
         .boss-status-card {
             background: linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.95) 100%);
-            padding: 16px 20px;
-            border-radius: 12px;
-            margin-bottom: 16px;
+            padding: 10px 16px;
+            border-radius: 10px;
+            margin-bottom: 10px;
             border: 1px solid rgba(100, 116, 139, 0.3);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
             transition: all 0.3s;
@@ -409,9 +409,9 @@
         .boss-info-row {
             display: flex;
             align-items: center;
-            gap: 16px;
+            gap: 12px;
             color: #cbd5e1;
-            font-size: 1.2em;
+            font-size: 1em;
             flex-wrap: wrap;
         }
 
@@ -590,8 +590,8 @@
 
         /* BOSS 圖片樣式 */
         .boss-image {
-            width: 50px;
-            height: 50px;
+            width: 40px;
+            height: 40px;
             object-fit: contain;
             flex-shrink: 0;
             filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
@@ -1768,11 +1768,21 @@
             return `${minStr} ~ ${maxStr}`;
         }
 
+        // BOSS資訊卡片自動關閉計時器
+        let bossInfoTimer = null;
+
         // BOSS選擇事件
         function onBossSelected() {
             const bossName = document.getElementById('boss-select').value;
             const mapSelectContainer = document.getElementById('map-select-container');
             const previewImage = document.getElementById('boss-preview-image');
+            const bossInfoCard = document.getElementById('boss-info');
+            
+            // 清除之前的計時器
+            if (bossInfoTimer) {
+                clearTimeout(bossInfoTimer);
+                bossInfoTimer = null;
+            }
             
             if (bossName && BOSS_DATA[bossName]) {
                 const info = BOSS_DATA[bossName];
@@ -1795,9 +1805,14 @@
                 
                 document.getElementById('map-info').textContent = `地圖: ${info.maps.join(', ')}`;
                 document.getElementById('time-info').textContent = `重生時間: ${formatTimeRange(info.min, info.max)}`;
-                document.getElementById('boss-info').style.display = 'block';
+                bossInfoCard.style.display = 'block';
+                
+                // 10秒後自動關閉
+                bossInfoTimer = setTimeout(() => {
+                    bossInfoCard.style.display = 'none';
+                }, 10000);
             } else {
-                document.getElementById('boss-info').style.display = 'none';
+                bossInfoCard.style.display = 'none';
                 mapSelectContainer.style.display = 'none';
                 previewImage.style.display = 'none';
             }
@@ -2277,22 +2292,19 @@
                         <div class="boss-card-header">
                             <div class="boss-info-left">
                                 ${bossImage}
-                                <div class="boss-name-section">
-                                    <div class="boss-name-main">${record.bossName}</div>
-                                    <div class="boss-info-row">
-                                        <div class="boss-info-item">
-                                            <span>頻道 ${record.channel}${mapInfo}</span>
-                                        </div>
-                                        <div class="boss-info-item">
-                                            <span style="color: #64748b;">|</span>
-                                            <span>⚔️ 擊殺: ${killTime}</span>
-                                        </div>
-                                        ${patrolInfo}
-                                        <div class="boss-info-item">
-                                            <span style="color: #64748b;">|</span>
-                                            <span class="boss-status-badge ${statusClass}">${statusText}</span>
-                                            <span style="font-family: 'Courier New', monospace; font-weight: 600;">${countdownText}</span>
-                                        </div>
+                                <div class="boss-info-row">
+                                    <div class="boss-info-item">
+                                        <span>頻道 ${record.channel}${mapInfo}</span>
+                                    </div>
+                                    <div class="boss-info-item">
+                                        <span style="color: #64748b;">|</span>
+                                        <span>⚔️ 擊殺: ${killTime}</span>
+                                    </div>
+                                    ${patrolInfo}
+                                    <div class="boss-info-item">
+                                        <span style="color: #64748b;">|</span>
+                                        <span class="boss-status-badge ${statusClass}">${statusText}</span>
+                                        <span style="font-family: 'Courier New', monospace; font-weight: 600;">${countdownText}</span>
                                     </div>
                                 </div>
                             </div>
