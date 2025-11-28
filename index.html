@@ -903,16 +903,16 @@
                         <label>頻道:</label>
                         <div style="display: flex; gap: 8px;">
                             <input type="text" id="channel-input" value="1" maxlength="4" style="flex: 1;" placeholder="頻道號碼">
-                            <button id="monitor-btn" onclick="toggleScreenMonitor()" class="capture-btn" title="開始/停止螢幕監控">
+                            <button type="button" id="monitor-btn" onclick="toggleScreenMonitor()" class="capture-btn" title="開始/停止螢幕監控">
                                 🎯
                             </button>
-                            <button onclick="adjustScanArea()" class="capture-btn" title="調整掃描位置" style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); border-color: #8b5cf6;">
+                            <button type="button" onclick="adjustScanArea()" class="capture-btn" title="調整掃描位置" style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); border-color: #8b5cf6;">
                                 ⚙️
                             </button>
-                            <button onclick="previewScanArea()" class="capture-btn" title="預覽掃描區域" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); border-color: #f59e0b;">
+                            <button type="button" onclick="previewScanArea()" class="capture-btn" title="預覽掃描區域" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); border-color: #f59e0b;">
                                 👁️
                             </button>
-                            <button onclick="showOcrHelp()" class="capture-btn" title="使用說明" style="background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%); border-color: #6b7280;">
+                            <button type="button" onclick="showOcrHelp()" class="capture-btn" title="使用說明" style="background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%); border-color: #6b7280;">
                                 ❓
                             </button>
                         </div>
@@ -929,7 +929,7 @@
                         </div>
                         <div id="selection-box" style="display: none; position: absolute; border: 3px dashed #10b981; background: rgba(16, 185, 129, 0.2);"></div>
                     </div>
-                    <button onclick="recordBoss()" style="background: linear-gradient(135deg, #0099cc 0%, #0077aa 100%); border-color: #0099cc;">
+                    <button type="button" onclick="recordBoss()" style="background: linear-gradient(135deg, #0099cc 0%, #0077aa 100%); border-color: #0099cc;">
                         📝 記錄擊殺
                     </button>
                 </div>
@@ -956,7 +956,7 @@
             <div class="section">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                     <h2 style="margin: 0;">當前記錄中的BOSS (<span id="boss-count">0</span>)</h2>
-                    <button onclick="clearAll()" class="danger" style="margin: 0;">⚠️ 清空所有記錄</button>
+                    <button type="button" onclick="clearAll()" class="danger" style="margin: 0;">⚠️ 清空所有記錄</button>
                 </div>
                 <div id="record-container" style="display: grid; gap: 16px;">
                     <!-- 卡片將通過JavaScript動態生成 -->
@@ -989,8 +989,8 @@
                 <div class="stats-header">
                     <h2>📊 BOSS擊殺統計</h2>
                     <div class="button-group" style="margin: 0;">
-                        <button onclick="resetTodayStats()">🔄 重置今日統計</button>
-                        <button onclick="resetAllStats()" class="danger">⚠️ 清空所有統計</button>
+                        <button type="button" onclick="resetTodayStats()">🔄 重置今日統計</button>
+                        <button type="button" onclick="resetAllStats()" class="danger">⚠️ 清空所有統計</button>
                     </div>
                 </div>
                 
@@ -1047,10 +1047,10 @@
                 </div>
 
                 <div class="button-group">
-                    <button onclick="submitFeedback()" style="padding: 15px 30px; font-size: 1.1em;">
+                    <button type="button" onclick="submitFeedback()" style="padding: 15px 30px; font-size: 1.1em;">
                         📨 提交建議
                     </button>
-                    <button onclick="clearFeedbackForm()" class="danger">
+                    <button type="button" onclick="clearFeedbackForm()" class="danger">
                         🔄 清空表單
                     </button>
                 </div>
@@ -2266,8 +2266,8 @@
                 }
 
                 // 按鈕HTML
-                const respawnBtnHtml = showRespawnBtn ? `<button class="boss-icon-btn" onclick="respawnSingleBoss(${record.id})" title="重新計時">🔄</button>` : '';
-                const patrolBtnHtml = showPatrolBtn ? `<button class="boss-icon-btn" onclick="patrolSingleBoss(${record.id})" title="巡邏打卡">👀</button>` : '';
+                const respawnBtnHtml = showRespawnBtn ? `<button type="button" class="boss-icon-btn" onclick="respawnSingleBoss(${record.id})" title="重新計時">🔄</button>` : '';
+                const patrolBtnHtml = showPatrolBtn ? `<button type="button" class="boss-icon-btn" onclick="patrolSingleBoss(${record.id})" title="巡邏打卡">👀</button>` : '';
 
                 // BOSS圖片
                 const bossImage = bossInfo && bossInfo.image ? `<img src="${bossInfo.image}" alt="${record.bossName}" class="boss-image">` : '';
@@ -2299,7 +2299,7 @@
                             <div class="boss-action-btns">
                                 ${respawnBtnHtml}
                                 ${patrolBtnHtml}
-                                <button class="boss-icon-btn delete" onclick="deleteRecord(${record.id})" title="刪除">🗑️</button>
+                                <button type="button" class="boss-icon-btn delete" onclick="deleteRecord(${record.id})" title="刪除">🗑️</button>
                             </div>
                         </div>
                     </div>
@@ -2409,6 +2409,14 @@
 
         // 頁面載入時初始化
         window.addEventListener('DOMContentLoaded', init);
+        
+        // 按 Enter 鍵記錄擊殺
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                recordBoss();
+            }
+        });
     </script>
 </body>
 </html>
