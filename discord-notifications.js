@@ -81,11 +81,16 @@ async function sendKillNotification(record) {
 
 // 提交改善建議
 async function submitFeedback() {
+    console.log('[DEBUG] submitFeedback 函數被調用');
+    
     const type = document.getElementById('feedback-type').value;
     const content = document.getElementById('feedback-content').value.trim();
     const contact = document.getElementById('feedback-contact').value.trim();
 
+    console.log('[DEBUG] 表單數據:', { type, content, contact });
+
     if (!content) {
+        console.log('[DEBUG] 內容為空，顯示警告');
         showNotification('請輸入詳細說明', 'warning');
         return;
     }
@@ -102,7 +107,7 @@ async function submitFeedback() {
             },
             {
                 name: '🕒 提交時間',
-                value: formatDateTime(now, true),
+                value: formatDiscordDateTime(now),
                 inline: true
             },
             {
@@ -125,7 +130,11 @@ async function submitFeedback() {
         });
     }
 
+    console.log('[DEBUG] 準備發送的 embed:', JSON.stringify(embed, null, 2));
+    console.log('[DEBUG] Webhook URL:', FEEDBACK_WEBHOOK);
+
     try {
+        console.log('[DEBUG] 開始發送請求...');
         const response = await fetch(FEEDBACK_WEBHOOK, {
             method: 'POST',
             headers: {
@@ -136,13 +145,23 @@ async function submitFeedback() {
             })
         });
 
+        console.log('[DEBUG] 回應狀態:', response.status, response.statusText);
+        
+        const responseText = await response.text();
+        console.log('[DEBUG] 回應內容:', responseText);
+
         if (response.ok) {
+            console.log('[DEBUG] 提交成功！');
             showNotification('感謝您的建議！已成功提交 ✨', 'success');
             clearFeedbackForm();
         } else {
+            console.error('[ERROR] 提交失敗 - 狀態碼:', response.status);
+            console.error('[ERROR] 錯誤訊息:', responseText);
             showNotification('提交失敗，請稍後再試', 'error');
         }
     } catch (error) {
+        console.error('[ERROR] 發生異常:', error);
+        console.error('[ERROR] 錯誤堆疊:', error.stack);
         showNotification('提交失敗，請檢查網路連線', 'error');
     }
 }
