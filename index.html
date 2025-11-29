@@ -819,6 +819,20 @@
         }
 
         @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .section {
+                padding: 15px;
+                margin-bottom: 15px;
+            }
+            
+            .section h2 {
+                font-size: 1.1em;
+                margin-bottom: 15px;
+            }
+            
             .input-group {
                 grid-template-columns: 1fr;
             }
@@ -828,49 +842,119 @@
             }
 
             table {
-                font-size: 0.85em;
+                font-size: 0.8em;
             }
 
             th, td {
-                padding: 8px;
+                padding: 6px 8px;
             }
 
             .stats-grid {
                 grid-template-columns: 1fr;
+                gap: 10px;
             }
 
             .quick-input-row {
                 grid-template-columns: 1fr;
-                gap: 12px;
+                gap: 10px;
             }
 
             .quick-input-row button {
                 width: 100%;
+                padding: 12px;
+            }
+            
+            /* 隱藏OCR螢幕監控按鈕 */
+            .capture-btn {
+                display: none !important;
+            }
+            
+            /* 頻道輸入優化 */
+            .input-field {
+                margin-bottom: 10px;
+            }
+            
+            .input-field input,
+            .input-field select {
+                padding: 10px;
+                font-size: 1em;
             }
 
             .boss-card-header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 12px;
+                flex-direction: row;
+                align-items: center;
+                gap: 10px;
             }
 
             .boss-info-left {
                 width: 100%;
+                flex: 1;
+            }
+            
+            .boss-image {
+                width: 35px;
+                height: 35px;
             }
 
             .boss-info-row {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 8px;
+                flex-direction: row;
+                flex-wrap: wrap;
+                align-items: center;
+                gap: 6px;
+                font-size: 0.85em;
+            }
+            
+            .boss-info-item {
+                gap: 4px;
+            }
+            
+            .boss-status-card {
+                padding: 8px 12px;
+                margin-bottom: 8px;
             }
 
             .countdown-badge {
-                width: 100%;
+                width: auto;
             }
 
             .boss-action-btns {
-                width: 100%;
-                justify-content: flex-start;
+                flex-shrink: 0;
+            }
+            
+            .boss-icon-btn {
+                width: 32px;
+                height: 32px;
+                font-size: 14px;
+            }
+            
+            /* 分頁標籤優化 */
+            .tabs {
+                gap: 5px;
+                margin-bottom: 15px;
+            }
+            
+            .tab {
+                padding: 10px 12px;
+                font-size: 0.9em;
+            }
+            
+            /* 統計卡片優化 */
+            .stats-card {
+                padding: 12px;
+            }
+            
+            .stats-card-image {
+                width: 35px;
+                height: 35px;
+            }
+            
+            /* 預覽區域優化 */
+            #scan-preview {
+                padding: 8px;
+            }
+            
+            #scan-preview img {
+                max-height: 60px;
             }
         }
     </style>
