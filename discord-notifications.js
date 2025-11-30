@@ -8,8 +8,8 @@ const DISCORD_WEBHOOKS = {
     "殭屍蘑菇王": "https://discord.com/api/webhooks/1440712167279165441/Csi_R_VtZOCEMCxfdxJzZVnFMdb2mAZQ8ePupNFVsZSpar8Y7nlgaOmrpzcwBzNy8i2D",
     "巴洛古": "https://discord.com/api/webhooks/1440712283356397629/Avw1nV_Gfuh8MUsMjroAVUCydVyEDDQlvPEjEk3b16uvaSxuChBGlhWwc7Mta4rRFBBn",
     "黑輪王": "https://discord.com/api/webhooks/1440712399899328512/bkmJ2wqFZB5PRUo7wbhrt9I1dMQsEYKHfPc6bZRWfwbWle6fzosXHyEHzkFXXQickWIc",
-    "仙人娃娃": "https://discord.com/api/webhooks/1440712496410525706/hTjO-fV43ekEg7suq6tZJw5FAFC5kRYWUAhBuEMMycBLztCjem8R_720E4sSpW8IwVFA"
-    "肯德熊": https://discord.com/api/webhooks/1444677508313382922/1BAuub-382pozgdn5ykJhqBQ_Nm93tiODhvohkHWV1ubMcW7dN53QR8iR3p9GOA302nm
+    "仙人娃娃": "https://discord.com/api/webhooks/1440712496410525706/hTjO-fV43ekEg7suq6tZJw5FAFC5kRYWUAhBuEMMycBLztCjem8R_720E4sSpW8IwVFA",
+    "肯德熊": "https://discord.com/api/webhooks/1444677508313382922/1BAuub-382pozgdn5ykJhqBQ_Nm93tiODhvohkHWV1ubMcW7dN53QR8iR3p9GOA302nm"
 };
 
 const FEEDBACK_WEBHOOK = 'https://discord.com/api/webhooks/1438760814466039910/iYegYu_LoPALQokZnyEjFJKuVXU9MxBHhMKvcQpZx0Ny3sKeVvUjmob0ozV5-BBHsxsj';
