@@ -181,26 +181,6 @@
             box-shadow: 0 0 0 2px rgba(0, 153, 204, 0.2);
         }
 
-        .checkbox-group {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-top: 10px;
-        }
-
-        input[type="checkbox"] {
-            width: 20px;
-            height: 20px;
-            cursor: pointer;
-        }
-
-        .boss-checkbox {
-            width: 18px;
-            height: 18px;
-            cursor: pointer;
-            accent-color: #00ccff;
-        }
-
         .info-box {
             background: rgba(0, 153, 204, 0.1);
             padding: 15px;
@@ -277,10 +257,6 @@
 
         tr:hover {
             background: rgba(0, 204, 255, 0.1);
-        }
-
-        tr.selected {
-            background: rgba(0, 204, 255, 0.2);
         }
 
         .status-waiting {
@@ -374,38 +350,6 @@
             min-width: 0;
         }
 
-        .boss-indicator {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            background: #fbbf24;
-            box-shadow: 0 0 10px #fbbf24;
-            flex-shrink: 0;
-            animation: pulseIndicator 2s ease-in-out infinite;
-        }
-
-        @keyframes pulseIndicator {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.7; transform: scale(1.1); }
-        }
-
-        .boss-name-section {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .boss-name-main {
-            color: #ffffff;
-            font-size: 1.2em;
-            font-weight: 600;
-            margin-bottom: 4px;
-        }
-
-        .boss-channel {
-            color: #94a3b8;
-            font-size: 0.9em;
-        }
-
         .boss-info-row {
             display: flex;
             align-items: center;
@@ -420,51 +364,6 @@
             align-items: center;
             gap: 6px;
             white-space: nowrap;
-        }
-
-        .countdown-badge {
-            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-            color: #ffffff;
-            padding: 12px 20px;
-            border-radius: 10px;
-            font-weight: 700;
-            font-size: 1.1em;
-            white-space: nowrap;
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
-            min-width: 120px;
-            text-align: center;
-            line-height: 1.4;
-        }
-
-        .countdown-badge .status-text {
-            font-size: 0.75em;
-            font-weight: 500;
-            opacity: 0.9;
-            display: block;
-            margin-bottom: 2px;
-        }
-
-        .countdown-badge .time-text {
-            font-size: 1.3em;
-            font-weight: 700;
-            font-family: 'Courier New', monospace;
-            letter-spacing: 1px;
-        }
-
-        .countdown-badge.in-window {
-            background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
-            animation: blinkBadge 1.5s ease-in-out infinite;
-            box-shadow: 0 4px 12px rgba(249, 115, 22, 0.4);
-        }
-
-        @keyframes blinkBadge {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.85; }
-        }
-
-        .countdown-badge.expired {
-            background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
-            box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
         }
 
         .boss-status-badge {
@@ -549,35 +448,6 @@
             font-weight: 600;
         }
 
-        .boss-action-btn {
-            flex: 1;
-            padding: 8px 12px;
-            background: rgba(30, 41, 59, 0.8);
-            border: 1px solid rgba(100, 116, 139, 0.3);
-            border-radius: 6px;
-            color: #cbd5e1;
-            cursor: pointer;
-            font-size: 0.85em;
-            transition: all 0.2s;
-        }
-
-        .boss-action-btn:hover {
-            background: rgba(51, 65, 85, 0.8);
-            border-color: rgba(100, 116, 139, 0.5);
-            transform: translateY(-1px);
-        }
-
-        .boss-action-btn.delete {
-            background: rgba(220, 38, 38, 0.1);
-            border-color: rgba(220, 38, 38, 0.3);
-            color: #fca5a5;
-        }
-
-        .boss-action-btn.delete:hover {
-            background: rgba(220, 38, 38, 0.2);
-            border-color: rgba(220, 38, 38, 0.5);
-        }
-
         .boss-status-card h3 {
             color: #00ccff;
             margin-bottom: 10px;
@@ -595,13 +465,6 @@
             object-fit: contain;
             flex-shrink: 0;
             filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
-        }
-
-        .boss-image-large {
-            width: 80px;
-            height: 80px;
-            object-fit: contain;
-            filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.4));
         }
 
         .boss-select-preview {
@@ -677,12 +540,6 @@
             50% { box-shadow: 0 0 0 8px rgba(239, 68, 68, 0); }
         }
 
-        .capture-btn.loading {
-            background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
-            border-color: #6b7280;
-            cursor: wait;
-        }
-
         .notification {
             position: fixed;
             top: 20px;
@@ -735,29 +592,6 @@
 
         .scrollbar::-webkit-scrollbar-thumb:hover {
             background: #00ff99;
-        }
-
-        .current-time {
-            text-align: center;
-            font-size: 1.2em;
-            color: #00ff99;
-            margin-bottom: 20px;
-            padding: 10px;
-            background: rgba(0, 255, 153, 0.1);
-            border-radius: 5px;
-        }
-
-        .action-buttons {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-
-        .hint {
-            color: #00ff99;
-            font-size: 0.9em;
-            margin-top: 10px;
-            font-style: italic;
         }
 
         .stats-grid {
@@ -913,10 +747,6 @@
                 margin-bottom: 8px;
             }
 
-            .countdown-badge {
-                width: auto;
-            }
-
             .boss-action-btns {
                 flex-shrink: 0;
             }
@@ -965,7 +795,8 @@
             <div class="tab active" onclick="switchTab(0)">BOSS記錄</div>
             <div class="tab" onclick="switchTab(1)">BOSS列表</div>
             <div class="tab" onclick="switchTab(2)">擊殺統計</div>
-            <div class="tab" onclick="switchTab(3)">改善建議</div>
+            <div class="tab" onclick="switchTab(3)">通知設定</div>
+            <div class="tab" onclick="switchTab(4)">改善建議</div>
         </div>
 
         <div class="tab-content active" id="tab-record">
@@ -1077,6 +908,108 @@
             </div>
         </div>
 
+        <div class="tab-content" id="tab-notification">
+            <div class="section">
+                <h2>🔔 Discord 通知設定</h2>
+                <p style="color: #a0a0c0; margin-bottom: 20px;">
+                    設定您的 Discord Webhook，即可在擊殺BOSS時自動接收通知到您的Discord頻道！
+                </p>
+
+                <div class="info-box" style="background: rgba(16, 185, 129, 0.1); border-left-color: #10b981;">
+                    <p style="color: #10b981; font-weight: bold; margin-bottom: 10px;">📢 統一通知 Webhook</p>
+                    <p style="color: #cbd5e1; font-size: 0.95em; margin-bottom: 5px;">
+                        此 Webhook 會接收<strong>所有BOSS</strong>的擊殺通知，方便集中管理。
+                    </p>
+                </div>
+
+                <div class="input-group" style="margin-top: 20px;">
+                    <div class="input-field" style="grid-column: 1 / -1;">
+                        <label style="font-size: 1.05em; color: #0099cc; font-weight: bold;">
+                            🔗 Discord Webhook URL:
+                        </label>
+                        <input type="text" id="user-webhook-url" 
+                               placeholder="https://discord.com/api/webhooks/..."
+                               style="width: 100%; font-family: monospace; font-size: 0.9em;">
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button type="button" onclick="saveUserWebhook()" 
+                            style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-color: #10b981; padding: 15px 30px; font-size: 1.1em;">
+                        💾 儲存設定
+                    </button>
+                    <button type="button" onclick="testUserWebhook()" 
+                            style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); border-color: #f59e0b; padding: 15px 30px; font-size: 1.1em;">
+                        🧪 測試通知
+                    </button>
+                    <button type="button" onclick="clearUserWebhook()" class="danger"
+                            style="padding: 15px 30px; font-size: 1.1em;">
+                        🗑️ 清除設定
+                    </button>
+                </div>
+
+                <div id="webhook-status" style="display: none; margin-top: 15px;" class="info-box">
+                    <p id="webhook-status-text"></p>
+                </div>
+
+                <!-- 使用教學 -->
+                <div class="section" style="margin-top: 30px; background: rgba(139, 92, 246, 0.05); border: 1px solid rgba(139, 92, 246, 0.3);">
+                    <h3 style="color: #a78bfa; margin-bottom: 15px;">📚 使用教學</h3>
+                    
+                    <div style="color: #cbd5e1; line-height: 1.8;">
+                        <p style="font-weight: bold; color: #a78bfa; margin-bottom: 10px;">🔹 步驟一：建立 Discord Webhook</p>
+                        <ol style="margin-left: 20px; margin-bottom: 20px;">
+                            <li>打開你的 Discord 伺服器</li>
+                            <li>在想要接收通知的頻道上點擊「編輯頻道」⚙️</li>
+                            <li>選擇「整合」→「Webhook」</li>
+                            <li>點擊「建立 Webhook」或「新增 Webhook」</li>
+                            <li>設定 Webhook 名稱（例如：楓之谷BOSS通知）</li>
+                            <li>點擊「複製 Webhook 網址」📋</li>
+                        </ol>
+
+                        <p style="font-weight: bold; color: #a78bfa; margin-bottom: 10px;">🔹 步驟二：貼上 Webhook 網址</p>
+                        <ol style="margin-left: 20px; margin-bottom: 20px;">
+                            <li>將複製的網址貼到上方的輸入框</li>
+                            <li>點擊「💾 儲存設定」按鈕</li>
+                            <li>點擊「🧪 測試通知」確認是否正常運作</li>
+                        </ol>
+
+                        <p style="font-weight: bold; color: #a78bfa; margin-bottom: 10px;">🔹 Webhook 網址格式範例：</p>
+                        <div style="background: #0a0a1a; padding: 12px; border-radius: 5px; font-family: monospace; font-size: 0.85em; margin-bottom: 20px; overflow-x: auto;">
+                            https://discord.com/api/webhooks/1234567890123456789/AbCdEfGhIjKlMnOpQrStUvWxYz1234567890
+                        </div>
+
+                        <p style="font-weight: bold; color: #a78bfa; margin-bottom: 10px;">🔹 通知內容說明：</p>
+                        <ul style="margin-left: 20px; margin-bottom: 20px;">
+                            <li>✅ 每次記錄 BOSS 擊殺時自動發送通知</li>
+                            <li>✅ 顯示 BOSS 名稱、頻道、地圖位置</li>
+                            <li>✅ 顯示預計重生時間範圍</li>
+                            <li>✅ 使用 BOSS 專屬顏色的訊息嵌入</li>
+                        </ul>
+
+                        <div style="background: rgba(245, 158, 11, 0.1); padding: 15px; border-radius: 8px; border-left: 4px solid #f59e0b; margin-top: 20px;">
+                            <p style="color: #fbbf24; font-weight: bold; margin-bottom: 8px;">⚠️ 注意事項：</p>
+                            <ul style="margin-left: 20px; color: #fcd34d;">
+                                <li>請勿將 Webhook 網址分享給他人</li>
+                                <li>Webhook 設定僅儲存在你的瀏覽器中</li>
+                                <li>清除瀏覽器資料會同時清除 Webhook 設定</li>
+                                <li>此功能是額外通知，不影響原本的個別 BOSS 通知</li>
+                            </ul>
+                        </div>
+
+                        <div style="background: rgba(16, 185, 129, 0.1); padding: 15px; border-radius: 8px; border-left: 4px solid #10b981; margin-top: 15px;">
+                            <p style="color: #34d399; font-weight: bold; margin-bottom: 8px;">💡 小技巧：</p>
+                            <ul style="margin-left: 20px; color: #6ee7b7;">
+                                <li>可以為不同用途建立多個 Discord 頻道和 Webhook</li>
+                                <li>建議測試通知確認設定正確後再開始使用</li>
+                                <li>如果更換 Webhook，記得重新儲存設定</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="tab-content" id="tab-feedback">
             <div class="section">
                 <h2>💡 改善建議</h2>
@@ -1170,7 +1103,7 @@
         // 存儲數據
         let activeBosses = [];
         let patrolRecords = [];
-        let bossStatistics = {}; // 新增：BOSS統計數據
+        let bossStatistics = {};
 
         // 初始化
         function init() {
@@ -1179,9 +1112,9 @@
             populateBossListTable();
             initializeStatistics();
             updateAllDisplays();
-            setInterval(updateAllDisplays, 1000); // 每秒更新一次以支持倒數計時
+            setInterval(updateAllDisplays, 1000);
+            loadUserWebhook(); // 載入用戶 Webhook 設定
 
-            // 添加Enter鍵監聯
             document.getElementById('channel-input').addEventListener('keypress', function(e) {
                 if (e.key === 'Enter') {
                     recordBoss();
@@ -1197,13 +1130,12 @@
 
         // 掃描區域設定（百分比）
         let scanArea = {
-            x: 28,      // 起始X %
-            y: 18,      // 起始Y %
-            width: 15,  // 寬度 %
-            height: 6   // 高度 %
+            x: 28,
+            y: 18,
+            width: 15,
+            height: 6
         };
         
-        // 載入儲存的設定
         const savedScanArea = localStorage.getItem('scanArea');
         if (savedScanArea) {
             scanArea = JSON.parse(savedScanArea);
@@ -1253,30 +1185,25 @@
                 const fullWidth = video.videoWidth;
                 const fullHeight = video.videoHeight;
                 
-                // 計算掃描區域
                 const startX = Math.floor(fullWidth * scanArea.x / 100);
                 const startY = Math.floor(fullHeight * scanArea.y / 100);
                 const cropWidth = Math.floor(fullWidth * scanArea.width / 100);
                 const cropHeight = Math.floor(fullHeight * scanArea.height / 100);
                 
-                // 擷取區域
                 const canvas = document.createElement('canvas');
                 canvas.width = cropWidth;
                 canvas.height = cropHeight;
                 const ctx = canvas.getContext('2d');
                 ctx.drawImage(video, startX, startY, cropWidth, cropHeight, 0, 0, cropWidth, cropHeight);
                 
-                // 停止串流
                 stream.getTracks().forEach(t => t.stop());
                 
-                // 顯示預覽
                 const previewDiv = document.getElementById('scan-preview');
                 const previewImg = document.getElementById('preview-img');
                 const countdown = document.getElementById('preview-countdown');
                 previewImg.src = canvas.toDataURL('image/png');
                 previewDiv.style.display = 'block';
                 
-                // 10秒倒計時自動關閉
                 let seconds = 10;
                 countdown.textContent = `(${seconds}秒後自動關閉)`;
                 
@@ -1289,12 +1216,6 @@
                         previewDiv.style.display = 'none';
                     }
                 }, 1000);
-                
-                console.log('預覽資訊:', {
-                    fullWidth, fullHeight,
-                    scanArea,
-                    擷取: { startX, startY, cropWidth, cropHeight }
-                });
                 
             } catch (error) {
                 console.error('預覽失敗:', error);
@@ -1353,7 +1274,6 @@
             try {
                 monitorBtn.innerHTML = '⏳';
                 
-                // 請求螢幕分享
                 screenStream = await navigator.mediaDevices.getDisplayMedia({
                     video: {
                         mediaSource: 'screen',
@@ -1361,29 +1281,22 @@
                     }
                 });
                 
-                // 建立video元素
                 videoElement = document.createElement('video');
                 videoElement.srcObject = screenStream;
                 videoElement.muted = true;
                 await videoElement.play();
                 
-                // 等待視頻準備
                 await new Promise(resolve => setTimeout(resolve, 500));
                 
-                // 監聽串流結束
                 screenStream.getVideoTracks()[0].addEventListener('ended', () => {
                     stopScreenMonitor();
                 });
                 
-                // 更新狀態
                 isMonitoring = true;
                 monitorBtn.innerHTML = '🔴';
                 monitorBtn.classList.add('monitoring');
                 
-                // 立即執行一次辨識
                 await captureAndRecognize();
-                
-                // 每1秒執行一次辨識
                 monitorInterval = setInterval(captureAndRecognize, 1000);
                 
                 showNotification('螢幕監控已開始', 'success');
@@ -1429,28 +1342,19 @@
                 const fullWidth = videoElement.videoWidth;
                 const fullHeight = videoElement.videoHeight;
                 
-                // 使用可調整的掃描區域
                 const startX = Math.floor(fullWidth * scanArea.x / 100);
                 const startY = Math.floor(fullHeight * scanArea.y / 100);
                 const cropWidth = Math.floor(fullWidth * scanArea.width / 100);
                 const cropHeight = Math.floor(fullHeight * scanArea.height / 100);
                 
-                console.log('掃描設定:', scanArea);
-                console.log('擷取區域:', { startX, startY, cropWidth, cropHeight, fullWidth, fullHeight });
+                if (cropWidth < 10 || cropHeight < 10) return;
                 
-                if (cropWidth < 10 || cropHeight < 10) {
-                    console.log('區域太小');
-                    return;
-                }
-                
-                // 擷取原始圖片
                 const tempCanvas = document.createElement('canvas');
                 tempCanvas.width = cropWidth;
                 tempCanvas.height = cropHeight;
                 const tempCtx = tempCanvas.getContext('2d');
                 tempCtx.drawImage(videoElement, startX, startY, cropWidth, cropHeight, 0, 0, cropWidth, cropHeight);
                 
-                // 放大2倍提高辨識率
                 const scale = 2;
                 const canvas = document.createElement('canvas');
                 canvas.width = cropWidth * scale;
@@ -1459,7 +1363,6 @@
                 ctx.imageSmoothingEnabled = false;
                 ctx.drawImage(tempCanvas, 0, 0, canvas.width, canvas.height);
                 
-                // 圖像預處理 - 提取白色文字
                 const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
                 const data = imageData.data;
                 for (let i = 0; i < data.length; i += 4) {
@@ -1467,20 +1370,14 @@
                     const g = data[i+1];
                     const b = data[i+2];
                     
-                    // 白色文字：RGB 都很高 (> 200)
-                    // 轉為黑字白底（OCR更容易辨識）
                     if (r > 200 && g > 200 && b > 200) {
-                        data[i] = data[i+1] = data[i+2] = 0;  // 黑色
+                        data[i] = data[i+1] = data[i+2] = 0;
                     } else {
-                        data[i] = data[i+1] = data[i+2] = 255; // 白色
+                        data[i] = data[i+1] = data[i+2] = 255;
                     }
                 }
                 ctx.putImageData(imageData, 0, 0);
                 
-                // 顯示處理後的圖片（調試用）
-                console.log('處理後圖片:', canvas.toDataURL('image/png').substring(0, 100) + '...');
-                
-                // OCR辨識
                 const result = await Tesseract.recognize(
                     canvas.toDataURL('image/png'),
                     'eng',
@@ -1488,8 +1385,6 @@
                 );
                 
                 const text = result.data.text.trim();
-                console.log('OCR結果:', text);
-                
                 const match = text.match(/(\d{1,4})/);
                 if (match) {
                     const channelNumber = match[1];
@@ -1506,36 +1401,8 @@
             }
         }
 
-        // 從文字中提取頻道號碼（保留完整數字，最多4位）
-        function extractChannelNumber(text) {
-            let match;
-            
-            // 模式1: 頻道 + 數字
-            match = text.match(/頻道\s*(\d{1,4})/);
-            if (match) return match[1];
-            
-            // 模式2: 频道（簡體）
-            match = text.match(/频道\s*(\d{1,4})/);
-            if (match) return match[1];
-            
-            // 模式3: 道 + 數字
-            match = text.match(/道\s*(\d{1,4})/);
-            if (match) return match[1];
-            
-            // 模式4: 尋找4位數字
-            match = text.match(/\b(\d{4})\b/);
-            if (match) return match[1];
-            
-            // 模式5: 尋找3位數字
-            match = text.match(/\b(\d{3})\b/);
-            if (match) return match[1];
-            
-            return null;
-        }
-
         // 初始化統計數據
         function initializeStatistics() {
-            // 確保每個BOSS都有統計數據
             Object.keys(BOSS_DATA).forEach(bossName => {
                 if (!bossStatistics[bossName]) {
                     bossStatistics[bossName] = {
@@ -1547,7 +1414,7 @@
             });
         }
 
-        // 獲取今天的日期字串 (YYYY-MM-DD)
+        // 獲取今天的日期字串
         function getTodayDateString() {
             const now = new Date();
             return now.toISOString().split('T')[0];
@@ -1598,13 +1465,11 @@
             const statsGrid = document.getElementById('stats-grid');
             const today = getTodayDateString();
             
-            // 更新日期和總計
             document.getElementById('stats-date').textContent = new Date().toLocaleDateString('zh-TW');
             
             let totalToday = 0;
             let totalAll = 0;
 
-            // 生成統計卡片
             let html = '';
             Object.entries(BOSS_DATA).forEach(([bossName, info]) => {
                 const stats = bossStatistics[bossName] || { totalKills: 0, todayKills: 0 };
@@ -1634,7 +1499,6 @@
 
             statsGrid.innerHTML = html;
             
-            // 更新總計
             document.getElementById('total-today-kills').textContent = totalToday;
             document.getElementById('total-all-kills').textContent = totalAll;
         }
@@ -1686,7 +1550,6 @@
             Object.entries(BOSS_DATA).forEach(([name, info]) => {
                 const row = tbody.insertRow();
                 
-                // 圖片列
                 const imgCell = row.insertCell(0);
                 if (info.image) {
                     imgCell.innerHTML = `<img src="${info.image}" alt="${name}" class="boss-list-image">`;
@@ -1705,21 +1568,8 @@
             const maxHour = Math.floor(max/60);
             const maxMin = max%60;
             
-            let minStr, maxStr;
-            
-            // 格式化最小時間
-            if (minHour > 0) {
-                minStr = minMin > 0 ? `${minHour}小時${minMin}分` : `${minHour}小時`;
-            } else {
-                minStr = `${minMin}分`;
-            }
-            
-            // 格式化最大時間
-            if (maxHour > 0) {
-                maxStr = maxMin > 0 ? `${maxHour}小時${maxMin}分` : `${maxHour}小時`;
-            } else {
-                maxStr = `${maxMin}分`;
-            }
+            let minStr = minHour > 0 ? (minMin > 0 ? `${minHour}小時${minMin}分` : `${minHour}小時`) : `${minMin}分`;
+            let maxStr = maxHour > 0 ? (maxMin > 0 ? `${maxHour}小時${maxMin}分` : `${maxHour}小時`) : `${maxMin}分`;
             
             return `${minStr} ~ ${maxStr}`;
         }
@@ -1734,7 +1584,6 @@
             const previewImage = document.getElementById('boss-preview-image');
             const bossInfoCard = document.getElementById('boss-info');
             
-            // 清除之前的計時器
             if (bossInfoTimer) {
                 clearTimeout(bossInfoTimer);
                 bossInfoTimer = null;
@@ -1743,14 +1592,12 @@
             if (bossName && BOSS_DATA[bossName]) {
                 const info = BOSS_DATA[bossName];
                 
-                // 檢查是否為黑輪王
                 if (info.hasMapSelect) {
                     mapSelectContainer.style.display = 'block';
                 } else {
                     mapSelectContainer.style.display = 'none';
                 }
                 
-                // 顯示BOSS圖片
                 if (info.image) {
                     previewImage.src = info.image;
                     previewImage.alt = bossName;
@@ -1763,7 +1610,6 @@
                 document.getElementById('time-info').textContent = `重生時間: ${formatTimeRange(info.min, info.max)}`;
                 bossInfoCard.style.display = 'block';
                 
-                // 10秒後自動關閉
                 bossInfoTimer = setTimeout(() => {
                     bossInfoCard.style.display = 'none';
                 }, 10000);
@@ -1778,7 +1624,7 @@
         function recordBoss() {
             const bossName = document.getElementById('boss-select').value;
             const channel = document.getElementById('channel-input').value;
-            const notification = true; // 默認開啟提醒
+            const notification = true;
 
             if (!bossName) {
                 showNotification('請選擇BOSS', 'warning');
@@ -1795,20 +1641,17 @@
             const respawnMin = new Date(now.getTime() + info.min * 60000);
             const respawnMax = new Date(now.getTime() + info.max * 60000);
 
-            // 獲取地圖信息
-            let mapLocation = info.maps[0]; // 默認第一個地圖
+            let mapLocation = info.maps[0];
             if (info.hasMapSelect) {
                 const selectedMap = document.getElementById('map-select').value;
                 mapLocation = selectedMap === '7' ? '夜市徒步區7' : '夜市徒步區7-1';
             }
 
-            // 檢查是否已存在相同BOSS和頻道的記錄
             const existingRecordIndex = activeBosses.findIndex(
                 b => b.bossName === bossName && b.channel === channel && b.map === mapLocation
             );
 
             if (existingRecordIndex !== -1) {
-                // 如果存在，更新現有記錄
                 const existingRecord = activeBosses[existingRecordIndex];
                 existingRecord.deathTime = now.toISOString();
                 existingRecord.respawnMin = respawnMin.toISOString();
@@ -1816,25 +1659,24 @@
                 existingRecord.notified = false;
                 existingRecord.lastPatrolTime = null;
                 
-                // 更新統計
                 updateBossStatistics(bossName);
                 
                 saveData();
                 updateAllDisplays();
 
-                // 在後台發送Discord通知（不阻塞UI）
+                // 發送個別 BOSS 專屬的 Discord 通知
                 if (typeof sendKillNotification === 'function') {
-                    sendKillNotification(existingRecord).catch(err => {
-                        // 靜默處理錯誤
-                    });
+                    sendKillNotification(existingRecord).catch(err => {});
                 }
+
+                // 發送用戶自訂的統一 Webhook 通知
+                sendUserWebhookNotification(existingRecord).catch(err => {});
 
                 showNotification(
                     `頻道 ${channel} - ${bossName}\n地圖: ${mapLocation}\n已更新擊殺時間！\n預計重生: ${formatTime(respawnMin)} ~ ${formatTime(respawnMax)}`,
                     'success'
                 );
             } else {
-                // 如果不存在，新增記錄
                 const record = {
                     id: Date.now(),
                     channel: channel,
@@ -1850,18 +1692,18 @@
 
                 activeBosses.push(record);
                 
-                // 更新統計
                 updateBossStatistics(bossName);
                 
                 saveData();
                 updateAllDisplays();
 
-                // 在後台發送Discord通知（不阻塞UI）
+                // 發送個別 BOSS 專屬的 Discord 通知
                 if (typeof sendKillNotification === 'function') {
-                    sendKillNotification(record).catch(err => {
-                        // 靜默處理錯誤
-                    });
+                    sendKillNotification(record).catch(err => {});
                 }
+
+                // 發送用戶自訂的統一 Webhook 通知
+                sendUserWebhookNotification(record).catch(err => {});
 
                 showNotification(
                     `頻道 ${channel} - ${bossName}\n地圖: ${mapLocation}\n擊殺時間已記錄！\n預計重生: ${formatTime(respawnMin)} ~ ${formatTime(respawnMax)}`,
@@ -1869,7 +1711,6 @@
                 );
             }
 
-            // 清空輸入
             document.getElementById('channel-input').value = '';
             document.getElementById('channel-input').focus();
         }
@@ -1895,18 +1736,18 @@
                 record.respawnMax = new Date(now.getTime() + info.max * 60000).toISOString();
                 record.notified = false;
                 
-                // 更新統計
                 updateBossStatistics(record.bossName);
                 
                 saveData();
                 updateAllDisplays();
                 
-                // 在後台發送Discord通知（不阻塞UI）
+                // 發送個別 BOSS 專屬的 Discord 通知
                 if (typeof sendKillNotification === 'function') {
-                    sendKillNotification(record).catch(err => {
-                        // 靜默處理錯誤
-                    });
+                    sendKillNotification(record).catch(err => {});
                 }
+
+                // 發送用戶自訂的統一 Webhook 通知
+                sendUserWebhookNotification(record).catch(err => {});
                 
                 showNotification(`已重新計時 ${record.bossName}！`, 'success');
             }
@@ -1937,89 +1778,6 @@
             }
         }
 
-        // 刪除記錄
-        function deleteRecords() {
-            const selected = getSelectedRecords();
-            if (selected.length === 0) {
-                showNotification('請選擇要刪除的記錄', 'warning');
-                return;
-            }
-
-            if (confirm(`確定要刪除 ${selected.length} 個記錄嗎？`)) {
-                activeBosses = activeBosses.filter(b => !selected.includes(b.id));
-                saveData();
-                updateAllDisplays();
-                showNotification(`已刪除 ${selected.length} 個BOSS記錄`, 'success');
-            }
-        }
-
-        // 重新計時BOSS
-        function respawnBoss() {
-            const selected = getSelectedRecords();
-            if (selected.length === 0) {
-                showNotification('請選擇要重新計時的BOSS記錄', 'warning');
-                return;
-            }
-
-            selected.forEach(id => {
-                const record = activeBosses.find(b => b.id === id);
-                if (record) {
-                    const info = BOSS_DATA[record.bossName];
-                    const now = new Date();
-                    record.deathTime = now.toISOString();
-                    record.respawnMin = new Date(now.getTime() + info.min * 60000).toISOString();
-                    record.respawnMax = new Date(now.getTime() + info.max * 60000).toISOString();
-                    record.notified = false;
-                    
-                    // 更新統計
-                    updateBossStatistics(record.bossName);
-                    
-                    // 在後台發送Discord通知（不阻塞UI）
-                    if (typeof sendKillNotification === 'function') {
-                        sendKillNotification(record).catch(err => {
-                            // 靜默處理錯誤
-                        });
-                    }
-                }
-            });
-
-            saveData();
-            updateAllDisplays();
-            showNotification(`已重新計時 ${selected.length} 個BOSS！`, 'success');
-        }
-
-        // 巡邏打卡
-        function patrolBoss() {
-            const selected = getSelectedRecords();
-            if (selected.length === 0) {
-                showNotification('請選擇要巡邏打卡的BOSS記錄', 'warning');
-                return;
-            }
-
-            const id = selected[0];
-            const record = activeBosses.find(b => b.id === id);
-            if (record) {
-                const now = new Date();
-                record.lastPatrolTime = now.toISOString();
-                
-                patrolRecords.push({
-                    timestamp: now.toISOString(),
-                    bossName: record.bossName,
-                    channel: record.channel,
-                    map: record.map,
-                    result: '未重生',
-                    note: '從BOSS記錄巡邏打卡'
-                });
-
-                saveData();
-                updateAllDisplays();
-                showNotification(
-                    `巡邏打卡記錄已儲存！\nBOSS: ${record.bossName}\n頻道: ${record.channel}\n地圖: ${record.map}\n時間: ${formatTime(now)}`,
-                    'success'
-                );
-            }
-        }
-
         // 清空所有記錄
         function clearAll() {
             if (activeBosses.length === 0) {
@@ -2035,71 +1793,185 @@
             }
         }
 
-        // 提交建議
-        async function submitFeedback() {
-            console.log('[DEBUG] submitFeedback 函數被調用');
+        // 清空建議表單
+        function clearFeedbackForm() {
+            document.getElementById('feedback-type').value = '功能建議';
+            document.getElementById('feedback-content').value = '';
+            document.getElementById('feedback-contact').value = '';
+        }
+
+        // ===== 用戶 Webhook 管理函數 =====
+        
+        // 載入用戶 Webhook
+        function loadUserWebhook() {
+            const savedWebhook = localStorage.getItem('userDiscordWebhook');
+            if (savedWebhook) {
+                document.getElementById('user-webhook-url').value = savedWebhook;
+                showWebhookStatus('✅ 已載入儲存的 Webhook 設定', 'success');
+            }
+        }
+
+        // 儲存用戶 Webhook
+        function saveUserWebhook() {
+            const webhookUrl = document.getElementById('user-webhook-url').value.trim();
             
-            const type = document.getElementById('feedback-type').value;
-            const content = document.getElementById('feedback-content').value.trim();
-            const contact = document.getElementById('feedback-contact').value.trim();
-
-            console.log('[DEBUG] 表單數據:', { type, content, contact });
-
-            if (!content) {
-                console.log('[DEBUG] 內容為空，顯示警告');
-                showNotification('請填寫詳細說明', 'warning');
+            if (!webhookUrl) {
+                showNotification('請輸入 Webhook URL', 'warning');
                 return;
             }
 
-            const FEEDBACK_WEBHOOK = 'https://discord.com/api/webhooks/1438760814466039910/iYegYu_LoPALQokZnyEjFJKuVXU9MxBHhMKvcQpZx0Ny3sKeVvUjmob0ozV5-BBHsxsj';
+            // 驗證 Webhook URL 格式
+            if (!webhookUrl.startsWith('https://discord.com/api/webhooks/') && 
+                !webhookUrl.startsWith('https://discordapp.com/api/webhooks/')) {
+                showNotification('請輸入正確的 Discord Webhook URL', 'error');
+                showWebhookStatus('❌ URL 格式不正確，請確認是否為 Discord Webhook 網址', 'error');
+                return;
+            }
+
+            localStorage.setItem('userDiscordWebhook', webhookUrl);
+            showNotification('✅ Webhook 已儲存！', 'success');
+            showWebhookStatus('✅ Webhook 設定已成功儲存，現在記錄 BOSS 時會自動發送通知到您的 Discord 頻道', 'success');
+        }
+
+        // 測試用戶 Webhook
+        async function testUserWebhook() {
+            const webhookUrl = document.getElementById('user-webhook-url').value.trim();
+            
+            if (!webhookUrl) {
+                showNotification('請先輸入並儲存 Webhook URL', 'warning');
+                return;
+            }
 
             const now = new Date();
-            const month = now.getMonth() + 1;
-            const day = now.getDate();
-            const hours = String(now.getHours()).padStart(2, '0');
-            const minutes = String(now.getMinutes()).padStart(2, '0');
-            const formattedTime = `${month}/${day} ${hours}:${minutes}`;
-
-            const embed = {
-                title: '📝 新的改善建議',
-                color: 0x00ccff,
+            const testEmbed = {
+                title: '🧪 測試通知',
+                description: '這是一則測試訊息，如果您看到這則訊息，表示 Webhook 設定成功！',
+                color: 0x10b981,
                 fields: [
                     {
-                        name: '📋 建議類型',
-                        value: type,
+                        name: '📅 測試時間',
+                        value: formatDateTime(now),
                         inline: true
                     },
                     {
-                        name: '🕒 提交時間',
-                        value: formattedTime,
+                        name: '✅ 狀態',
+                        value: '設定正常',
                         inline: true
-                    },
-                    {
-                        name: '💬 詳細說明',
-                        value: content.length > 1024 ? content.substring(0, 1021) + '...' : content,
-                        inline: false
                     }
                 ],
                 timestamp: now.toISOString(),
                 footer: {
-                    text: '楓之谷BOSS重生時間系統 - 改善建議'
+                    text: '楓之谷BOSS重生時間系統 - 測試通知'
                 }
             };
 
-            if (contact) {
-                embed.fields.push({
-                    name: '📧 聯絡方式',
-                    value: contact,
-                    inline: false
+            try {
+                showNotification('正在發送測試通知...', 'success');
+                const response = await fetch(webhookUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        embeds: [testEmbed]
+                    })
                 });
+
+                if (response.ok) {
+                    showNotification('✅ 測試通知已成功發送！請檢查您的 Discord 頻道', 'success');
+                    showWebhookStatus('✅ 測試成功！已發送測試訊息到您的 Discord 頻道', 'success');
+                } else {
+                    const errorText = await response.text();
+                    console.error('Webhook 測試失敗:', response.status, errorText);
+                    showNotification('❌ 測試失敗，請檢查 Webhook URL 是否正確', 'error');
+                    showWebhookStatus(`❌ 測試失敗 (錯誤代碼: ${response.status})，請確認 Webhook URL 是否正確`, 'error');
+                }
+            } catch (error) {
+                console.error('發送測試通知時發生錯誤:', error);
+                showNotification('❌ 發送失敗，請檢查網路連線', 'error');
+                showWebhookStatus('❌ 發送失敗，請檢查網路連線或 Webhook URL 是否正確', 'error');
+            }
+        }
+
+        // 清除用戶 Webhook
+        function clearUserWebhook() {
+            if (confirm('確定要清除 Webhook 設定嗎？')) {
+                localStorage.removeItem('userDiscordWebhook');
+                document.getElementById('user-webhook-url').value = '';
+                showNotification('已清除 Webhook 設定', 'success');
+                showWebhookStatus('ℹ️ Webhook 設定已清除', 'warning');
+            }
+        }
+
+        // 顯示 Webhook 狀態訊息
+        function showWebhookStatus(message, type) {
+            const statusDiv = document.getElementById('webhook-status');
+            const statusText = document.getElementById('webhook-status-text');
+            
+            statusText.textContent = message;
+            statusDiv.style.display = 'block';
+            
+            // 根據類型設定樣式
+            if (type === 'success') {
+                statusDiv.style.background = 'rgba(16, 185, 129, 0.1)';
+                statusDiv.style.borderLeftColor = '#10b981';
+                statusText.style.color = '#34d399';
+            } else if (type === 'error') {
+                statusDiv.style.background = 'rgba(239, 68, 68, 0.1)';
+                statusDiv.style.borderLeftColor = '#ef4444';
+                statusText.style.color = '#f87171';
+            } else if (type === 'warning') {
+                statusDiv.style.background = 'rgba(245, 158, 11, 0.1)';
+                statusDiv.style.borderLeftColor = '#f59e0b';
+                statusText.style.color = '#fbbf24';
             }
 
-            console.log('[DEBUG] 準備發送的 embed:', JSON.stringify(embed, null, 2));
-            console.log('[DEBUG] Webhook URL:', FEEDBACK_WEBHOOK);
+            // 5秒後自動隱藏（除非是錯誤訊息）
+            if (type !== 'error') {
+                setTimeout(() => {
+                    statusDiv.style.display = 'none';
+                }, 5000);
+            }
+        }
+
+        // 發送用戶 Webhook 通知
+        async function sendUserWebhookNotification(record) {
+            const webhookUrl = localStorage.getItem('userDiscordWebhook');
+            if (!webhookUrl) return; // 如果沒有設定就不發送
+
+            const deathTime = new Date(record.deathTime);
+            const respawnMin = new Date(record.respawnMin);
+            const respawnMax = new Date(record.respawnMax);
+
+            const embed = {
+                title: '⚔️ BOSS擊殺記錄',
+                description: `**${record.bossName}** 已被擊殺！`,
+                color: parseInt(BOSS_DATA[record.bossName]?.color?.replace('#', '') || 'FF0000', 16),
+                fields: [
+                    {
+                        name: '頻道',
+                        value: String(record.channel),
+                        inline: true
+                    },
+                    {
+                        name: '地圖',
+                        value: record.map || BOSS_DATA[record.bossName]?.map || '未知',
+                        inline: true
+                    },
+                    {
+                        name: '⏰ 預計重生時間',
+                        value: `**${formatDateTime(respawnMin)} ~ ${formatDateTime(respawnMax)}**`,
+                        inline: false
+                    }
+                ],
+                timestamp: new Date().toISOString(),
+                footer: {
+                    text: '楓之谷BOSS重生時間系統'
+                }
+            };
 
             try {
-                console.log('[DEBUG] 開始發送請求...');
-                const response = await fetch(FEEDBACK_WEBHOOK, {
+                await fetch(webhookUrl, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -2108,49 +1980,16 @@
                         embeds: [embed]
                     })
                 });
-
-                console.log('[DEBUG] 回應狀態:', response.status, response.statusText);
-                
-                const responseText = await response.text();
-                console.log('[DEBUG] 回應內容:', responseText);
-
-                if (response.ok) {
-                    console.log('[DEBUG] 提交成功！');
-                    showNotification('感謝您的建議！已成功提交 ✨', 'success');
-                    clearFeedbackForm();
-                } else {
-                    console.error('[ERROR] 提交失敗 - 狀態碼:', response.status);
-                    console.error('[ERROR] 錯誤訊息:', responseText);
-                    showNotification('提交失敗，請稍後再試', 'error');
-                }
+                // 靜默處理，不顯示通知
             } catch (error) {
-                console.error('[ERROR] 發生異常:', error);
-                console.error('[ERROR] 錯誤堆疊:', error.stack);
-                showNotification('提交失敗，請檢查網路連線', 'error');
+                // 靜默處理錯誤
+                console.error('用戶 Webhook 發送失敗:', error);
             }
-        }
-
-        // 清空建議表單
-        function clearFeedbackForm() {
-            document.getElementById('feedback-type').value = '功能建議';
-            document.getElementById('feedback-content').value = '';
-            document.getElementById('feedback-contact').value = '';
-        }
-
-        // 獲取選中的記錄ID
-        function getSelectedRecords() {
-            const checkboxes = document.querySelectorAll('.boss-checkbox:checked');
-            return Array.from(checkboxes).map(cb => parseInt(cb.dataset.id));
-        }
-
-        // 切換全選（已移除全選按鈕，保留函數以防其他地方使用）
-        function toggleSelectAll() {
-            // 此功能已移除，保留空函數以防止錯誤
         }
 
         // 更新所有顯示
         function updateAllDisplays() {
-            checkAndResetDailyStats(); // 檢查是否需要重置每日統計
+            checkAndResetDailyStats();
             updateRecordDisplay();
             updateStatisticsDisplay();
         }
@@ -2160,7 +1999,6 @@
             const container = document.getElementById('record-container');
             const now = new Date();
             
-            // 更新BOSS計數
             document.getElementById('boss-count').textContent = activeBosses.length;
 
             if (activeBosses.length === 0) {
@@ -2179,7 +2017,6 @@
                 const bossInfo = BOSS_DATA[record.bossName];
                 const bossColor = bossInfo ? bossInfo.color : '#0099cc';
                 
-                // 計算狀態和倒數時間
                 let statusText = '';
                 let statusClass = '';
                 let countdownText = '';
@@ -2189,10 +2026,7 @@
                 if (now < respawnMin) {
                     statusText = '即將重生';
                     statusClass = 'waiting';
-                    showRespawnBtn = false;
-                    showPatrolBtn = false;
                     
-                    // 計算倒數時間
                     const totalSeconds = Math.floor((respawnMin - now) / 1000);
                     const hours = Math.floor(totalSeconds / 3600);
                     const minutes = Math.floor((totalSeconds % 3600) / 60);
@@ -2204,7 +2038,6 @@
                     showRespawnBtn = true;
                     showPatrolBtn = true;
                     
-                    // 計算窗口期剩餘時間
                     const totalSeconds = Math.floor((respawnMax - now) / 1000);
                     const hours = Math.floor(totalSeconds / 3600);
                     const minutes = Math.floor((totalSeconds % 3600) / 60);
@@ -2214,9 +2047,7 @@
                     statusText = '確定重生';
                     statusClass = 'confirmed';
                     showRespawnBtn = true;
-                    showPatrolBtn = false;
                     
-                    // 計算超過時間
                     const diffMin = Math.floor((now - respawnMax) / 60000);
                     countdownText = `+${diffMin}分`;
                 }
@@ -2224,7 +2055,6 @@
                 const mapInfo = record.map ? ` | ${record.map}` : '';
                 const killTime = formatDateTime(new Date(record.deathTime));
                 
-                // 巡邏時間資訊
                 let patrolInfo = '';
                 if (record.lastPatrolTime) {
                     const diff = Math.floor((now - new Date(record.lastPatrolTime)) / 60000);
@@ -2236,11 +2066,9 @@
                     `;
                 }
 
-                // 按鈕HTML
                 const respawnBtnHtml = showRespawnBtn ? `<button type="button" class="boss-icon-btn" onclick="respawnSingleBoss(${record.id})" title="重新計時">🔄</button>` : '';
                 const patrolBtnHtml = showPatrolBtn ? `<button type="button" class="boss-icon-btn" onclick="patrolSingleBoss(${record.id})" title="巡邏打卡">👀</button>` : '';
 
-                // BOSS圖片
                 const bossImage = bossInfo && bossInfo.image ? `<img src="${bossInfo.image}" alt="${record.bossName}" class="boss-image">` : '';
 
                 html += `
@@ -2275,22 +2103,6 @@
             });
 
             container.innerHTML = html;
-        }
-
-        // 獲取BOSS狀態
-        function getStatus(record) {
-            const now = new Date();
-            const respawnMin = new Date(record.respawnMin);
-            const respawnMax = new Date(record.respawnMax);
-
-            if (now < respawnMin) {
-                const diff = Math.floor((respawnMin - now) / 60000);
-                return { text: `等待中 (${diff}分)`, className: 'status-waiting' };
-            } else if (now >= respawnMin && now <= respawnMax) {
-                return { text: '🔴 可能已重生！', className: 'status-possible' };
-            } else {
-                return { text: '⏰ 肯定已重生！', className: 'status-definite' };
-            }
         }
 
         // 顯示通知
