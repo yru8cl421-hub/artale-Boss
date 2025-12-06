@@ -1,8 +1,17 @@
 // Discord 通知配置文件
-// 注意：此文件包含敏感的 Webhook URLs，請勿上傳到公開的 GitHub repository
+// 
+// ⚠️ 重要說明：
+// 1. 此檔案包含開發者設定的個別 BOSS 專屬 Webhook URLs
+// 2. 這些是「額外的」通知，會發送到各個 BOSS 專屬的頻道
+// 3. 使用者可以在系統的「通知設定」頁面設定自己的統一 Webhook
+// 4. 使用者的 Webhook 會接收所有 BOSS 的擊殺通知
+// 5. 兩種通知互不影響，可以同時使用
+// 
+// 注意：請勿將此檔案上傳到公開的 GitHub repository
 // 建議在 .gitignore 中添加此文件
 
-// Discord Webhook URLs
+// ===== 個別 BOSS 專屬的 Discord Webhook URLs =====
+// 以下是各個 BOSS 專屬的通知 Webhook（開發者使用）
 const DISCORD_WEBHOOKS = {
     "蘑菇王": "https://discord.com/api/webhooks/1438472081003118653/4KS7P2dGU_7KF-6tIQRgUuaLQYGPf8AZD0oDhYnUNGAJFFZKY6FhAs96O1UnLYnV9TvC",
     "殭屍蘑菇王": "https://discord.com/api/webhooks/1440712167279165441/Csi_R_VtZOCEMCxfdxJzZVnFMdb2mAZQ8ePupNFVsZSpar8Y7nlgaOmrpzcwBzNy8i2D",
