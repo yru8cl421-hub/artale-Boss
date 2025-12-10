@@ -2648,5 +2648,84 @@
             }
         });
     </script>
+
+    <!-- ==================== 雲端同步系統整合 ==================== -->
+    <!-- 引入同步系統 -->
+    <script src="sync-system.js"></script>
+    
+    <script>
+        // 初始化同步系統（僅啟用上傳功能）
+        window.addEventListener('DOMContentLoaded', function() {
+            // 延遲一下，確保所有原始程式碼都已載入
+            setTimeout(function() {
+                if (typeof initSyncSystem === 'function') {
+                    // 初始化同步系統
+                    initSyncSystem();
+                    
+                    // 停用下載功能（index.html 只需要上傳）
+                    if (typeof SYNC_CONFIG !== 'undefined') {
+                        SYNC_CONFIG.enableDownload = false;  // 關閉下載
+                        SYNC_CONFIG.enableUpload = true;     // 保持上傳開啟
+                        SYNC_CONFIG.autoSync = false;        // 關閉自動同步（因為不需要下載）
+                        console.log('[整合] 雲端同步系統已啟動（僅上傳模式）');
+                    }
+                } else {
+                    console.error('[整合] 找不到 initSyncSystem 函數，請確認 sync-system.js 已正確載入');
+                }
+            }, 500);
+        });
+        
+        // 包裝原有的 recordBoss 函數，添加雲端同步功能
+        (function() {
+            // 等待原有的 recordBoss 函數載入
+            setTimeout(function() {
+                if (typeof recordBoss === 'undefined') {
+                    console.error('[整合] 找不到原有的 recordBoss 函數');
+                    return;
+                }
+                
+                // 保存原有的 recordBoss 函數
+                const originalRecordBoss = window.recordBoss;
+                
+                // 建立新的 recordBoss 函數
+                window.recordBoss = async function() {
+                    console.log('[整合] recordBoss 被呼叫');
+                    
+                    // 先執行原有的記錄邏輯
+                    if (originalRecordBoss) {
+                        originalRecordBoss.apply(this, arguments);
+                    }
+                    
+                    // 等待一下讓 activeBosses 更新
+                    await new Promise(resolve => setTimeout(resolve, 200));
+                    
+                    // 上傳到雲端（只上傳，不下載）
+                    if (typeof activeBosses !== 'undefined' && activeBosses.length > 0) {
+                        const latestRecord = activeBosses[activeBosses.length - 1];
+                        console.log('[整合] 準備上傳記錄到雲端:', latestRecord.bossName, 'CH' + latestRecord.channel);
+                        
+                        // 呼叫同步系統上傳（只上傳，不會下載覆蓋本地資料）
+                        if (typeof uploadLocalRecords === 'function') {
+                            try {
+                                await uploadLocalRecords();
+                                console.log('[整合] ✅ 上傳完成');
+                            } catch (error) {
+                                console.error('[整合] ❌ 上傳失敗:', error);
+                            }
+                        } else {
+                            console.warn('[整合] 找不到 uploadLocalRecords 函數');
+                        }
+                    } else {
+                        console.warn('[整合] activeBosses 為空或未定義');
+                    }
+                };
+                
+                console.log('[整合] ✅ recordBoss 函數已成功包裝，現在會自動上傳到雲端（僅上傳，不下載）');
+            }, 1000);
+        })();
+    </script>
+    <!-- ==================== 雲端同步系統整合結束 ==================== -->
+    
+    
 </body>
 </html>
