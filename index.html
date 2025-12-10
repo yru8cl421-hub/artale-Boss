@@ -2675,52 +2675,76 @@
             }, 500);
         });
         
-        // 包裝原有的 recordBoss 函數，添加雲端同步功能
+        // 包裝原有的 recordBoss 和 respawnSingleBoss 函數，添加雲端同步功能
         (function() {
-            // 等待原有的 recordBoss 函數載入
+            // 等待原有函數載入
             setTimeout(function() {
+                // ========== 包裝 recordBoss (記錄擊殺) ==========
                 if (typeof recordBoss === 'undefined') {
                     console.error('[整合] 找不到原有的 recordBoss 函數');
-                    return;
+                } else {
+                    const originalRecordBoss = window.recordBoss;
+                    
+                    window.recordBoss = async function() {
+                        console.log('[整合] 記錄擊殺 - recordBoss 被呼叫');
+                        
+                        // 先執行原有的記錄邏輯
+                        if (originalRecordBoss) {
+                            originalRecordBoss.apply(this, arguments);
+                        }
+                        
+                        // 等待一下讓 activeBosses 更新
+                        await new Promise(resolve => setTimeout(resolve, 200));
+                        
+                        // ✅ 上傳到雲端
+                        if (typeof activeBosses !== 'undefined' && activeBosses.length > 0) {
+                            const latestRecord = activeBosses[activeBosses.length - 1];
+                            console.log('[整合] 準備上傳記錄到雲端:', latestRecord.bossName, 'CH' + latestRecord.channel);
+                            
+                            if (typeof uploadLocalRecords === 'function') {
+                                try {
+                                    await uploadLocalRecords();
+                                    console.log('[整合] ✅ 記錄擊殺 - 上傳完成');
+                                } catch (error) {
+                                    console.error('[整合] ❌ 記錄擊殺 - 上傳失敗:', error);
+                                }
+                            }
+                        }
+                    };
+                    
+                    console.log('[整合] ✅ recordBoss 函數已包裝（記錄擊殺會上傳）');
                 }
                 
-                // 保存原有的 recordBoss 函數
-                const originalRecordBoss = window.recordBoss;
-                
-                // 建立新的 recordBoss 函數
-                window.recordBoss = async function() {
-                    console.log('[整合] recordBoss 被呼叫');
+                // ========== 包裝 respawnSingleBoss (重新計時) ==========
+                if (typeof respawnSingleBoss === 'undefined') {
+                    console.error('[整合] 找不到原有的 respawnSingleBoss 函數');
+                } else {
+                    const originalRespawnSingleBoss = window.respawnSingleBoss;
                     
-                    // 先執行原有的記錄邏輯
-                    if (originalRecordBoss) {
-                        originalRecordBoss.apply(this, arguments);
-                    }
-                    
-                    // 等待一下讓 activeBosses 更新
-                    await new Promise(resolve => setTimeout(resolve, 200));
-                    
-                    // 上傳到雲端（只上傳，不下載）
-                    if (typeof activeBosses !== 'undefined' && activeBosses.length > 0) {
-                        const latestRecord = activeBosses[activeBosses.length - 1];
-                        console.log('[整合] 準備上傳記錄到雲端:', latestRecord.bossName, 'CH' + latestRecord.channel);
+                    window.respawnSingleBoss = async function(recordId) {
+                        console.log('[整合] 重新計時 - respawnSingleBoss 被呼叫, ID:', recordId);
                         
-                        // 呼叫同步系統上傳（只上傳，不會下載覆蓋本地資料）
+                        // 先執行原有的重新計時邏輯
+                        if (originalRespawnSingleBoss) {
+                            originalRespawnSingleBoss.apply(this, arguments);
+                        }
+                        
+                        // 等待一下讓 activeBosses 更新
+                        await new Promise(resolve => setTimeout(resolve, 200));
+                        
+                        // ✅ 上傳到雲端
                         if (typeof uploadLocalRecords === 'function') {
                             try {
                                 await uploadLocalRecords();
-                                console.log('[整合] ✅ 上傳完成');
+                                console.log('[整合] ✅ 重新計時 - 上傳完成');
                             } catch (error) {
-                                console.error('[整合] ❌ 上傳失敗:', error);
+                                console.error('[整合] ❌ 重新計時 - 上傳失敗:', error);
                             }
-                        } else {
-                            console.warn('[整合] 找不到 uploadLocalRecords 函數');
                         }
-                    } else {
-                        console.warn('[整合] activeBosses 為空或未定義');
-                    }
-                };
-                
-                console.log('[整合] ✅ recordBoss 函數已成功包裝，現在會自動上傳到雲端（僅上傳，不下載）');
+                    };
+                    
+                    console.log('[整合] ✅ respawnSingleBoss 函數已包裝（重新計時會上傳）');
+                }
             }, 1000);
         })();
     </script>
