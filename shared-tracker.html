@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>楓之谷BOSS重生時間系統 - 共享追蹤器</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #0a0a1a 0%, #15152b 100%);
+            color: #e2e8f0;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(21, 21, 43, 0.5);
+            border-radius: 15px;
+            border: 1px solid rgba(0, 153, 204, 0.3);
+        }
+
+        .header h1 {
+            color: #0099cc;
+            font-size: 2em;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px rgba(0, 153, 204, 0.3);
+        }
+
+        .header p {
+            color: #66ddee;
+            font-size: 1.1em;
+        }
+
+        .sync-status-bar {
+            background: rgba(30, 41, 59, 0.6);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(100, 116, 139, 0.3);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .sync-status-bar .status-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .filter-section {
+            background: rgba(30, 41, 59, 0.6);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(100, 116, 139, 0.3);
+        }
+
+        .filter-group {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .filter-label {
+            color: #0099cc;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        select {
+            padding: 10px 15px;
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(100, 116, 139, 0.4);
+            border-radius: 5px;
+            color: #e2e8f0;
+            font-size: 1em;
+            min-width: 200px;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: #0099cc;
+            box-shadow: 0 0 0 2px rgba(0, 153, 204, 0.2);
+        }
+
+        button {
+            padding: 10px 20px;
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(100, 116, 139, 0.4);
+            border-radius: 5px;
+            color: #e2e8f0;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s;
+        }
+
+        button:hover {
+            background: #0099cc;
+            color: #0a0a1a;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 153, 204, 0.3);
+            border-color: #0099cc;
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button.danger {
+            border-color: rgba(239, 68, 68, 0.4);
+            color: #fca5a5;
+        }
+
+        button.danger:hover {
+            background: #ef4444;
+            color: #ffffff;
+            border-color: #ef4444;
+        }
+
+        .stats-bar {
+            background: rgba(0, 153, 204, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+            border: 1px solid rgba(0, 153, 204, 0.3);
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .stat-label {
+            color: #94a3b8;
+            font-size: 0.9em;
+        }
+
+        .stat-value {
+            color: #0099cc;
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+
+        #record-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .boss-status-card {
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.8) 0%, rgba(15, 23, 42, 0.8) 100%);
+            border-left: 4px solid var(--boss-color);
+            border-radius: 10px;
+            padding: 20px;
+            transition: all 0.3s;
+            border: 1px solid rgba(100, 116, 139, 0.3);
+        }
+
+        .boss-status-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+            border-color: var(--boss-color);
+        }
+
+        .boss-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .boss-info-left {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .boss-image {
+            width: 80px;
+            height: 80px;
+            object-fit: contain;
+            image-rendering: pixelated;
+        }
+
+        .boss-info-row {
+            flex: 1;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .boss-info-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #cbd5e1;
+            font-size: 0.95em;
+        }
+
+        .boss-status-badge {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.85em;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .boss-status-badge.waiting {
+            background: rgba(251, 191, 36, 0.2);
+            color: #fbbf24;
+            border: 1px solid rgba(251, 191, 36, 0.5);
+        }
+
+        .boss-status-badge.possible {
+            background: rgba(34, 197, 94, 0.2);
+            color: #22c55e;
+            border: 1px solid rgba(34, 197, 94, 0.5);
+        }
+
+        .boss-status-badge.confirmed {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.5);
+        }
+
+        .boss-action-btns {
+            display: flex;
+            gap: 8px;
+        }
+
+        .boss-icon-btn {
+            width: 40px;
+            height: 40px;
+            padding: 0;
+            font-size: 1.2em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+        }
+
+        .boss-icon-btn.delete:hover {
+            background: #ef4444;
+            border-color: #ef4444;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            background: rgba(15, 23, 42, 0.95);
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            animation: slideIn 0.3s ease-out;
+            border: 1px solid rgba(100, 116, 139, 0.4);
+            max-width: 400px;
+        }
+
+        .notification.success {
+            border-left: 4px solid #10b981;
+        }
+
+        .notification.error {
+            border-left: 4px solid #ef4444;
+        }
+
+        .notification.warning {
+            border-left: 4px solid #f59e0b;
+        }
+
+        .notification.info {
+            border-left: 4px solid #3b82f6;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .sync-spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(251, 191, 36, 0.3);
+            border-top-color: #fbbf24;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #64748b;
+        }
+
+        .empty-state-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+        }
+
+        .empty-state-text {
+            font-size: 1.2em;
+            margin-bottom: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .boss-card-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .boss-info-left {
+                width: 100%;
+            }
+            
+            .boss-action-btns {
+                width: 100%;
+                justify-content: flex-end;
+            }
+            
+            .filter-group {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            select {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌐 楓之谷BOSS重生時間系統 - 共享追蹤器</h1>
+            <p>即時查看所有玩家的BOSS記錄</p>
+        </div>
+
+        <!-- 同步狀態欄 -->
+        <div class="sync-status-bar">
+            <div class="status-item">
+                <span style="color: #0099cc; font-weight: bold;">同步狀態:</span>
+                <div id="sync-status">
+                    <div style="color: #64748b;">尚未同步</div>
+                </div>
+            </div>
+            <div class="status-item">
+                <button type="button" onclick="manualSync()">🔄 手動同步</button>
+                <button type="button" onclick="toggleAutoSync()">
+                    <span id="auto-sync-text">⏸️ 停用自動同步</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- 篩選區 -->
+        <div class="filter-section">
+            <div class="filter-group">
+                <span class="filter-label">🎯 篩選BOSS:</span>
+                <select id="boss-filter" onchange="applyFilter()">
+                    <option value="all">全部BOSS</option>
+                </select>
+                <button type="button" onclick="clearFilter()">🔄 重置篩選</button>
+            </div>
+        </div>
+
+        <!-- 統計欄 -->
+        <div class="stats-bar">
+            <div class="stat-item">
+                <span class="stat-label">📊 記錄總數</span>
+                <span class="stat-value" id="total-records">0</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">⏰ 即將重生</span>
+                <span class="stat-value" id="waiting-count">0</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">🟢 可能重生</span>
+                <span class="stat-value" id="possible-count">0</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">🔴 確定重生</span>
+                <span class="stat-value" id="confirmed-count">0</span>
+            </div>
+        </div>
+
+        <!-- BOSS記錄容器 -->
+        <div id="record-container">
+            <div class="empty-state">
+                <div class="empty-state-icon">🔍</div>
+                <div class="empty-state-text">正在載入記錄...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 引入同步系統 -->
+    <script src="sync-system.js"></script>
+    <!-- 引入 Discord 通知系統 -->
+    <script src="discord-notifications.js"></script>
+
+    <script>
+        // BOSS資料定義（與 index.html 相同）
+        const BOSS_DATA = {
+            "紅寶王": { min: 23, max: 30, maps: ["海岸草叢3"], color: "#ff4444", image: "images/紅寶王.gif" },
+            "樹妖王": { min: 23, max: 30, maps: ["東方岩石山5"], color: "#8bc34a", image: "images/樹妖王.gif" },
+            "冥界幽靈": { min: 45, max: 60, maps: ["1號線<4區>", "2號線<3區>"], color: "#9c27b0", image: "images/冥界幽靈.gif" },
+            "巨居蟹": { min: 45, max: 60, maps: ["海龜沙灘"], color: "#ff9800", image: "images/巨居蟹.gif" },
+            "殭屍猴王": { min: 38, max: 45, maps: ["巫婆森林1"], color: "#795548", image: "images/殭屍猴王.gif" },
+            "蘑菇王": { min: 210, max: 240, maps: ["鋼之肥肥公園3"], color: "#ff5722", image: "images/蘑菇王.gif" },
+            "沼澤巨鱷": { min: 90, max: 105, maps: ["危險的黑鱷魚1"], color: "#4caf50", image: "images/沼澤巨鱷.gif" },
+            "殭屍蘑菇王": { min: 195, max: 225, maps: ["蘑菇王之墓"], color: "#e91e63", image: "images/殭屍蘑菇王.gif" },
+            "巴洛古": { min: 405, max: 540, maps: ["受詛咒的神殿"], color: "#ff0000", image: "images/巴洛古.gif" },
+            "艾利傑": { min: 118, max: 128, maps: ["天空階梯2"], color: "#00bcd4", image: "images/艾利傑.gif" },
+            "雪山女巫": { min: 158, max: 180, maps: ["冰面1"], color: "#87ceeb", image: "images/雪山女巫.gif" },
+            "雪毛怪人": { min: 45, max: 68, maps: ["雪人之谷"], color: "#f0f8ff", image: "images/雪毛怪人.gif" },
+            "厄運死神": { min: 45, max: 105, maps: ["死亡森林4"], color: "#2f4f4f", image: "images/厄運死神.gif" },
+            "咕咕鐘": { min: 68, max: 90, maps: ["時間之路<3>"], color: "#daa520", image: "images/咕咕鐘.gif" },
+            "葛雷金剛": { min: 270, max: 350, maps: ["葛雷草原"], color: "#8b4513", image: "images/葛雷金剛.gif" },
+            "書生幽靈": { min: 150, max: 300, maps: ["狐狸谷"], color: "#9370db", image: "images/書生幽靈.gif" },
+            "九尾妖狐": { min: 210, max: 570, maps: ["月亮山坡"], color: "#ff69b4", image: "images/九尾妖狐.gif" },
+            "黑輪王": { min: 780, max: 1020, maps: ["夜市徒步區7", "夜市徒步區7-1"], color: "#000000", hasMapSelect: true, image: "images/黑輪王.gif" },
+            "瘋狂喵z客": { min: 120, max: 420, maps: ["名人大道西部區域"], color: "#ffa500", image: "images/瘋狂喵z客.gif" },
+            "仙人娃娃": { min: 158, max: 180, maps: ["上級訓練場"], color: "#98fb98", image: "images/仙人娃娃.gif" },
+            "肯德熊": { min: 113, max: 128, maps: ["流浪熊的領土"], color: "#8b7355", image: "images/肯德熊.gif" },
+            "喵怪仙人": { min: 150, max: 170, maps: ["喵怪仙人的領域"], color: "#ffb6c1", image: "images/喵怪仙人.gif" },
+            "巨大深山人蔘": { min: 60, max: 135, maps: ["豐饒的藥草田"], color: "#ffd700", image: "images/巨大深山人蔘.gif" },
+            "海怒斯": { min: 180, max: 300, maps: ["海怒斯洞穴"], color: "#1e90ff", image: "images/海怒斯.gif" }
+        };
+
+        // 全域變數
+        let allRecords = [];
+        let filteredRecords = [];
+        let currentFilter = 'all';
+        let activeBosses = []; // 用於兼容 sync-system.js
+
+        // 初始化
+        async function init() {
+            console.log('[SHARED] 初始化共享追蹤器...');
+            
+            // 填充 BOSS 篩選器
+            populateBossFilter();
+            
+            // 初始化同步系統
+            if (typeof initSyncSystem === 'function') {
+                initSyncSystem();
+            }
+            
+            // 定時更新顯示
+            setInterval(updateDisplay, 1000);
+            
+            console.log('[SHARED] 初始化完成');
+        }
+
+        // 填充 BOSS 篩選器選項
+        function populateBossFilter() {
+            const select = document.getElementById('boss-filter');
+            Object.keys(BOSS_DATA).forEach(bossName => {
+                const option = document.createElement('option');
+                option.value = bossName;
+                option.textContent = bossName;
+                select.appendChild(option);
+            });
+        }
+
+        // 從雲端下載記錄（使用 sync-system.js 的 SYNC_API_URL）
+        async function downloadRemoteRecords() {
+            console.log('[SHARED] 正在下載遠端記錄...');
+            
+            // 使用 sync-system.js 中定義的 SYNC_API_URL
+            if (typeof SYNC_API_URL === 'undefined') {
+                console.error('[SHARED] 找不到 SYNC_API_URL，請確認已引入 sync-system.js');
+                showNotification('同步系統未正確載入', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${SYNC_API_URL}?action=getActiveRecords`);
+                const result = await response.json();
+                
+                if (!result.success) {
+                    console.error('[SHARED] 下載失敗:', result.message);
+                    return;
+                }
+                
+                console.log(`[SHARED] 下載到 ${result.records.length} 筆記錄`);
+                
+                // 更新全域記錄
+                allRecords = result.records;
+                applyFilter();
+                
+            } catch (error) {
+                console.error('[SHARED] 下載過程出錯:', error);
+                showNotification('無法連接到雲端服務', 'error');
+            }
+        }
+
+        // 套用篩選
+        function applyFilter() {
+            const filterValue = document.getElementById('boss-filter').value;
+            currentFilter = filterValue;
+            
+            if (filterValue === 'all') {
+                filteredRecords = [...allRecords];
+            } else {
+                filteredRecords = allRecords.filter(record => record.bossName === filterValue);
+            }
+            
+            updateDisplay();
+        }
+
+        // 清除篩選
+        function clearFilter() {
+            document.getElementById('boss-filter').value = 'all';
+            applyFilter();
+        }
+
+        // 更新顯示
+        function updateDisplay() {
+            const container = document.getElementById('record-container');
+            const now = new Date();
+            
+            if (filteredRecords.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📭</div>
+                        <div class="empty-state-text">目前沒有符合條件的記錄</div>
+                        <p style="color: #64748b; margin-top: 10px;">請嘗試更改篩選條件或等待同步更新</p>
+                    </div>
+                `;
+                updateStats(0, 0, 0, 0);
+                return;
+            }
+
+            // 按照重生時間排序（最快重生的在前）
+            const sorted = [...filteredRecords].sort((a, b) => 
+                new Date(a.respawnMin) - new Date(b.respawnMin)
+            );
+
+            let waitingCount = 0;
+            let possibleCount = 0;
+            let confirmedCount = 0;
+
+            let html = '';
+            sorted.forEach(record => {
+                const respawnMin = new Date(record.respawnMin);
+                const respawnMax = new Date(record.respawnMax);
+                const bossInfo = BOSS_DATA[record.bossName];
+                const bossColor = bossInfo ? bossInfo.color : '#0099cc';
+                
+                let statusText = '';
+                let statusClass = '';
+                let countdownText = '';
+                let showRespawnBtn = false;
+                
+                if (now < respawnMin) {
+                    statusText = '即將重生';
+                    statusClass = 'waiting';
+                    waitingCount++;
+                    
+                    const totalSeconds = Math.floor((respawnMin - now) / 1000);
+                    const hours = Math.floor(totalSeconds / 3600);
+                    const minutes = Math.floor((totalSeconds % 3600) / 60);
+                    const seconds = totalSeconds % 60;
+                    countdownText = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+                } else if (now >= respawnMin && now <= respawnMax) {
+                    statusText = '可能重生';
+                    statusClass = 'possible';
+                    possibleCount++;
+                    showRespawnBtn = true;
+                    
+                    const totalSeconds = Math.floor((respawnMax - now) / 1000);
+                    const hours = Math.floor(totalSeconds / 3600);
+                    const minutes = Math.floor((totalSeconds % 3600) / 60);
+                    const seconds = totalSeconds % 60;
+                    countdownText = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+                } else {
+                    statusText = '確定重生';
+                    statusClass = 'confirmed';
+                    confirmedCount++;
+                    showRespawnBtn = true;
+                    
+                    const diffMin = Math.floor((now - respawnMax) / 60000);
+                    countdownText = `+${diffMin}分`;
+                }
+
+                const mapInfo = record.map ? ` | ${record.map}` : '';
+                const killTime = formatDateTime(new Date(record.deathTime));
+                const respawnTimeRange = `${formatTime(respawnMin)} ~ ${formatTime(respawnMax)}`;
+                
+                let patrolInfo = '';
+                if (record.lastPatrolTime) {
+                    const diff = Math.floor((now - new Date(record.lastPatrolTime)) / 60000);
+                    patrolInfo = `
+                        <div class="boss-info-item">
+                            <span style="color: #64748b;">|</span>
+                            <span>👀 巡邏: ${diff}分鐘前</span>
+                        </div>
+                    `;
+                }
+
+                const respawnBtnHtml = showRespawnBtn ? `<button type="button" class="boss-icon-btn" onclick="respawnBoss('${record.id}', '${record.bossName}', ${record.channel})" title="重新計時">🔄</button>` : '';
+
+                const bossImage = bossInfo && bossInfo.image ? `<img src="${bossInfo.image}" alt="${record.bossName}" class="boss-image">` : '';
+                
+                const recorderInfo = record.recorder ? `<div class="boss-info-item"><span style="color: #64748b;">|</span><span style="color: #94a3b8;">記錄者: ${record.recorder.substring(0, 10)}...</span></div>` : '';
+
+                html += `
+                    <div class="boss-status-card" style="--boss-color: ${bossColor};">
+                        <div class="boss-card-header">
+                            <div class="boss-info-left">
+                                ${bossImage}
+                                <div class="boss-info-row">
+                                    <div class="boss-info-item">
+                                        <span style="font-size: 1.2em; font-weight: bold; color: ${bossColor};">${record.bossName}</span>
+                                    </div>
+                                    <div class="boss-info-item">
+                                        <span style="color: #64748b;">|</span>
+                                        <span>頻道 ${record.channel}${mapInfo}</span>
+                                    </div>
+                                    <div class="boss-info-item">
+                                        <span style="color: #64748b;">|</span>
+                                        <span>⚔️ 擊殺: ${killTime}</span>
+                                    </div>
+                                    <div class="boss-info-item">
+                                        <span style="color: #64748b;">|</span>
+                                        <span>⏰ 重生: ${respawnTimeRange}</span>
+                                    </div>
+                                    ${patrolInfo}
+                                    ${recorderInfo}
+                                    <div class="boss-info-item">
+                                        <span style="color: #64748b;">|</span>
+                                        <span class="boss-status-badge ${statusClass}">${statusText}</span>
+                                        <span style="font-family: 'Courier New', monospace; font-weight: 600; font-size: 1.1em;">${countdownText}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="boss-action-btns">
+                                ${respawnBtnHtml}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+            updateStats(filteredRecords.length, waitingCount, possibleCount, confirmedCount);
+        }
+
+        // 更新統計數據
+        function updateStats(total, waiting, possible, confirmed) {
+            document.getElementById('total-records').textContent = total;
+            document.getElementById('waiting-count').textContent = waiting;
+            document.getElementById('possible-count').textContent = possible;
+            document.getElementById('confirmed-count').textContent = confirmed;
+        }
+
+        // 重新計時 BOSS（創建新記錄）
+        function respawnBoss(id, bossName, channel) {
+            if (!confirm(`確定要重新計時 ${bossName} (頻道${channel}) 嗎？\n\n這將創建一個新的擊殺記錄並同步到雲端。`)) {
+                return;
+            }
+
+            const info = BOSS_DATA[bossName];
+            const now = new Date();
+            const respawnMin = new Date(now.getTime() + info.min * 60000);
+            const respawnMax = new Date(now.getTime() + info.max * 60000);
+
+            // 從 localStorage 獲取 USER_ID，如果沒有則創建一個
+            let userId = localStorage.getItem('userId');
+            if (!userId) {
+                userId = 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                localStorage.setItem('userId', userId);
+            }
+
+            const newRecord = {
+                id: Date.now(),
+                bossName: bossName,
+                channel: channel,
+                map: info.maps[0],
+                deathTime: now.toISOString(),
+                respawnMin: respawnMin.toISOString(),
+                respawnMax: respawnMax.toISOString(),
+                lastPatrolTime: null,
+                recorder: userId
+            };
+
+            // 上傳到雲端
+            uploadSingleRecord(newRecord);
+
+            showNotification(`${bossName} 重新計時成功！`, 'success');
+        }
+
+        // 上傳單筆記錄到雲端
+        async function uploadSingleRecord(record) {
+            // 使用 sync-system.js 中定義的 SYNC_API_URL
+            if (typeof SYNC_API_URL === 'undefined') {
+                console.error('[SHARED] 找不到 SYNC_API_URL');
+                return;
+            }
+            
+            try {
+                const response = await fetch(SYNC_API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action: 'addRecord',
+                        record: record
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    console.log('[SHARED] 記錄上傳成功');
+                    // 重新下載記錄
+                    await downloadRemoteRecords();
+                } else {
+                    console.error('[SHARED] 記錄上傳失敗:', result.message);
+                }
+            } catch (error) {
+                console.error('[SHARED] 上傳過程出錯:', error);
+            }
+        }
+
+        // 手動同步
+        async function manualSync() {
+            showNotification('正在同步資料...', 'info');
+            await downloadRemoteRecords();
+            showNotification('同步完成！', 'success');
+        }
+
+        // 切換自動同步
+        function toggleAutoSync() {
+            const text = document.getElementById('auto-sync-text');
+            const isEnabled = SYNC_CONFIG.autoSync;
+            
+            if (typeof window.SyncSystem !== 'undefined') {
+                window.SyncSystem.toggleAutoSync(!isEnabled);
+                text.textContent = isEnabled ? '▶️ 啟用自動同步' : '⏸️ 停用自動同步';
+            }
+        }
+
+        // 格式化時間
+        function formatTime(date) {
+            const month = date.getMonth() + 1;
+            const day = date.getDate();
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            return `${month}/${day} ${hours}:${minutes}`;
+        }
+
+        function formatDateTime(date) {
+            return formatTime(date);
+        }
+
+        // 顯示通知
+        function showNotification(message, type = 'success') {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerHTML = `<p style="white-space: pre-line;">${message}</p>`;
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.remove();
+            }, 5000);
+        }
+
+        // 用戶 ID（從 sync-system.js 獲取，避免重複宣告）
+        // 注意：USER_ID 已在 sync-system.js 中定義，這裡不需要重複宣告
+
+        // 頁面載入時初始化
+        window.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
