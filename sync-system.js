@@ -6,7 +6,7 @@
 // 3. 雙向資料同步（避免衝突）
 
 // Google Apps Script Web App URL
-const SYNC_API_URL = 'https://script.google.com/macros/s/AKfycbxXhrD0x_unkKTGRAs7D9za8afpOxwuBZqWlphmkOdtDg8VPEV_43OUqKeZUjLeGONT6Q/exec';
+const SYNC_API_URL = 'https://script.google.com/macros/s/AKfycbw2FsYqnOg12nkUWbynSN7lczSq5Hw-0cSVBFWNHkQGn7DGSsqTWEM0YRg4FJfHbNKz/exec';
 
 // 同步設定
 const SYNC_CONFIG = {
