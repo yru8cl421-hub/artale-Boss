@@ -1,3 +1,39 @@
+// Google Apps Script 部署 URL
+const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwFZwmhsF2xiD-WomecYjO_bw5aeQ05MXPnpofonZ0jiMDnE7GTrXu8ua19X8mfHPdl/exec';
+
+// 發送記錄到 Google Sheets
+async function sendToGoogleSheets(record) {
+    try {
+        const payload = {
+            action: 'add',
+            data: {
+                bossName: record.bossName,
+                channel: record.channel,
+                map: record.map || '未知',
+                deathTime: record.deathTime,
+                respawnMin: record.respawnMin,
+                respawnMax: record.respawnMax,
+                timestamp: new Date().toISOString()
+            }
+        };
+
+        await fetch(GOOGLE_SCRIPT_URL, {
+            method: 'POST',
+            mode: 'no-cors', // 重要：Google Apps Script 需要 no-cors 模式
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(payload)
+        });
+
+        console.log('✅ 已同步到雲端:', record.bossName);
+        return true;
+    } catch (error) {
+        console.error('❌ 雲端同步失敗:', error);
+        return false;
+    }
+}
+
 // 存儲數據
 let activeBosses = [];
 let patrolRecords = [];
@@ -618,6 +654,11 @@ function recordBoss() {
         // 3. 發送使用者自訂的統一 Webhook 通知（如果有設定，無論個別是否有設定都會發送）
         sendUserWebhookNotification(record).catch(err => {});
 
+        // 發送到 Google Sheets
+        sendToGoogleSheets(record).catch(err => {
+            console.error("Google Sheets 同步失敗:", err);
+        });
+
         showNotification(
             `頻道 ${channel} - ${bossName}\n地圖: ${mapLocation}\n擊殺時間已記錄！\n預計重生: ${formatTime(respawnMin)} ~ ${formatTime(respawnMax)}`,
             'success'
@@ -665,6 +706,11 @@ function respawnSingleBoss(id) {
 
         // 3. 發送使用者自訂的統一 Webhook 通知（如果有設定，無論個別是否有設定都會發送）
         sendUserWebhookNotification(record).catch(err => {});
+
+        // 發送到 Google Sheets
+        sendToGoogleSheets(record).catch(err => {
+            console.error("Google Sheets 同步失敗:", err);
+        });
         
         showNotification(`已重新計時 ${record.bossName}！`, 'success');
     }
