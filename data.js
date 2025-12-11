@@ -1,0 +1,27 @@
+// BOSS 數據
+const BOSS_DATA = {
+    "紅寶王": { min: 23, max: 30, maps: ["海岸草叢3"], color: "#ff4444", image: "images/紅寶王.gif" },
+    "樹妖王": { min: 23, max: 30, maps: ["東方岩石山5"], color: "#8bc34a", image: "images/樹妖王.gif" },
+    "冥界幽靈": { min: 45, max: 60, maps: ["1號線<4區>", "2號線<3區>"], color: "#9c27b0", image: "images/冥界幽靈.gif" },
+    "巨居蟹": { min: 45, max: 60, maps: ["海龜沙灘"], color: "#ff9800", image: "images/巨居蟹.gif" },
+    "殭屍猴王": { min: 38, max: 45, maps: ["巫婆森林1"], color: "#795548", image: "images/殭屍猴王.gif" },
+    "蘑菇王": { min: 210, max: 240, maps: ["鋼之肥肥公園3"], color: "#ff5722", image: "images/蘑菇王.gif" },
+    "沼澤巨鱷": { min: 90, max: 105, maps: ["危險的黑鱷魚1"], color: "#4caf50", image: "images/沼澤巨鱷.gif" },
+    "殭屍蘑菇王": { min: 195, max: 225, maps: ["蘑菇王之墓"], color: "#e91e63", image: "images/殭屍蘑菇王.gif" },
+    "巴洛古": { min: 405, max: 540, maps: ["受詛咒的神殿"], color: "#ff0000", image: "images/巴洛古.gif" },
+    "艾利傑": { min: 118, max: 128, maps: ["天空階梯2"], color: "#00bcd4", image: "images/艾利傑.gif" },
+    "雪山女巫": { min: 158, max: 180, maps: ["冰面1"], color: "#87ceeb", image: "images/雪山女巫.gif" },
+    "雪毛怪人": { min: 45, max: 68, maps: ["雪人之谷"], color: "#f0f8ff", image: "images/雪毛怪人.gif" },
+    "厄運死神": { min: 45, max: 105, maps: ["死亡森林4"], color: "#2f4f4f", image: "images/厄運死神.gif" },
+    "咕咕鐘": { min: 68, max: 90, maps: ["時間之路<3>"], color: "#daa520", image: "images/咕咕鐘.gif" },
+    "葛雷金剛": { min: 270, max: 350, maps: ["葛雷草原"], color: "#8b4513", image: "images/葛雷金剛.gif" },
+    "書生幽靈": { min: 150, max: 300, maps: ["狐狸谷"], color: "#9370db", image: "images/書生幽靈.gif" },
+    "九尾妖狐": { min: 210, max: 570, maps: ["月亮山坡"], color: "#ff69b4", image: "images/九尾妖狐.gif" },
+    "黑輪王": { min: 780, max: 1020, maps: ["夜市徒步區7", "夜市徒步區7-1"], color: "#000000", hasMapSelect: true, image: "images/黑輪王.gif" },
+    "瘋狂喵z客": { min: 120, max: 420, maps: ["名人大道西部區域"], color: "#ffa500", image: "images/瘋狂喵z客.gif" },
+    "仙人娃娃": { min: 158, max: 180, maps: ["上級訓練場"], color: "#98fb98", image: "images/仙人娃娃.gif" },
+    "肯德熊": { min: 113, max: 128, maps: ["流浪熊的領土"], color: "#8b7355", image: "images/肯德熊.gif" },
+    "喵怪仙人": { min: 150, max: 170, maps: ["喵怪仙人的領域"], color: "#ffb6c1", image: "images/喵怪仙人.gif" },
+    "巨大深山人蔘": { min: 60, max: 135, maps: ["豐饒的藥草田"], color: "#ffd700", image: "images/巨大深山人蔘.gif" },
+    "海怒斯": { min: 180, max: 300, maps: ["海怒斯洞穴"], color: "#1e90ff", image: "images/海怒斯.gif" }
+};
