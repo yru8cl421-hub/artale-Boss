@@ -588,12 +588,14 @@ function recordBoss() {
         mapLocation = selectedMap === '7' ? '夜市徒步區7' : '夜市徒步區7-1';
     }
 
+    // 檢查是否已有相同頻道的相同BOSS（不管地圖，只保留最新記錄）
     const existingRecordIndex = activeBosses.findIndex(
-        b => b.bossName === bossName && b.channel === channel && b.map === mapLocation
+        b => b.bossName === bossName && b.channel === channel
     );
 
     if (existingRecordIndex !== -1) {
         const existingRecord = activeBosses[existingRecordIndex];
+        existingRecord.map = mapLocation; // 更新地圖位置
         existingRecord.deathTime = now.toISOString();
         existingRecord.respawnMin = respawnMin.toISOString();
         existingRecord.respawnMax = respawnMax.toISOString();
@@ -617,8 +619,13 @@ function recordBoss() {
         // 3. 發送使用者自訂的統一 Webhook 通知（如果有設定，無論個別是否有設定都會發送）
         sendUserWebhookNotification(existingRecord).catch(err => {});
 
+        // 發送到 Google Sheets（更新記錄）
+        sendToGoogleSheets(existingRecord).catch(err => {
+            console.error("Google Sheets 同步失敗:", err);
+        });
+
         showNotification(
-            `頻道 ${channel} - ${bossName}\n地圖: ${mapLocation}\n已更新擊殺時間！\n預計重生: ${formatTime(respawnMin)} ~ ${formatTime(respawnMax)}`,
+            `頻道 ${channel} - ${bossName}\n地圖: ${mapLocation}\n已更新擊殺時間！（覆蓋舊記錄）\n預計重生: ${formatTime(respawnMin)} ~ ${formatTime(respawnMax)}`,
             'success'
         );
     } else {
