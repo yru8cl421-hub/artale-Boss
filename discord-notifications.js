@@ -21,7 +21,7 @@ const DISCORD_WEBHOOKS = {
     "肯德熊": "https://discord.com/api/webhooks/1444677508313382922/1BAuub-382pozgdn5ykJhqBQ_Nm93tiODhvohkHWV1ubMcW7dN53QR8iR3p9GOA302nm"
 };
 
-const FEEDBACK_WEBHOOK = 'https://discord.com/api/webhooks/1438760814466039910/iYegYu_LoPALQokZnyEjFJKuVXU9MxBHhMKvcQpZx0Ny3sKeVvUjmob0ozV5-BBHsxsj';
+const FEEDBACK_WEBHOOK = 'https://discord.com/api/webhooks/1449981621636960266/rbH2jiB6dPHI0CjOyslspYmLFsR2mD6UmzcY8uoR1AN5uduam25OKwNbIwAasx4uQCp0';
 
 // 格式化日期時間為 月/日 24小時制
 function formatDiscordDateTime(date) {
