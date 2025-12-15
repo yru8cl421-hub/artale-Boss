@@ -61,6 +61,9 @@ function init() {
             recordBoss();
         }
     });
+    
+    // 設定每天 00:00 自動重新整理
+    setupAutoMidnightRefresh();
 }
 
 // 螢幕監控相關變數
@@ -1449,3 +1452,19 @@ document.addEventListener('keydown', function(e) {
         recordBoss();
     }
 });
+
+// 設定每天 00:00 自動重新整理
+function setupAutoMidnightRefresh() {
+    const now = new Date();
+    const midnight = new Date();
+    midnight.setHours(24, 0, 0, 0); // 設定為下一個午夜
+    
+    const timeUntilMidnight = midnight.getTime() - now.getTime();
+    
+    console.log(`[自動重新整理] 將在 ${Math.floor(timeUntilMidnight / 1000 / 60)} 分鐘後的 00:00 自動重新整理頁面`);
+    
+    setTimeout(() => {
+        console.log('[自動重新整理] 已到達 00:00，重新整理頁面...');
+        location.reload();
+    }, timeUntilMidnight);
+}
