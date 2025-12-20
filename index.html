@@ -29,7 +29,7 @@
                     <div class="input-field">
                         <label>頻道:</label>
                         <div style="display: flex; gap: 8px;">
-                            <input type="text" id="channel-input" value="1" maxlength="4" style="flex: 1;" placeholder="頻道號碼">
+                            <input type="number" id="channel-input" min="1" max="9999" step="1" style="flex: 1;" placeholder="頻道號碼">
                             <button type="button" id="monitor-btn" onclick="toggleScreenMonitor()" class="capture-btn" title="開始/停止螢幕監控">
                                 🎯
                             </button>
