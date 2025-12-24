@@ -19,10 +19,8 @@ async function sendToGoogleSheets(record) {
 
         await fetch(GOOGLE_SCRIPT_URL, {
             method: 'POST',
-            mode: 'no-cors', // 重要：Google Apps Script 需要 no-cors 模式
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
         });
 
@@ -36,7 +34,7 @@ async function sendToGoogleSheets(record) {
 
 // 存儲數據
 let activeBosses = [];
-let patrolRecords = [];
+let patrolRecords = []; // 恢復：巡邏記錄陣列
 let bossStatistics = {};
 
 // 初始化
@@ -47,9 +45,9 @@ function init() {
     initializeStatistics();
     updateAllDisplays();
     setInterval(updateAllDisplays, 1000);
-    loadUserWebhook(); // 載入用戶 Webhook 設定
-    
-    // 初始化個別 BOSS Webhook 計數
+    loadUserWebhook();
+
+    // 恢復：初始化個別 BOSS Webhook 計數
     const individualWebhooks = loadIndividualWebhooks();
     const configuredCount = Object.keys(individualWebhooks).length;
     const totalCount = Object.keys(BOSS_DATA).length;
@@ -57,12 +55,9 @@ function init() {
     document.getElementById('total-boss-count').textContent = totalCount;
 
     document.getElementById('channel-input').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            recordBoss();
-        }
+        if (e.key === 'Enter') recordBoss();
     });
     
-    // 設定每天 00:00 自動重新整理
     setupAutoMidnightRefresh();
 }
 
@@ -72,134 +67,223 @@ let monitorInterval = null;
 let isMonitoring = false;
 let videoElement = null;
 
-// 掃描區域設定（百分比）
-let scanArea = {
-    x: 28,
-    y: 18,
-    width: 15,
-    height: 6
-};
-
+// 掃描區域設定
+let scanArea = { x: 28, y: 18, width: 15, height: 6 };
 const savedScanArea = localStorage.getItem('scanArea');
-if (savedScanArea) {
-    scanArea = JSON.parse(savedScanArea);
-}
+if (savedScanArea) scanArea = JSON.parse(savedScanArea);
+
+// 視訊選擇器相關變數
+let selectorStream = null;
+let selectorVideo = null;
+let selectorCanvas = null;
+let selectorCtx = null;
+let isSelecting = false;
+let selectionStart = null;
+let selectionRect = null;
 
 // 調整掃描位置
-function adjustScanArea() {
-    const input = prompt(
-        '請輸入掃描區域（格式：X%, Y%, 寬%, 高%）\n' +
-        '目前設定：' + scanArea.x + ', ' + scanArea.y + ', ' + scanArea.width + ', ' + scanArea.height + '\n\n' +
-        '提示：X=左邊距離, Y=上邊距離\n' +
-        '例如：30, 20, 15, 6',
-        scanArea.x + ', ' + scanArea.y + ', ' + scanArea.width + ', ' + scanArea.height
-    );
-    
-    if (input) {
-        const parts = input.split(',').map(s => parseFloat(s.trim()));
-        if (parts.length === 4 && parts.every(n => !isNaN(n) && n >= 0 && n <= 100)) {
-            scanArea = {
-                x: parts[0],
-                y: parts[1],
-                width: parts[2],
-                height: parts[3]
-            };
-            localStorage.setItem('scanArea', JSON.stringify(scanArea));
-            showNotification('掃描區域已更新！', 'success');
-        } else {
-            showNotification('格式錯誤，請輸入4個0-100的數字', 'error');
-        }
-    }
-}
-
-// 預覽掃描區域
-let previewTimer = null;
-async function previewScanArea() {
+async function adjustScanArea() {
     try {
-        const stream = await navigator.mediaDevices.getDisplayMedia({
-            video: { mediaSource: 'screen' }
+        const overlay = document.createElement('div');
+        overlay.id = 'scan-selector-overlay';
+        overlay.innerHTML = `
+            <div class="selector-container">
+                <div class="selector-header">
+                    <h3>🎯 請框選頻道號碼區域</h3>
+                    <p>在視訊畫面上拖拉滑鼠框選「頻道的 XXXX」的文字區域</p>
+                    <p style="color: #f59e0b; font-size: 0.9em; margin-top: 8px;">⚠️ 載入中,請稍候...</p>
+                </div>
+                <div class="selector-video-wrapper">
+                    <video id="selector-video" autoplay muted playsinline></video>
+                    <canvas id="selector-canvas"></canvas>
+                </div>
+                <div class="selector-controls">
+                    <div class="selector-info">
+                        <span id="selector-coords">正在載入視訊...</span>
+                    </div>
+                    <div class="selector-buttons">
+                        <button onclick="cancelSelection()" class="btn-secondary">❌ 取消</button>
+                        <button onclick="confirmSelection()" class="btn-primary" id="confirm-btn" disabled>✅ 確認</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(overlay);
+
+        selectorStream = await navigator.mediaDevices.getDisplayMedia({
+            video: { cursor: "never", displaySurface: "monitor", logicalSurface: true, frameRate: 5 }
         });
+
+        selectorVideo = document.getElementById('selector-video');
+        selectorVideo.srcObject = selectorStream;
+        await selectorVideo.play();
+        await new Promise(resolve => setTimeout(resolve, 1000));
         
-        const video = document.createElement('video');
-        video.srcObject = stream;
-        video.muted = true;
-        await video.play();
-        await new Promise(r => setTimeout(r, 300));
+        console.log('視訊尺寸:', selectorVideo.videoWidth, 'x', selectorVideo.videoHeight);
+
+        selectorCanvas = document.getElementById('selector-canvas');
+        if (selectorVideo.videoWidth === 0 || selectorVideo.videoHeight === 0) {
+            throw new Error('無法取得視訊尺寸,請重新選擇視窗');
+        }
         
-        const fullWidth = video.videoWidth;
-        const fullHeight = video.videoHeight;
-        
-        const startX = Math.floor(fullWidth * scanArea.x / 100);
-        const startY = Math.floor(fullHeight * scanArea.y / 100);
-        const cropWidth = Math.floor(fullWidth * scanArea.width / 100);
-        const cropHeight = Math.floor(fullHeight * scanArea.height / 100);
-        
-        const canvas = document.createElement('canvas');
-        canvas.width = cropWidth;
-        canvas.height = cropHeight;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(video, startX, startY, cropWidth, cropHeight, 0, 0, cropWidth, cropHeight);
-        
-        stream.getTracks().forEach(t => t.stop());
-        
-        const previewDiv = document.getElementById('scan-preview');
-        const previewImg = document.getElementById('preview-img');
-        const countdown = document.getElementById('preview-countdown');
-        previewImg.src = canvas.toDataURL('image/png');
-        previewDiv.style.display = 'block';
-        
-        let seconds = 10;
-        countdown.textContent = `(${seconds}秒後自動關閉)`;
-        
-        if (previewTimer) clearInterval(previewTimer);
-        previewTimer = setInterval(() => {
-            seconds--;
-            countdown.textContent = `(${seconds}秒後自動關閉)`;
-            if (seconds <= 0) {
-                clearInterval(previewTimer);
-                previewDiv.style.display = 'none';
+        selectorCanvas.width = selectorVideo.videoWidth;
+        selectorCanvas.height = selectorVideo.videoHeight;
+        selectorCtx = selectorCanvas.getContext('2d', { willReadFrequently: true });
+
+        document.querySelector('.selector-header p:last-child').textContent = '✅ 視訊已載入,請開始框選區域';
+        document.querySelector('.selector-header p:last-child').style.color = '#10b981';
+        document.getElementById('selector-coords').textContent = '請開始框選...';
+
+        let frameCount = 0;
+        const drawFrame = () => {
+            if (!selectorVideo || !selectorCanvas || !selectorCtx) return;
+            
+            try {
+                selectorCtx.drawImage(selectorVideo, 0, 0, selectorCanvas.width, selectorCanvas.height);
+                frameCount++;
+                
+                if (frameCount % 30 === 0) console.log('視訊繪製正常,幀數:', frameCount);
+                
+                if (selectionRect) {
+                    selectorCtx.strokeStyle = '#10b981';
+                    selectorCtx.lineWidth = 3;
+                    selectorCtx.strokeRect(selectionRect.x, selectionRect.y, selectionRect.width, selectionRect.height);
+                    selectorCtx.fillStyle = 'rgba(16, 185, 129, 0.1)';
+                    selectorCtx.fillRect(selectionRect.x, selectionRect.y, selectionRect.width, selectionRect.height);
+                    
+                    const cornerSize = 10;
+                    selectorCtx.fillStyle = '#10b981';
+                    selectorCtx.fillRect(selectionRect.x - 1.5, selectionRect.y - 1.5, cornerSize, 3);
+                    selectorCtx.fillRect(selectionRect.x - 1.5, selectionRect.y - 1.5, 3, cornerSize);
+                    selectorCtx.fillRect(selectionRect.x + selectionRect.width - cornerSize + 1.5, selectionRect.y - 1.5, cornerSize, 3);
+                    selectorCtx.fillRect(selectionRect.x + selectionRect.width - 1.5, selectionRect.y - 1.5, 3, cornerSize);
+                    selectorCtx.fillRect(selectionRect.x - 1.5, selectionRect.y + selectionRect.height - cornerSize + 1.5, 3, cornerSize);
+                    selectorCtx.fillRect(selectionRect.x - 1.5, selectionRect.y + selectionRect.height - 1.5, cornerSize, 3);
+                    selectorCtx.fillRect(selectionRect.x + selectionRect.width - cornerSize + 1.5, selectionRect.y + selectionRect.height - 1.5, cornerSize, 3);
+                    selectorCtx.fillRect(selectionRect.x + selectionRect.width - 1.5, selectionRect.y + selectionRect.height - cornerSize + 1.5, 3, cornerSize);
+                }
+            } catch (error) {
+                console.error('繪製錯誤:', error);
             }
-        }, 1000);
+            
+            requestAnimationFrame(drawFrame);
+        };
         
+        setTimeout(() => drawFrame(), 500);
+        setupSelectionEvents();
+
+        selectorStream.getVideoTracks()[0].addEventListener('ended', () => {
+            console.log('使用者停止了螢幕共享');
+            cancelSelection();
+        });
+
     } catch (error) {
-        console.error('預覽失敗:', error);
+        console.error('無法開啟視訊選擇器:', error);
+        let errorMessage = '無法開啟視訊選擇器';
+        if (error.name === 'NotAllowedError') errorMessage = '您拒絕了螢幕共享權限,請重新嘗試並允許共享';
+        else if (error.name === 'NotFoundError') errorMessage = '找不到可用的螢幕或視窗';
+        else if (error.message) errorMessage += ': ' + error.message;
+        showNotification(errorMessage, 'error');
+        cleanupSelector();
     }
 }
 
-// 使用說明
-function showOcrHelp() {
-    const helpText = `
-【螢幕監控 OCR 使用說明】
-
-📌 功能說明：
-自動辨識遊戲中「選擇頻道」視窗的頻道號碼
-
-📌 使用步驟：
-1️⃣ 在遊戲中打開「選擇頻道」視窗
-2️⃣ 點擊 👁️ 預覽，選擇遊戲視窗
-3️⃣ 確認預覽圖片只有「頻道 XXXX」區域
-4️⃣ 如果位置不對，點 ⚙️ 調整掃描位置
-5️⃣ 點擊 🎯 開始監控
-6️⃣ 再次點擊 🎯 停止監控
-
-📌 按鈕說明：
-🎯 開始/停止監控（綠色=待機，紅色=監控中）
-⚙️ 調整掃描位置（輸入 X%, Y%, 寬%, 高%）
-👁️ 預覽掃描區域（確認位置是否正確）
-❓ 顯示此說明
-
-📌 調整位置提示：
-• X = 從左邊算起的距離百分比
-• Y = 從上面算起的距離百分比
-• 數字越大 = 越往右/下移動
-
-📌 注意事項：
-• 監控時請保持「選擇頻道」視窗開啟
-• 頻道改變時輸入框會閃綠光
-• 設定會自動儲存，下次不用重新設定
-    `.trim();
+// 設定滑鼠選擇事件
+function setupSelectionEvents() {
+    const canvas = selectorCanvas;
+    const rect = canvas.getBoundingClientRect();
     
-    alert(helpText);
+    const getCanvasCoords = (e) => {
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+        return { x: (e.clientX - rect.left) * scaleX, y: (e.clientY - rect.top) * scaleY };
+    };
+
+    canvas.addEventListener('mousedown', (e) => {
+        const coords = getCanvasCoords(e);
+        isSelecting = true;
+        selectionStart = coords;
+        selectionRect = { x: coords.x, y: coords.y, width: 0, height: 0 };
+        updateSelectorInfo();
+    });
+
+    canvas.addEventListener('mousemove', (e) => {
+        if (!isSelecting || !selectionStart) return;
+        const coords = getCanvasCoords(e);
+        const width = coords.x - selectionStart.x;
+        const height = coords.y - selectionStart.y;
+        selectionRect = {
+            x: width < 0 ? coords.x : selectionStart.x,
+            y: height < 0 ? coords.y : selectionStart.y,
+            width: Math.abs(width),
+            height: Math.abs(height)
+        };
+        updateSelectorInfo();
+    });
+
+    canvas.addEventListener('mouseup', () => {
+        if (isSelecting && selectionRect && selectionRect.width > 10 && selectionRect.height > 10) {
+            document.getElementById('confirm-btn').disabled = false;
+        }
+        isSelecting = false;
+    });
+}
+
+// 更新選擇器資訊
+function updateSelectorInfo() {
+    if (!selectionRect || !selectorCanvas) return;
+    const x = Math.round(selectionRect.x);
+    const y = Math.round(selectionRect.y);
+    const w = Math.round(selectionRect.width);
+    const h = Math.round(selectionRect.height);
+    
+    const xPercent = ((x / selectorCanvas.width) * 100).toFixed(1);
+    const yPercent = ((y / selectorCanvas.height) * 100).toFixed(1);
+    const wPercent = ((w / selectorCanvas.width) * 100).toFixed(1);
+    const hPercent = ((h / selectorCanvas.height) * 100).toFixed(1);
+    
+    document.getElementById('selector-coords').textContent = 
+        `位置: ${x}, ${y} (${xPercent}%, ${yPercent}%) | 大小: ${w} x ${h} (${wPercent}% x ${hPercent}%)`;
+}
+
+// 確認選擇
+function confirmSelection() {
+    if (!selectionRect || !selectorCanvas) return;
+    
+    scanArea = {
+        x: parseFloat(((selectionRect.x / selectorCanvas.width) * 100).toFixed(2)),
+        y: parseFloat(((selectionRect.y / selectorCanvas.height) * 100).toFixed(2)),
+        width: parseFloat(((selectionRect.width / selectorCanvas.width) * 100).toFixed(2)),
+        height: parseFloat(((selectionRect.height / selectorCanvas.height) * 100).toFixed(2))
+    };
+    
+    localStorage.setItem('scanArea', JSON.stringify(scanArea));
+    showNotification(`掃描區域已更新！\n位置: ${scanArea.x}%, ${scanArea.y}%\n大小: ${scanArea.width}% x ${scanArea.height}%`, 'success');
+    
+    cleanupSelector();
+}
+
+// 取消選擇
+function cancelSelection() {
+    cleanupSelector();
+}
+
+// 清理選擇器
+function cleanupSelector() {
+    if (selectorStream) {
+        selectorStream.getTracks().forEach(track => track.stop());
+        selectorStream = null;
+    }
+    
+    selectorVideo = null;
+    selectorCanvas = null;
+    selectorCtx = null;
+    isSelecting = false;
+    selectionStart = null;
+    selectionRect = null;
+    
+    const overlay = document.getElementById('scan-selector-overlay');
+    if (overlay) overlay.remove();
 }
 
 // 切換螢幕監控
@@ -219,10 +303,7 @@ async function startScreenMonitor() {
         monitorBtn.innerHTML = '⏳';
         
         screenStream = await navigator.mediaDevices.getDisplayMedia({
-            video: {
-                mediaSource: 'screen',
-                frameRate: { ideal: 1, max: 5 }
-            }
+            video: { mediaSource: 'screen', frameRate: { ideal: 1, max: 5 } }
         });
         
         videoElement = document.createElement('video');
@@ -345,6 +426,8 @@ async function captureAndRecognize() {
     }
 }
 
+// ===== 恢復：統計功能 =====
+
 // 初始化統計數據
 function initializeStatistics() {
     Object.keys(BOSS_DATA).forEach(bossName => {
@@ -352,7 +435,9 @@ function initializeStatistics() {
             bossStatistics[bossName] = {
                 totalKills: 0,
                 todayKills: 0,
-                lastResetDate: getTodayDateString()
+                lastResetDate: getTodayDateString(),
+                lastKillTime: null,
+                channelDistribution: {}
             };
         }
     });
@@ -383,12 +468,14 @@ function checkAndResetDailyStats() {
 }
 
 // 更新BOSS統計
-function updateBossStatistics(bossName) {
+function updateBossStatistics(bossName, channel) {
     if (!bossStatistics[bossName]) {
         bossStatistics[bossName] = {
             totalKills: 0,
             todayKills: 0,
-            lastResetDate: getTodayDateString()
+            lastResetDate: getTodayDateString(),
+            lastKillTime: null,
+            channelDistribution: {}
         };
     }
 
@@ -400,6 +487,15 @@ function updateBossStatistics(bossName) {
 
     bossStatistics[bossName].totalKills++;
     bossStatistics[bossName].todayKills++;
+    bossStatistics[bossName].lastKillTime = new Date().toISOString();
+    
+    // 更新頻道分佈
+    if (!bossStatistics[bossName].channelDistribution) {
+        bossStatistics[bossName].channelDistribution = {};
+    }
+    const channelKey = String(channel);
+    bossStatistics[bossName].channelDistribution[channelKey] = 
+        (bossStatistics[bossName].channelDistribution[channelKey] || 0) + 1;
     
     saveData();
 }
@@ -407,6 +503,8 @@ function updateBossStatistics(bossName) {
 // 更新統計顯示
 function updateStatisticsDisplay() {
     const statsGrid = document.getElementById('stats-grid');
+    if (!statsGrid) return;
+    
     const today = getTodayDateString();
     
     document.getElementById('stats-date').textContent = new Date().toLocaleDateString('zh-TW');
@@ -421,7 +519,9 @@ function updateStatisticsDisplay() {
         totalToday += stats.todayKills;
         totalAll += stats.totalKills;
 
-        const bossImageHtml = info.image ? `<img src="${info.image}" alt="${bossName}" class="stats-card-image">` : `<span style="color: ${info.color}">●</span>`;
+        const bossImageHtml = info.image ? 
+            `<img src="${info.image}" alt="${bossName}" class="stats-card-image">` : 
+            `<span style="color: ${info.color}">●</span>`;
 
         html += `
             <div class="stats-card">
@@ -469,6 +569,8 @@ function resetAllStats() {
             bossStatistics[bossName].totalKills = 0;
             bossStatistics[bossName].todayKills = 0;
             bossStatistics[bossName].lastResetDate = today;
+            bossStatistics[bossName].lastKillTime = null;
+            bossStatistics[bossName].channelDistribution = {};
         });
         saveData();
         updateStatisticsDisplay();
@@ -476,315 +578,7 @@ function resetAllStats() {
     }
 }
 
-// 填充BOSS選擇列表
-function populateBossSelect() {
-    const select = document.getElementById('boss-select');
-    Object.keys(BOSS_DATA).forEach(boss => {
-        const option = document.createElement('option');
-        option.value = boss;
-        option.textContent = boss;
-        select.appendChild(option);
-    });
-}
-
-// 填充BOSS列表表格
-function populateBossListTable() {
-    const tbody = document.getElementById('boss-list-tbody');
-    tbody.innerHTML = '';
-    Object.entries(BOSS_DATA).forEach(([name, info]) => {
-        const row = tbody.insertRow();
-        
-        const imgCell = row.insertCell(0);
-        if (info.image) {
-            imgCell.innerHTML = `<img src="${info.image}" alt="${name}" class="boss-list-image">`;
-        }
-        
-        row.insertCell(1).textContent = name;
-        row.insertCell(2).textContent = formatTimeRange(info.min, info.max);
-        row.insertCell(3).textContent = info.maps.join(', ');
-    });
-}
-
-// 格式化時間範圍
-function formatTimeRange(min, max) {
-    const minHour = Math.floor(min/60);
-    const minMin = min%60;
-    const maxHour = Math.floor(max/60);
-    const maxMin = max%60;
-    
-    let minStr = minHour > 0 ? (minMin > 0 ? `${minHour}小時${minMin}分` : `${minHour}小時`) : `${minMin}分`;
-    let maxStr = maxHour > 0 ? (maxMin > 0 ? `${maxHour}小時${maxMin}分` : `${maxHour}小時`) : `${maxMin}分`;
-    
-    return `${minStr} ~ ${maxStr}`;
-}
-
-// BOSS資訊卡片自動關閉計時器
-let bossInfoTimer = null;
-
-// BOSS選擇事件
-function onBossSelected() {
-    const bossName = document.getElementById('boss-select').value;
-    const mapSelectContainer = document.getElementById('map-select-container');
-    const previewImage = document.getElementById('boss-preview-image');
-    const bossInfoCard = document.getElementById('boss-info');
-    
-    if (bossInfoTimer) {
-        clearTimeout(bossInfoTimer);
-        bossInfoTimer = null;
-    }
-    
-    if (bossName && BOSS_DATA[bossName]) {
-        const info = BOSS_DATA[bossName];
-        
-        if (info.hasMapSelect) {
-            mapSelectContainer.style.display = 'block';
-        } else {
-            mapSelectContainer.style.display = 'none';
-        }
-        
-        if (info.image) {
-            previewImage.src = info.image;
-            previewImage.alt = bossName;
-            previewImage.style.display = 'block';
-        } else {
-            previewImage.style.display = 'none';
-        }
-        
-        document.getElementById('map-info').textContent = `地圖: ${info.maps.join(', ')}`;
-        document.getElementById('time-info').textContent = `重生時間: ${formatTimeRange(info.min, info.max)}`;
-        bossInfoCard.style.display = 'block';
-        
-        bossInfoTimer = setTimeout(() => {
-            bossInfoCard.style.display = 'none';
-        }, 10000);
-    } else {
-        bossInfoCard.style.display = 'none';
-        mapSelectContainer.style.display = 'none';
-        previewImage.style.display = 'none';
-    }
-}
-
-// 記錄BOSS擊殺
-function recordBoss() {
-    const bossName = document.getElementById('boss-select').value;
-    const channel = document.getElementById('channel-input').value;
-    const notification = true;
-
-    if (!bossName) {
-        showNotification('請選擇BOSS', 'warning');
-        return;
-    }
-
-    if (!channel) {
-        showNotification('請輸入頻道', 'warning');
-        return;
-    }
-
-    const info = BOSS_DATA[bossName];
-    const now = new Date();
-    const respawnMin = new Date(now.getTime() + info.min * 60000);
-    const respawnMax = new Date(now.getTime() + info.max * 60000);
-
-    let mapLocation = info.maps[0];
-    if (info.hasMapSelect) {
-        const selectedMap = document.getElementById('map-select').value;
-        mapLocation = selectedMap === '7' ? '夜市徒步區7' : '夜市徒步區7-1';
-    }
-
-    // 檢查是否已有相同頻道的相同BOSS（不管地圖，只保留最新記錄）
-    const existingRecordIndex = activeBosses.findIndex(
-        b => b.bossName === bossName && b.channel === channel
-    );
-
-    if (existingRecordIndex !== -1) {
-        const existingRecord = activeBosses[existingRecordIndex];
-        existingRecord.map = mapLocation; // 更新地圖位置
-        existingRecord.deathTime = now.toISOString();
-        existingRecord.respawnMin = respawnMin.toISOString();
-        existingRecord.respawnMax = respawnMax.toISOString();
-        existingRecord.notified = false;
-        existingRecord.lastPatrolTime = null;
-        
-        updateBossStatistics(bossName);
-        
-        saveData();
-        updateAllDisplays();
-
-        // 發送 Discord 通知（整合個別和統一）
-        // 1. 先檢查並發送個別 BOSS 專屬的 Discord 通知
-        if (typeof sendKillNotification === 'function') {
-            sendKillNotification(existingRecord).catch(err => {});
-        }
-
-        // 2. 發送使用者設定的個別 BOSS Webhook（如果有設定）
-        sendIndividualBossWebhookNotification(existingRecord).catch(err => {});
-
-        // 3. 發送使用者自訂的統一 Webhook 通知（如果有設定，無論個別是否有設定都會發送）
-        sendUserWebhookNotification(existingRecord).catch(err => {});
-
-        // 發送到 Google Sheets（更新記錄）
-        sendToGoogleSheets(existingRecord).catch(err => {
-            console.error("Google Sheets 同步失敗:", err);
-        });
-
-        showNotification(
-            `頻道 ${channel} - ${bossName}\n地圖: ${mapLocation}\n已更新擊殺時間！（覆蓋舊記錄）\n預計重生: ${formatTime(respawnMin)} ~ ${formatTime(respawnMax)}`,
-            'success'
-        );
-    } else {
-        const record = {
-            id: Date.now(),
-            channel: channel,
-            bossName: bossName,
-            map: mapLocation,
-            deathTime: now.toISOString(),
-            respawnMin: respawnMin.toISOString(),
-            respawnMax: respawnMax.toISOString(),
-            notified: false,
-            notificationEnabled: notification,
-            lastPatrolTime: null
-        };
-
-        activeBosses.push(record);
-        
-        updateBossStatistics(bossName);
-        
-        saveData();
-        updateAllDisplays();
-
-        // 發送 Discord 通知（整合個別和統一）
-        // 1. 先檢查並發送個別 BOSS 專屬的 Discord 通知
-        if (typeof sendKillNotification === 'function') {
-            sendKillNotification(record).catch(err => {});
-        }
-
-        // 2. 發送使用者設定的個別 BOSS Webhook（如果有設定）
-        sendIndividualBossWebhookNotification(record).catch(err => {});
-
-        // 3. 發送使用者自訂的統一 Webhook 通知（如果有設定，無論個別是否有設定都會發送）
-        sendUserWebhookNotification(record).catch(err => {});
-
-        // 發送到 Google Sheets
-        sendToGoogleSheets(record).catch(err => {
-            console.error("Google Sheets 同步失敗:", err);
-        });
-
-        showNotification(
-            `頻道 ${channel} - ${bossName}\n地圖: ${mapLocation}\n擊殺時間已記錄！\n預計重生: ${formatTime(respawnMin)} ~ ${formatTime(respawnMax)}`,
-            'success'
-        );
-    }
-
-    document.getElementById('channel-input').value = '';
-    document.getElementById('channel-input').focus();
-}
-
-// 刪除單個記錄
-function deleteRecord(id) {
-    if (confirm('確定要刪除此記錄嗎？')) {
-        activeBosses = activeBosses.filter(b => b.id !== id);
-        saveData();
-        updateAllDisplays();
-        showNotification('已刪除BOSS記錄', 'success');
-    }
-}
-
-// 重新計時單個BOSS
-function respawnSingleBoss(id) {
-    const record = activeBosses.find(b => b.id === id);
-    if (record) {
-        const info = BOSS_DATA[record.bossName];
-        const now = new Date();
-        record.deathTime = now.toISOString();
-        record.respawnMin = new Date(now.getTime() + info.min * 60000).toISOString();
-        record.respawnMax = new Date(now.getTime() + info.max * 60000).toISOString();
-        record.notified = false;
-        
-        updateBossStatistics(record.bossName);
-        
-        saveData();
-        updateAllDisplays();
-        
-        // 發送 Discord 通知（整合個別和統一）
-        // 1. 先檢查並發送個別 BOSS 專屬的 Discord 通知
-        if (typeof sendKillNotification === 'function') {
-            sendKillNotification(record).catch(err => {});
-        }
-
-        // 2. 發送使用者設定的個別 BOSS Webhook（如果有設定）
-        sendIndividualBossWebhookNotification(record).catch(err => {});
-
-        // 3. 發送使用者自訂的統一 Webhook 通知（如果有設定，無論個別是否有設定都會發送）
-        sendUserWebhookNotification(record).catch(err => {});
-
-        // 發送到 Google Sheets
-        sendToGoogleSheets(record).catch(err => {
-            console.error("Google Sheets 同步失敗:", err);
-        });
-        
-        showNotification(`已重新計時 ${record.bossName}！`, 'success');
-    }
-}
-
-// 巡邏打卡單個BOSS
-function patrolSingleBoss(id) {
-    const record = activeBosses.find(b => b.id === id);
-    if (record) {
-        const now = new Date();
-        record.lastPatrolTime = now.toISOString();
-        
-        patrolRecords.push({
-            timestamp: now.toISOString(),
-            bossName: record.bossName,
-            channel: record.channel,
-            map: record.map,
-            result: '未重生',
-            note: '從BOSS記錄巡邏打卡'
-        });
-
-        saveData();
-        updateAllDisplays();
-        showNotification(
-            `巡邏打卡記錄已儲存！\nBOSS: ${record.bossName}\n頻道: ${record.channel}\n地圖: ${record.map}`,
-            'success'
-        );
-    }
-}
-
-// 清空所有記錄
-function clearAll() {
-    if (activeBosses.length === 0) {
-        showNotification('目前沒有記錄', 'warning');
-        return;
-    }
-
-    if (confirm('確定要清空所有BOSS記錄嗎？')) {
-        activeBosses = [];
-        saveData();
-        updateAllDisplays();
-        showNotification('已清空所有記錄', 'success');
-    }
-}
-
-// 清空建議表單
-function clearFeedbackForm() {
-    document.getElementById('feedback-type').value = '功能建議';
-    document.getElementById('feedback-content').value = '';
-    document.getElementById('feedback-contact').value = '';
-}
-
-// ===== 用戶 Webhook 管理函數 =====
-
-// 載入用戶 Webhook
-function loadUserWebhook() {
-    const savedWebhook = localStorage.getItem('userDiscordWebhook');
-    if (savedWebhook) {
-        document.getElementById('user-webhook-url').value = savedWebhook;
-        showWebhookStatus('✅ 已載入儲存的 Webhook 設定', 'success');
-    }
-}
-
-// ===== 個別 BOSS Webhook 管理函數 =====
+// ===== 恢復：個別 BOSS Webhook 功能 =====
 
 // 載入個別 BOSS Webhook 設定
 function loadIndividualWebhooks() {
@@ -810,6 +604,8 @@ function saveIndividualWebhooks(webhooks) {
 // 生成個別 BOSS Webhook 列表
 function populateBossWebhooksList() {
     const container = document.getElementById('boss-webhooks-list');
+    if (!container) return;
+    
     const individualWebhooks = loadIndividualWebhooks();
     
     let html = '';
@@ -863,8 +659,10 @@ function populateBossWebhooksList() {
     container.innerHTML = html;
     
     // 更新計數
-    document.getElementById('individual-webhook-count').textContent = configuredCount;
-    document.getElementById('total-boss-count').textContent = totalCount;
+    const countElement = document.getElementById('individual-webhook-count');
+    const totalElement = document.getElementById('total-boss-count');
+    if (countElement) countElement.textContent = configuredCount;
+    if (totalElement) totalElement.textContent = totalCount;
 }
 
 // 切換個別 Webhook 區塊顯示
@@ -892,7 +690,6 @@ function saveAllIndividualWebhooks() {
         if (input) {
             const url = input.value.trim();
             if (url) {
-                // 驗證 URL 格式
                 if (url.startsWith('https://discord.com/api/webhooks/') || 
                     url.startsWith('https://discordapp.com/api/webhooks/')) {
                     individualWebhooks[bossName] = url;
@@ -906,9 +703,8 @@ function saveAllIndividualWebhooks() {
     });
 
     saveIndividualWebhooks(individualWebhooks);
-    populateBossWebhooksList(); // 重新載入以更新 ✅ 標記
+    populateBossWebhooksList();
     showNotification(`✅ 已儲存 ${savedCount} 個 BOSS 的 Webhook 設定`, 'success');
-    showWebhookStatus(`✅ 已儲存 ${savedCount} 個 BOSS 的個別 Webhook 設定`, 'success');
 }
 
 // 測試單個 BOSS 的 Webhook
@@ -921,7 +717,6 @@ async function testSingleBossWebhook(bossName) {
         return;
     }
 
-    // 驗證 URL 格式
     if (!webhookUrl.startsWith('https://discord.com/api/webhooks/') && 
         !webhookUrl.startsWith('https://discordapp.com/api/webhooks/')) {
         showNotification(`${bossName} 的 Webhook URL 格式不正確`, 'error');
@@ -967,7 +762,6 @@ async function testSingleBossWebhook(bossName) {
         if (response.ok) {
             showNotification(`✅ ${bossName} 的測試通知已成功發送！`, 'success');
             
-            // 標記為已設定
             const card = document.getElementById(`boss-webhook-${bossName.replace(/\s/g, '-')}`);
             if (card && !card.classList.contains('webhook-configured')) {
                 card.classList.add('webhook-configured');
@@ -991,12 +785,11 @@ function clearSingleBossWebhook(bossName) {
             card.classList.remove('webhook-configured');
         }
         
-        // 從儲存中移除
         const individualWebhooks = loadIndividualWebhooks();
         delete individualWebhooks[bossName];
         saveIndividualWebhooks(individualWebhooks);
         
-        populateBossWebhooksList(); // 更新計數
+        populateBossWebhooksList();
         showNotification(`已清除 ${bossName} 的 Webhook 設定`, 'success');
     }
 }
@@ -1007,16 +800,15 @@ function clearAllIndividualWebhooks() {
         localStorage.removeItem('individualBossWebhooks');
         populateBossWebhooksList();
         showNotification('已清除所有個別 BOSS 的 Webhook 設定', 'success');
-        showWebhookStatus('ℹ️ 所有個別 BOSS 的 Webhook 設定已清除', 'warning');
     }
 }
 
-// 發送個別 BOSS 的 Webhook 通知（優先級高於統一通知）
+// 發送個別 BOSS 的 Webhook 通知
 async function sendIndividualBossWebhookNotification(record) {
     const individualWebhooks = loadIndividualWebhooks();
     const webhookUrl = individualWebhooks[record.bossName];
     
-    if (!webhookUrl) return false; // 沒有設定就返回 false
+    if (!webhookUrl) return false;
 
     const deathTime = new Date(record.deathTime);
     const respawnMin = new Date(record.respawnMin);
@@ -1034,7 +826,7 @@ async function sendIndividualBossWebhookNotification(record) {
             },
             {
                 name: '地圖',
-                value: record.map || BOSS_DATA[record.bossName]?.map || '未知',
+                value: record.map || BOSS_DATA[record.bossName]?.maps[0] || '未知',
                 inline: true
             },
             {
@@ -1059,186 +851,287 @@ async function sendIndividualBossWebhookNotification(record) {
                 embeds: [embed]
             })
         });
-        return true; // 發送成功
+        return true;
     } catch (error) {
         console.error(`${record.bossName} 個別 Webhook 發送失敗:`, error);
-        return false; // 發送失敗
+        return false;
     }
 }
 
-// 儲存用戶 Webhook
-function saveUserWebhook() {
-    const webhookUrl = document.getElementById('user-webhook-url').value.trim();
-    
-    if (!webhookUrl) {
-        showNotification('請輸入 Webhook URL', 'warning');
-        return;
-    }
+// ===== 恢復：巡邏打卡功能 =====
 
-    // 驗證 Webhook URL 格式
-    if (!webhookUrl.startsWith('https://discord.com/api/webhooks/') && 
-        !webhookUrl.startsWith('https://discordapp.com/api/webhooks/')) {
-        showNotification('請輸入正確的 Discord Webhook URL', 'error');
-        showWebhookStatus('❌ URL 格式不正確，請確認是否為 Discord Webhook 網址', 'error');
-        return;
-    }
-
-    localStorage.setItem('userDiscordWebhook', webhookUrl);
-    showNotification('✅ Webhook 已儲存！', 'success');
-    showWebhookStatus('✅ Webhook 設定已成功儲存，現在記錄 BOSS 時會自動發送通知到您的 Discord 頻道', 'success');
-}
-
-// 測試用戶 Webhook
-async function testUserWebhook() {
-    const webhookUrl = document.getElementById('user-webhook-url').value.trim();
-    
-    if (!webhookUrl) {
-        showNotification('請先輸入並儲存 Webhook URL', 'warning');
-        return;
-    }
-
-    const now = new Date();
-    const testEmbed = {
-        title: '🧪 測試通知',
-        description: '這是一則測試訊息，如果您看到這則訊息，表示 Webhook 設定成功！',
-        color: 0x10b981,
-        fields: [
-            {
-                name: '📅 測試時間',
-                value: formatDateTime(now),
-                inline: true
-            },
-            {
-                name: '✅ 狀態',
-                value: '設定正常',
-                inline: true
-            }
-        ],
-        timestamp: now.toISOString(),
-        footer: {
-            text: '楓之谷BOSS重生時間系統 - 測試通知'
-        }
-    };
-
-    try {
-        showNotification('正在發送測試通知...', 'success');
-        const response = await fetch(webhookUrl, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                embeds: [testEmbed]
-            })
+// 巡邏打卡單個BOSS
+function patrolSingleBoss(id) {
+    const record = activeBosses.find(b => b.id === id);
+    if (record) {
+        const now = new Date();
+        record.lastPatrolTime = now.toISOString();
+        
+        patrolRecords.push({
+            timestamp: now.toISOString(),
+            bossName: record.bossName,
+            channel: record.channel,
+            map: record.map,
+            result: '未重生',
+            note: '從BOSS記錄巡邏打卡'
         });
 
-        if (response.ok) {
-            showNotification('✅ 測試通知已成功發送！請檢查您的 Discord 頻道', 'success');
-            showWebhookStatus('✅ 測試成功！已發送測試訊息到您的 Discord 頻道', 'success');
+        saveData();
+        updateAllDisplays();
+        showNotification(`已記錄 ${record.bossName} 的巡邏時間`, 'success');
+    }
+}
+
+// ===== 原有功能 =====
+
+// 填充BOSS選擇列表
+function populateBossSelect() {
+    const select = document.getElementById('boss-select');
+    Object.keys(BOSS_DATA).forEach(boss => {
+        const option = document.createElement('option');
+        option.value = boss;
+        option.textContent = boss;
+        select.appendChild(option);
+    });
+}
+
+// BOSS選擇事件
+function onBossSelected() {
+    const bossName = document.getElementById('boss-select').value;
+    const mapSelectContainer = document.getElementById('map-select-container');
+    const previewImage = document.getElementById('boss-preview-image');
+    const bossInfoCard = document.getElementById('boss-info');
+    
+    if (bossName && BOSS_DATA[bossName]) {
+        const info = BOSS_DATA[bossName];
+        
+        if (info.hasMapSelect) {
+            mapSelectContainer.style.display = 'block';
         } else {
-            const errorText = await response.text();
-            console.error('Webhook 測試失敗:', response.status, errorText);
-            showNotification('❌ 測試失敗，請檢查 Webhook URL 是否正確', 'error');
-            showWebhookStatus(`❌ 測試失敗 (錯誤代碼: ${response.status})，請確認 Webhook URL 是否正確`, 'error');
+            mapSelectContainer.style.display = 'none';
         }
-    } catch (error) {
-        console.error('發送測試通知時發生錯誤:', error);
-        showNotification('❌ 發送失敗，請檢查網路連線', 'error');
-        showWebhookStatus('❌ 發送失敗，請檢查網路連線或 Webhook URL 是否正確', 'error');
+        
+        if (info.image) {
+            previewImage.src = info.image;
+            previewImage.alt = bossName;
+            previewImage.style.display = 'block';
+        } else {
+            previewImage.style.display = 'none';
+        }
+        
+        document.getElementById('map-info').textContent = `地圖: ${info.maps.join(', ')}`;
+        document.getElementById('time-info').textContent = `重生時間: ${formatTimeRange(info.min, info.max)}`;
+        bossInfoCard.style.display = 'block';
+    } else {
+        bossInfoCard.style.display = 'none';
+        mapSelectContainer.style.display = 'none';
+        previewImage.style.display = 'none';
     }
 }
 
-// 清除用戶 Webhook
-function clearUserWebhook() {
-    if (confirm('確定要清除 Webhook 設定嗎？')) {
-        localStorage.removeItem('userDiscordWebhook');
-        document.getElementById('user-webhook-url').value = '';
-        showNotification('已清除 Webhook 設定', 'success');
-        showWebhookStatus('ℹ️ Webhook 設定已清除', 'warning');
-    }
-}
-
-// 顯示 Webhook 狀態訊息
-function showWebhookStatus(message, type) {
-    const statusDiv = document.getElementById('webhook-status');
-    const statusText = document.getElementById('webhook-status-text');
+// 格式化時間範圍
+function formatTimeRange(min, max) {
+    const minHour = Math.floor(min/60);
+    const minMin = min%60;
+    const maxHour = Math.floor(max/60);
+    const maxMin = max%60;
     
-    statusText.textContent = message;
-    statusDiv.style.display = 'block';
+    let minStr = minHour > 0 ? (minMin > 0 ? `${minHour}小時${minMin}分` : `${minHour}小時`) : `${minMin}分`;
+    let maxStr = maxHour > 0 ? (maxMin > 0 ? `${maxHour}小時${maxMin}分` : `${maxHour}小時`) : `${maxMin}分`;
     
-    // 根據類型設定樣式
-    if (type === 'success') {
-        statusDiv.style.background = 'rgba(16, 185, 129, 0.1)';
-        statusDiv.style.borderLeftColor = '#10b981';
-        statusText.style.color = '#34d399';
-    } else if (type === 'error') {
-        statusDiv.style.background = 'rgba(239, 68, 68, 0.1)';
-        statusDiv.style.borderLeftColor = '#ef4444';
-        statusText.style.color = '#f87171';
-    } else if (type === 'warning') {
-        statusDiv.style.background = 'rgba(245, 158, 11, 0.1)';
-        statusDiv.style.borderLeftColor = '#f59e0b';
-        statusText.style.color = '#fbbf24';
-    }
-
-    // 5秒後自動隱藏（除非是錯誤訊息）
-    if (type !== 'error') {
-        setTimeout(() => {
-            statusDiv.style.display = 'none';
-        }, 5000);
-    }
+    return `${minStr} ~ ${maxStr}`;
 }
 
-// 發送用戶 Webhook 通知
-async function sendUserWebhookNotification(record) {
-    const webhookUrl = localStorage.getItem('userDiscordWebhook');
-    if (!webhookUrl) return; // 如果沒有設定就不發送
+// 記錄BOSS擊殺
+function recordBoss() {
+    const bossName = document.getElementById('boss-select').value;
+    const channel = document.getElementById('channel-input').value;
+    const customTimeInput = document.getElementById('custom-time-input').value.trim();
 
-    const deathTime = new Date(record.deathTime);
-    const respawnMin = new Date(record.respawnMin);
-    const respawnMax = new Date(record.respawnMax);
+    if (!bossName) {
+        showNotification('請選擇BOSS', 'warning');
+        return;
+    }
 
-    const embed = {
-        title: '⚔️ BOSS擊殺記錄',
-        description: `**${record.bossName}** 已被擊殺！`,
-        color: parseInt(BOSS_DATA[record.bossName]?.color?.replace('#', '') || 'FF0000', 16),
-        fields: [
-            {
-                name: '頻道',
-                value: String(record.channel),
-                inline: true
-            },
-            {
-                name: '地圖',
-                value: record.map || BOSS_DATA[record.bossName]?.map || '未知',
-                inline: true
-            },
-            {
-                name: '⏰ 預計重生時間',
-                value: `**${formatDateTime(respawnMin)} ~ ${formatDateTime(respawnMax)}**`,
-                inline: false
+    if (!channel) {
+        showNotification('請輸入頻道', 'warning');
+        return;
+    }
+
+    const info = BOSS_DATA[bossName];
+    
+    // 使用自訂時間或當前時間
+    let deathTime;
+    if (customTimeInput) {
+        // 解析多種時間格式
+        let hours, minutes;
+        
+        // 格式1: 純數字 (例如: 1106, 906, 2359)
+        if (/^\d{3,4}$/.test(customTimeInput)) {
+            const timeStr = customTimeInput.padStart(4, '0'); // 906 -> 0906
+            hours = parseInt(timeStr.substring(0, 2));
+            minutes = parseInt(timeStr.substring(2, 4));
+        }
+        // 格式2: HH:MM 或 H:MM (例如: 11:06, 9:06)
+        else if (/^\d{1,2}:\d{2}$/.test(customTimeInput)) {
+            const parts = customTimeInput.split(':');
+            hours = parseInt(parts[0]);
+            minutes = parseInt(parts[1]);
+        }
+        // 格式3: HH.MM 或 H.MM (例如: 11.06, 9.06)
+        else if (/^\d{1,2}\.\d{2}$/.test(customTimeInput)) {
+            const parts = customTimeInput.split('.');
+            hours = parseInt(parts[0]);
+            minutes = parseInt(parts[1]);
+        }
+        // 格式4: HH MM 或 H MM (例如: 11 06, 9 06)
+        else if (/^\d{1,2}\s+\d{2}$/.test(customTimeInput)) {
+            const parts = customTimeInput.split(/\s+/);
+            hours = parseInt(parts[0]);
+            minutes = parseInt(parts[1]);
+        }
+        else {
+            showNotification('時間格式錯誤，支援格式：1106、11:06、11.06 或 11 06', 'error');
+            return;
+        }
+        
+        if (hours < 0 || hours > 23 || minutes < 0 || minutes > 59) {
+            showNotification('時間範圍錯誤（小時: 0-23，分鐘: 0-59）', 'error');
+            return;
+        }
+        
+        deathTime = new Date();
+        deathTime.setHours(hours, minutes, 0, 0);
+        
+        // 如果輸入的時間比現在晚很多，可能是昨天的時間
+        const now = new Date();
+        if (deathTime > now) {
+            const timeDiff = deathTime - now;
+            // 如果未來時間超過12小時，假設是昨天
+            if (timeDiff > 12 * 60 * 60 * 1000) {
+                deathTime.setDate(deathTime.getDate() - 1);
             }
-        ],
-        timestamp: new Date().toISOString(),
-        footer: {
-            text: '楓之谷BOSS重生時間系統'
         }
-    };
+    } else {
+        deathTime = new Date();
+    }
+    
+    const respawnMin = new Date(deathTime.getTime() + info.min * 60000);
+    const respawnMax = new Date(deathTime.getTime() + info.max * 60000);
 
-    try {
-        await fetch(webhookUrl, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                embeds: [embed]
-            })
-        });
-        // 靜默處理，不顯示通知
-    } catch (error) {
-        // 靜默處理錯誤
-        console.error('用戶 Webhook 發送失敗:', error);
+    let mapLocation = info.maps[0];
+    if (info.hasMapSelect) {
+        const selectedMap = document.getElementById('map-select').value;
+        mapLocation = selectedMap === '7' ? '夜市徒步區7' : '夜市徒步區7-1';
+    }
+
+    const existingRecordIndex = activeBosses.findIndex(
+        b => b.bossName === bossName && b.channel === channel
+    );
+
+    if (existingRecordIndex !== -1) {
+        const existingRecord = activeBosses[existingRecordIndex];
+        existingRecord.map = mapLocation;
+        existingRecord.deathTime = deathTime.toISOString();
+        existingRecord.respawnMin = respawnMin.toISOString();
+        existingRecord.respawnMax = respawnMax.toISOString();
+        existingRecord.notified = false;
+        existingRecord.lastPatrolTime = null;
+        
+        updateBossStatistics(bossName, channel);
+        
+        saveData();
+        updateAllDisplays();
+
+        sendIndividualBossWebhookNotification(existingRecord).catch(err => {});
+        sendUserWebhookNotification(existingRecord).catch(err => {});
+        sendToGoogleSheets(existingRecord).catch(err => {});
+
+        showNotification(
+            `頻道 ${channel} - ${bossName}\n地圖: ${mapLocation}\n已更新擊殺時間！`,
+            'success'
+        );
+    } else {
+        const record = {
+            id: Date.now(),
+            channel: channel,
+            bossName: bossName,
+            map: mapLocation,
+            deathTime: deathTime.toISOString(),
+            respawnMin: respawnMin.toISOString(),
+            respawnMax: respawnMax.toISOString(),
+            notified: false,
+            lastPatrolTime: null
+        };
+
+        activeBosses.push(record);
+        
+        updateBossStatistics(bossName, channel);
+        
+        saveData();
+        updateAllDisplays();
+
+        sendIndividualBossWebhookNotification(record).catch(err => {});
+        sendUserWebhookNotification(record).catch(err => {});
+        sendToGoogleSheets(record).catch(err => {});
+
+        showNotification(
+            `頻道 ${channel} - ${bossName}\n地圖: ${mapLocation}\n擊殺時間已記錄！`,
+            'success'
+        );
+    }
+
+    document.getElementById('channel-input').value = '';
+    document.getElementById('custom-time-input').value = '';
+    document.getElementById('channel-input').focus();
+}
+
+// 刪除單個記錄
+function deleteRecord(id) {
+    if (confirm('確定要刪除此記錄嗎？')) {
+        activeBosses = activeBosses.filter(b => b.id !== id);
+        saveData();
+        updateAllDisplays();
+        showNotification('已刪除BOSS記錄', 'success');
+    }
+}
+
+// 重新計時單個BOSS
+function respawnSingleBoss(id) {
+    const record = activeBosses.find(b => b.id === id);
+    if (record) {
+        const info = BOSS_DATA[record.bossName];
+        const now = new Date();
+        record.deathTime = now.toISOString();
+        record.respawnMin = new Date(now.getTime() + info.min * 60000).toISOString();
+        record.respawnMax = new Date(now.getTime() + info.max * 60000).toISOString();
+        record.notified = false;
+        
+        updateBossStatistics(record.bossName, record.channel);
+        
+        saveData();
+        updateAllDisplays();
+        
+        sendIndividualBossWebhookNotification(record).catch(err => {});
+        sendUserWebhookNotification(record).catch(err => {});
+        sendToGoogleSheets(record).catch(err => {});
+        
+        showNotification(`已重新計時 ${record.bossName}！`, 'success');
+    }
+}
+
+// 清空所有記錄
+function clearAll() {
+    if (activeBosses.length === 0) {
+        showNotification('目前沒有記錄', 'warning');
+        return;
+    }
+
+    if (confirm('確定要清空所有BOSS記錄嗎？')) {
+        activeBosses = [];
+        saveData();
+        updateAllDisplays();
+        showNotification('已清空所有記錄', 'success');
     }
 }
 
@@ -1247,14 +1140,13 @@ function updateAllDisplays() {
     checkAndResetDailyStats();
     updateRecordDisplay();
     updateStatisticsDisplay();
+    updateBossCount();
 }
 
 // 更新記錄顯示
 function updateRecordDisplay() {
     const container = document.getElementById('record-container');
     const now = new Date();
-    
-    document.getElementById('boss-count').textContent = activeBosses.length;
 
     if (activeBosses.length === 0) {
         container.innerHTML = '<p style="text-align: center; color: #a0a0c0; padding: 40px 0;">目前沒有記錄中的BOSS</p>';
@@ -1265,8 +1157,7 @@ function updateRecordDisplay() {
         new Date(a.respawnMin) - new Date(b.respawnMin)
     );
 
-    let html = '';
-    sorted.forEach(record => {
+    container.innerHTML = sorted.map(record => {
         const respawnMin = new Date(record.respawnMin);
         const respawnMax = new Date(record.respawnMax);
         const bossInfo = BOSS_DATA[record.bossName];
@@ -1281,7 +1172,6 @@ function updateRecordDisplay() {
         if (now < respawnMin) {
             statusText = '即將重生';
             statusClass = 'waiting';
-            
             const totalSeconds = Math.floor((respawnMin - now) / 1000);
             const hours = Math.floor(totalSeconds / 3600);
             const minutes = Math.floor((totalSeconds % 3600) / 60);
@@ -1292,7 +1182,6 @@ function updateRecordDisplay() {
             statusClass = 'possible';
             showRespawnBtn = true;
             showPatrolBtn = true;
-            
             const totalSeconds = Math.floor((respawnMax - now) / 1000);
             const hours = Math.floor(totalSeconds / 3600);
             const minutes = Math.floor((totalSeconds % 3600) / 60);
@@ -1302,7 +1191,6 @@ function updateRecordDisplay() {
             statusText = '確定重生';
             statusClass = 'confirmed';
             showRespawnBtn = true;
-            
             const diffMin = Math.floor((now - respawnMax) / 60000);
             countdownText = `+${diffMin}分`;
         }
@@ -1321,12 +1209,15 @@ function updateRecordDisplay() {
             `;
         }
 
-        const respawnBtnHtml = showRespawnBtn ? `<button type="button" class="boss-icon-btn" onclick="respawnSingleBoss(${record.id})" title="重新計時">🔄</button>` : '';
-        const patrolBtnHtml = showPatrolBtn ? `<button type="button" class="boss-icon-btn" onclick="patrolSingleBoss(${record.id})" title="巡邏打卡">👀</button>` : '';
+        const respawnBtnHtml = showRespawnBtn ? 
+            `<button type="button" class="boss-icon-btn" onclick="respawnSingleBoss(${record.id})" title="重新計時">🔄</button>` : '';
+        const patrolBtnHtml = showPatrolBtn ? 
+            `<button type="button" class="boss-icon-btn" onclick="patrolSingleBoss(${record.id})" title="巡邏打卡">👀</button>` : '';
 
-        const bossImage = bossInfo && bossInfo.image ? `<img src="${bossInfo.image}" alt="${record.bossName}" class="boss-image">` : '';
+        const bossImage = bossInfo && bossInfo.image ? 
+            `<img src="${bossInfo.image}" alt="${record.bossName}" class="boss-image">` : '';
 
-        html += `
+        return `
             <div class="boss-status-card" style="--boss-color: ${bossColor};">
                 <div class="boss-card-header">
                     <div class="boss-info-left">
@@ -1355,52 +1246,379 @@ function updateRecordDisplay() {
                 </div>
             </div>
         `;
-    });
-
-    container.innerHTML = html;
+    }).join('');
 }
 
-// 顯示通知
-function showNotification(message, type = 'success') {
-    const notification = document.createElement('div');
-    notification.className = `notification ${type}`;
-    notification.innerHTML = `<p style="white-space: pre-line;">${message}</p>`;
-    document.body.appendChild(notification);
-
-    setTimeout(() => {
-        notification.remove();
-    }, 5000);
+// 更新BOSS計數
+function updateBossCount() {
+    document.getElementById('boss-count').textContent = activeBosses.length;
 }
 
-// 切換標籤
-function switchTab(index) {
-    const tabs = document.querySelectorAll('.tab');
-    const contents = document.querySelectorAll('.tab-content');
+// 格式化時間差
+function formatTimeDiff(ms) {
+    const totalMinutes = Math.floor(ms / 60000);
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+    return hours > 0 ? `${hours}小時${minutes}分` : `${minutes}分鐘`;
+}
 
-    tabs.forEach(tab => tab.classList.remove('active'));
-    contents.forEach(content => content.classList.remove('active'));
-
-    tabs[index].classList.add('active');
-    contents[index].classList.add('active');
+// 格式化日期
+function formatDate(date) {
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    return `${month}/${day} ${hours}:${minutes}`;
 }
 
 // 格式化時間
 function formatTime(date) {
-    return date.toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', hour12: false });
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    return `${hours}:${minutes}`;
 }
 
-function formatDateTime(date, withSeconds = false) {
-    const options = { 
-        month: '2-digit', 
-        day: '2-digit', 
-        hour: '2-digit', 
-        minute: '2-digit',
-        hour12: false
-    };
-    if (withSeconds) {
-        options.second = '2-digit';
+function formatDateTime(date) {
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    return `${month}/${day} ${hours}:${minutes}`;
+}
+
+// 顯示通知
+function showNotification(message, type = 'info') {
+    const notification = document.createElement('div');
+    notification.className = `notification ${type}`;
+    notification.textContent = message;
+    document.body.appendChild(notification);
+    setTimeout(() => notification.classList.add('show'), 10);
+    setTimeout(() => {
+        notification.classList.remove('show');
+        setTimeout(() => notification.remove(), 300);
+    }, 3000);
+}
+
+// 顯示頻道偵測使用說明
+function showChannelDetectionHelp() {
+    const overlay = document.createElement('div');
+    overlay.id = 'help-overlay';
+    overlay.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10000;
+        padding: 20px;
+        box-sizing: border-box;
+    `;
+    
+    overlay.innerHTML = `
+        <div style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); 
+                    border-radius: 16px; 
+                    padding: 30px; 
+                    max-width: 700px; 
+                    width: 100%;
+                    max-height: 90vh;
+                    overflow-y: auto;
+                    border: 2px solid #00ccff;
+                    box-shadow: 0 8px 32px rgba(0, 204, 255, 0.3);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+                <h2 style="color: #00ff99; margin: 0; font-size: 1.8em;">📖 頻道偵測使用說明</h2>
+                <button onclick="this.closest('#help-overlay').remove()" 
+                        style="background: #ef4444; 
+                               border: none; 
+                               color: white; 
+                               width: 36px; 
+                               height: 36px; 
+                               border-radius: 50%; 
+                               cursor: pointer; 
+                               font-size: 1.3em;
+                               display: flex;
+                               align-items: center;
+                               justify-content: center;
+                               transition: all 0.3s;">✕</button>
+            </div>
+            
+            <div style="color: #e0e0e0; line-height: 1.8; font-size: 1.05em;">
+                <div style="background: rgba(16, 185, 129, 0.15); 
+                            padding: 20px; 
+                            border-radius: 12px; 
+                            border-left: 4px solid #10b981; 
+                            margin-bottom: 25px;">
+                    <h3 style="color: #10b981; margin: 0 0 15px 0; font-size: 1.3em;">✨ 功能介紹</h3>
+                    <p style="margin: 0; color: #d1d5db;">
+                        頻道偵測功能可以自動識別遊戲畫面中的「頻道的 XXXX」文字，自動填入頻道號碼，讓你不用手動輸入！
+                    </p>
+                </div>
+
+                <div style="background: rgba(59, 130, 246, 0.15); 
+                            padding: 20px; 
+                            border-radius: 12px; 
+                            border-left: 4px solid #3b82f6; 
+                            margin-bottom: 25px;">
+                    <h3 style="color: #3b82f6; margin: 0 0 15px 0; font-size: 1.3em;">🎯 按鈕功能說明</h3>
+                    <div style="display: grid; gap: 15px;">
+                        <div style="background: rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 8px;">
+                            <div style="color: #fbbf24; font-weight: bold; margin-bottom: 8px;">🎯 螢幕監控</div>
+                            <div style="color: #d1d5db; font-size: 0.95em;">開始/停止自動偵測頻道號碼。點擊後會要求分享螢幕，然後每秒自動掃描並填入頻道號碼。</div>
+                        </div>
+                        <div style="background: rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 8px;">
+                            <div style="color: #a78bfa; font-weight: bold; margin-bottom: 8px;">⚙️ 調整掃描位置</div>
+                            <div style="color: #d1d5db; font-size: 0.95em;">首次使用必須設定！用滑鼠框選遊戲畫面中「頻道的 XXXX」的文字區域，系統會記住這個位置。</div>
+                        </div>
+                        <div style="background: rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 8px;">
+                            <div style="color: #f59e0b; font-weight: bold; margin-bottom: 8px;">👁️ 預覽掃描區域</div>
+                            <div style="color: #d1d5db; font-size: 0.95em;">查看當前設定的掃描區域是否正確，可以確認框選位置有沒有偏移。</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="background: rgba(245, 158, 11, 0.15); 
+                            padding: 20px; 
+                            border-radius: 12px; 
+                            border-left: 4px solid #f59e0b; 
+                            margin-bottom: 25px;">
+                    <h3 style="color: #f59e0b; margin: 0 0 15px 0; font-size: 1.3em;">📋 使用步驟</h3>
+                    <ol style="margin: 0; padding-left: 25px; color: #d1d5db;">
+                        <li style="margin-bottom: 12px;">
+                            <strong style="color: #fbbf24;">第一次使用：</strong>點擊 ⚙️ 調整掃描位置，框選「頻道的 XXXX」文字區域
+                        </li>
+                        <li style="margin-bottom: 12px;">
+                            <strong style="color: #fbbf24;">開始偵測：</strong>點擊 🎯 螢幕監控，選擇要分享的遊戲視窗
+                        </li>
+                        <li style="margin-bottom: 12px;">
+                            <strong style="color: #fbbf24;">自動填入：</strong>系統會每秒自動識別頻道號碼並填入
+                        </li>
+                        <li style="margin-bottom: 12px;">
+                            <strong style="color: #fbbf24;">停止偵測：</strong>再次點擊 🎯 螢幕監控即可停止
+                        </li>
+                    </ol>
+                </div>
+
+                <div style="background: rgba(239, 68, 68, 0.15); 
+                            padding: 20px; 
+                            border-radius: 12px; 
+                            border-left: 4px solid #ef4444;">
+                    <h3 style="color: #ef4444; margin: 0 0 15px 0; font-size: 1.3em;">⚠️ 注意事項</h3>
+                    <ul style="margin: 0; padding-left: 25px; color: #d1d5db;">
+                        <li style="margin-bottom: 10px;">請確保「頻道的 XXXX」文字清晰可見</li>
+                        <li style="margin-bottom: 10px;">框選區域時盡量貼合文字邊緣</li>
+                        <li style="margin-bottom: 10px;">如果識別不準確，可以重新調整掃描位置</li>
+                        <li style="margin-bottom: 10px;">分享螢幕時請選擇遊戲視窗（不要選整個螢幕）</li>
+                    </ul>
+                </div>
+
+                <div style="text-align: center; margin-top: 25px;">
+                    <button onclick="this.closest('#help-overlay').remove()" 
+                            style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); 
+                                   border: 2px solid #10b981; 
+                                   color: white; 
+                                   padding: 12px 40px; 
+                                   border-radius: 8px; 
+                                   cursor: pointer; 
+                                   font-size: 1.1em; 
+                                   font-weight: bold;
+                                   transition: all 0.3s;
+                                   box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);">
+                        我知道了
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(overlay);
+    
+    // 點擊背景關閉
+    overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) {
+            overlay.remove();
+        }
+    });
+}
+
+
+// 切換分頁
+function switchTab(index) {
+    const tabs = document.querySelectorAll('.tab');
+    const contents = document.querySelectorAll('.tab-content');
+    tabs.forEach((tab, i) => {
+        if (i === index) {
+            tab.classList.add('active');
+            contents[i].classList.add('active');
+        } else {
+            tab.classList.remove('active');
+            contents[i].classList.remove('active');
+        }
+    });
+    if (index === 2) updateStatistics();
+}
+
+// 填充 BOSS 列表表格
+function populateBossListTable() {
+    const tbody = document.getElementById('boss-list-tbody');
+    tbody.innerHTML = Object.entries(BOSS_DATA)
+        .sort(([a], [b]) => a.localeCompare(b))
+        .map(([name, data]) => {
+            const imageHtml = data.image ? 
+                `<img src="${data.image}" alt="${name}" style="width:50px;height:50px;object-fit:contain;" onerror="this.style.display='none'">` : 
+                '<span style="color:#666;">無圖片</span>';
+            return `
+                <tr>
+                    <td style="text-align:center;">${imageHtml}</td>
+                    <td><strong>${name}</strong></td>
+                    <td>${formatTimeRange(data.min, data.max)}</td>
+                    <td>${data.maps.join(', ')}</td>
+                </tr>
+            `;
+        }).join('');
+}
+
+// 更新統計資料
+function updateStatistics() {
+    const tbody = document.getElementById('stats-tbody');
+    if (!tbody) return;
+    
+    const entries = Object.entries(bossStatistics)
+        .filter(([_, stats]) => stats.totalKills > 0)
+        .sort(([_, a], [__, b]) => b.totalKills - a.totalKills);
+    
+    if (entries.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#888;">尚無擊殺記錄</td></tr>';
+        return;
     }
-    return date.toLocaleString('zh-TW', options).replace(/\//g, '/');
+    
+    tbody.innerHTML = entries.map(([bossName, stats]) => {
+        const lastKill = stats.lastKillTime ? formatDate(new Date(stats.lastKillTime)) : '無';
+        const topChannels = Object.entries(stats.channelDistribution || {})
+            .sort(([_, a], [__, b]) => b - a)
+            .slice(0, 3)
+            .map(([ch, count]) => `${ch}頻 (${count}次)`)
+            .join(', ');
+        return `
+            <tr>
+                <td><strong>${bossName}</strong></td>
+                <td style="text-align:center;">${stats.totalKills}</td>
+                <td>${lastKill}</td>
+                <td>${topChannels || '無'}</td>
+            </tr>
+        `;
+    }).join('');
+}
+
+// 載入用戶 Webhook 設定
+function loadUserWebhook() {
+    const saved = localStorage.getItem('userWebhook');
+    if (saved) {
+        const input = document.getElementById('webhook-url');
+        if (input) input.value = saved;
+        updateWebhookStatus();
+    }
+}
+
+// 保存用戶 Webhook
+function saveUserWebhook() {
+    const url = document.getElementById('webhook-url').value.trim();
+    if (url && !url.startsWith('https://discord.com/api/webhooks/')) {
+        showNotification('請輸入有效的 Discord Webhook URL', 'error');
+        return;
+    }
+    localStorage.setItem('userWebhook', url);
+    updateWebhookStatus();
+    showNotification('Webhook 設定已保存', 'success');
+}
+
+// 更新 Webhook 狀態
+function updateWebhookStatus() {
+    const url = localStorage.getItem('userWebhook');
+    const statusEl = document.getElementById('webhook-status');
+    const statusTextEl = document.getElementById('webhook-status-text');
+    if (!statusEl || !statusTextEl) return;
+    
+    if (url) {
+        statusEl.style.display = 'block';
+        statusTextEl.innerHTML = '✅ 已設定 (將接收所有BOSS通知)';
+        statusTextEl.style.color = '#10b981';
+    } else {
+        statusEl.style.display = 'block';
+        statusTextEl.innerHTML = '❌ 未設定';
+        statusTextEl.style.color = '#ef4444';
+    }
+}
+
+// 清除用戶 Webhook
+function clearUserWebhook() {
+    if (confirm('確定要清除統一通知 Webhook 設定嗎？')) {
+        localStorage.removeItem('userWebhook');
+        document.getElementById('webhook-url').value = '';
+        updateWebhookStatus();
+        showNotification('Webhook 設定已清除', 'success');
+    }
+}
+
+// 測試用戶 Webhook
+async function testUserWebhook() {
+    const url = document.getElementById('webhook-url').value.trim();
+    if (!url) {
+        showNotification('請先輸入 Webhook URL', 'warning');
+        return;
+    }
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                embeds: [{
+                    title: '🧪 測試通知',
+                    description: '這是一則測試訊息，如果您看到這則訊息，表示 Webhook 設定成功！',
+                    color: 0x00ff00,
+                    timestamp: new Date().toISOString(),
+                    footer: { text: '楓之谷BOSS重生時間系統' }
+                }]
+            })
+        });
+        if (response.ok) showNotification('✅ 測試成功！請檢查您的 Discord 頻道', 'success');
+        else showNotification('❌ 測試失敗，請檢查 Webhook URL 是否正確', 'error');
+    } catch (error) {
+        console.error('測試失敗:', error);
+        showNotification('❌ 測試失敗，請檢查網路連線', 'error');
+    }
+}
+
+// 發送用戶 Webhook 通知
+async function sendUserWebhookNotification(record) {
+    const webhookUrl = localStorage.getItem('userWebhook');
+    if (!webhookUrl) return;
+    const deathTime = new Date(record.deathTime);
+    const respawnMin = new Date(record.respawnMin);
+    const respawnMax = new Date(record.respawnMax);
+    const embed = {
+        title: '⚔️ BOSS擊殺記錄',
+        description: `**${record.bossName}** 已被擊殺！`,
+        color: parseInt(BOSS_DATA[record.bossName]?.color?.replace('#', '') || 'FF0000', 16),
+        fields: [
+            { name: '頻道', value: String(record.channel), inline: true },
+            { name: '地圖', value: record.map, inline: true },
+            { name: '⏰ 預計重生時間', value: `**${formatDate(respawnMin)} ~ ${formatDate(respawnMax)}**`, inline: false }
+        ],
+        timestamp: new Date().toISOString(),
+        footer: { text: '楓之谷BOSS重生時間系統' }
+    };
+    try {
+        await fetch(webhookUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ embeds: [embed] })
+        });
+    } catch (error) {
+        console.error('用戶 Webhook 發送失敗:', error);
+    }
 }
 
 // 保存數據到localStorage
@@ -1442,29 +1660,14 @@ function loadData() {
     }
 }
 
-// 頁面載入時初始化
-window.addEventListener('DOMContentLoaded', init);
-
-// 按 Enter 鍵記錄擊殺
-document.addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') {
-        e.preventDefault();
-        recordBoss();
-    }
-});
-
 // 設定每天 00:00 自動重新整理
 function setupAutoMidnightRefresh() {
     const now = new Date();
-    const midnight = new Date();
-    midnight.setHours(24, 0, 0, 0); // 設定為下一個午夜
-    
-    const timeUntilMidnight = midnight.getTime() - now.getTime();
-    
-    console.log(`[自動重新整理] 將在 ${Math.floor(timeUntilMidnight / 1000 / 60)} 分鐘後的 00:00 自動重新整理頁面`);
-    
-    setTimeout(() => {
-        console.log('[自動重新整理] 已到達 00:00，重新整理頁面...');
-        location.reload();
-    }, timeUntilMidnight);
+    const night = new Date();
+    night.setHours(24, 0, 0, 0);
+    const msToMidnight = night.getTime() - now.getTime();
+    setTimeout(() => location.reload(), msToMidnight);
 }
+
+// 當頁面載入完成時初始化
+window.addEventListener('load', init);
