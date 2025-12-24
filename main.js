@@ -896,11 +896,19 @@ function populateBossSelect() {
 }
 
 // BOSS選擇事件
+let bossInfoTimeout = null; // 用於存儲計時器
+
 function onBossSelected() {
     const bossName = document.getElementById('boss-select').value;
     const mapSelectContainer = document.getElementById('map-select-container');
     const previewImage = document.getElementById('boss-preview-image');
     const bossInfoCard = document.getElementById('boss-info');
+    
+    // 清除之前的計時器
+    if (bossInfoTimeout) {
+        clearTimeout(bossInfoTimeout);
+        bossInfoTimeout = null;
+    }
     
     if (bossName && BOSS_DATA[bossName]) {
         const info = BOSS_DATA[bossName];
@@ -922,6 +930,12 @@ function onBossSelected() {
         document.getElementById('map-info').textContent = `地圖: ${info.maps.join(', ')}`;
         document.getElementById('time-info').textContent = `重生時間: ${formatTimeRange(info.min, info.max)}`;
         bossInfoCard.style.display = 'block';
+        
+        // 5 秒後自動隱藏
+        bossInfoTimeout = setTimeout(() => {
+            bossInfoCard.style.display = 'none';
+            bossInfoTimeout = null;
+        }, 5000);
     } else {
         bossInfoCard.style.display = 'none';
         mapSelectContainer.style.display = 'none';
