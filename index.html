@@ -19,38 +19,43 @@
         <div class="tab-content active" id="tab-record">
             <div class="section">
                 <h2>快速記錄 BOSS 擊殺</h2>
-                <div class="quick-input-row">
-                    <div class="input-field">
-                        <label>選擇BOSS:</label>
-                        <select id="boss-select" onchange="onBossSelected()">
+                <div style="display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap;">
+                    <div style="display: flex; flex-direction: column; gap: 5px; min-width: 150px;">
+                        <label style="color: #a0a0c0; font-size: 0.9em;">選擇BOSS:</label>
+                        <select id="boss-select" onchange="onBossSelected()" style="padding: 10px;">
                             <option value="">請選擇...</option>
                         </select>
                     </div>
-                    <div class="input-field">
-                        <label>頻道:</label>
-                        <div style="display: flex; gap: 8px;">
-                            <input type="number" id="channel-input" min="1" max="9999" step="1" style="flex: 1;" placeholder="頻道號碼">
+                    <div style="display: flex; flex-direction: column; gap: 5px; min-width: 120px;">
+                        <label style="color: #a0a0c0; font-size: 0.9em;">擊殺時間:</label>
+                        <input type="text" id="custom-time-input" placeholder="1106" style="padding: 10px;">
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 5px; min-width: 100px;">
+                        <label style="color: #a0a0c0; font-size: 0.9em;">頻道:</label>
+                        <input type="number" id="channel-input" min="1" max="9999" step="1" placeholder="頻道" style="padding: 10px;">
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 5px;">
+                        <label style="color: #a0a0c0; font-size: 0.9em;">頻道偵測:</label>
+                        <div style="display: flex; gap: 5px;">
                             <button type="button" id="monitor-btn" onclick="toggleScreenMonitor()" class="capture-btn" title="開始/停止螢幕監控">
                                 🎯
                             </button>
                             <button type="button" onclick="adjustScanArea()" class="capture-btn" title="調整掃描位置" style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); border-color: #8b5cf6;">
                                 ⚙️
                             </button>
-                            <button type="button" onclick="previewScanArea()" class="capture-btn" title="預覽掃描區域" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); border-color: #f59e0b;">
-                                👁️
-                            </button>
-                            <button type="button" onclick="showOcrHelp()" class="capture-btn" title="使用說明" style="background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%); border-color: #6b7280;">
+                            <button type="button" onclick="showChannelDetectionHelp()" class="capture-btn" title="使用說明" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-color: #10b981;">
                                 ❓
                             </button>
                         </div>
-                        <div id="scan-preview" style="display:none; margin-top:10px; padding:10px; background:#1a1a2e; border-radius:8px;">
-                            <div style="color:#888; margin-bottom:5px;">掃描區域預覽：<span id="preview-countdown" style="color:#10b981;"></span></div>
-                            <img id="preview-img" style="max-width:100%; border:2px solid #10b981; border-radius:4px;">
-                        </div>
                     </div>
-                    <button type="button" onclick="recordBoss()" style="background: linear-gradient(135deg, #0099cc 0%, #0077aa 100%); border-color: #0099cc;">
+                    <button type="button" onclick="recordBoss()" style="background: linear-gradient(135deg, #0099cc 0%, #0077aa 100%); border-color: #0099cc; padding: 10px 24px; margin-top: 22px;">
                         📝 記錄擊殺
                     </button>
+                </div>
+
+                <div id="scan-preview" style="display:none; margin-top:10px; padding:10px; background:#1a1a2e; border-radius:8px;">
+                    <div style="color:#888; margin-bottom:5px;">掃描區域預覽：<span id="preview-countdown" style="color:#10b981;"></span></div>
+                    <img id="preview-img" style="max-width:100%; border:2px solid #10b981; border-radius:4px;">
                 </div>
 
                 <div class="map-select-wrapper" id="map-select-container" style="display: none;">
@@ -144,7 +149,7 @@
                         <label style="font-size: 1.05em; color: #0099cc; font-weight: bold;">
                             🔗 Discord Webhook URL:
                         </label>
-                        <input type="text" id="user-webhook-url" 
+                        <input type="text" id="webhook-url" 
                                placeholder="https://discord.com/api/webhooks/..."
                                style="width: 100%; font-family: monospace; font-size: 0.9em;">
                     </div>
