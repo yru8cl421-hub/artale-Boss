@@ -133,151 +133,114 @@
         <div class="tab-content" id="tab-notification">
             <div class="section">
                 <h2>🔔 Discord 通知設定</h2>
-                <p style="color: #a0a0c0; margin-bottom: 20px;">
-                    設定您的 Discord Webhook，即可在擊殺BOSS時自動接收通知到您的Discord頻道！
-                </p>
-
-                <div class="info-box" style="background: rgba(16, 185, 129, 0.1); border-left-color: #10b981;">
-                    <p style="color: #10b981; font-weight: bold; margin-bottom: 10px;">📢 統一通知 Webhook</p>
-                    <p style="color: #cbd5e1; font-size: 0.95em; margin-bottom: 5px;">
-                        此 Webhook 會接收<strong>所有BOSS</strong>的擊殺通知，方便集中管理。
+                
+                <div class="notification-section">
+                    <h3>📢 統一通知設定 (推薦)</h3>
+                    <p style="color: #a0a0c0; margin-bottom: 15px;">
+                        設定一個 Discord Webhook，所有 BOSS 擊殺都會發送到同一個頻道。適合個人使用或團隊協作。
                     </p>
-                </div>
-
-                <div class="input-group" style="margin-top: 20px;">
-                    <div class="input-field" style="grid-column: 1 / -1;">
-                        <label style="font-size: 1.05em; color: #0099cc; font-weight: bold;">
-                            🔗 Discord Webhook URL:
-                        </label>
-                        <input type="text" id="webhook-url" 
-                               placeholder="https://discord.com/api/webhooks/..."
-                               style="width: 100%; font-family: monospace; font-size: 0.9em;">
-                    </div>
-                </div>
-
-                <div class="button-group">
-                    <button type="button" onclick="saveUserWebhook()" 
-                            style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-color: #10b981; padding: 15px 30px; font-size: 1.1em;">
-                        💾 儲存設定
-                    </button>
-                    <button type="button" onclick="testUserWebhook()" 
-                            style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); border-color: #f59e0b; padding: 15px 30px; font-size: 1.1em;">
-                        🧪 測試通知
-                    </button>
-                    <button type="button" onclick="clearUserWebhook()" class="danger"
-                            style="padding: 15px 30px; font-size: 1.1em;">
-                        🗑️ 清除設定
-                    </button>
-                </div>
-
-                <div id="webhook-status" style="display: none; margin-top: 15px;" class="info-box">
-                    <p id="webhook-status-text"></p>
-                </div>
-
-                <!-- 個別 BOSS 通知設定 -->
-                <div class="section" style="margin-top: 30px; background: rgba(139, 92, 246, 0.05); border: 1px solid rgba(139, 92, 246, 0.3);">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                        <div>
-                            <h3 style="color: #a78bfa; margin-bottom: 8px;">🎯 個別 BOSS 通知設定</h3>
-                            <p style="color: #cbd5e1; font-size: 0.9em;">
-                                為每個 BOSS 設定專屬的 Webhook（選用）| 已設定：<span id="individual-webhook-count" style="color: #10b981; font-weight: bold;">0</span> / <span id="total-boss-count">0</span>
-                            </p>
+                    
+                    <div class="input-group">
+                        <div class="input-field">
+                            <label>Discord Webhook URL:</label>
+                            <input type="url" id="unified-webhook" 
+                                   placeholder="https://discord.com/api/webhooks/..."
+                                   onchange="saveUnifiedWebhook()">
                         </div>
-                        <button type="button" onclick="toggleIndividualWebhooks()" id="toggle-individual-btn"
-                                style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); border-color: #8b5cf6; padding: 10px 20px;">
-                            📂 展開設定
+                    </div>
+
+                    <div class="button-group">
+                        <button type="button" onclick="testUnifiedWebhook()">
+                            🧪 測試通知
+                        </button>
+                        <button type="button" onclick="clearUnifiedWebhook()" class="danger">
+                            🗑️ 清除設定
                         </button>
                     </div>
 
-                    <div id="individual-webhooks-container" style="display: none;">
-                        <div class="info-box" style="background: rgba(245, 158, 11, 0.1); border-left-color: #f59e0b; margin-bottom: 20px;">
-                            <p style="color: #fbbf24; font-size: 0.95em;">
-                                💡 <strong>提示：</strong>個別設定會覆蓋統一通知。如果某個 BOSS 沒有設定專屬 Webhook，會自動使用上方的統一通知。
-                            </p>
-                        </div>
-
-                        <div class="button-group" style="margin-bottom: 20px;">
-                            <button type="button" onclick="saveAllIndividualWebhooks()" 
-                                    style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-color: #10b981;">
-                                💾 儲存所有設定
-                            </button>
-                            <button type="button" onclick="clearAllIndividualWebhooks()" class="danger">
-                                🗑️ 清除所有個別設定
-                            </button>
-                        </div>
-
-                        <div id="boss-webhooks-list" style="display: grid; gap: 15px;">
-                            <!-- BOSS Webhook 輸入框將在這裡動態生成 -->
-                        </div>
+                    <div class="info-box">
+                        <p style="color: #10b981; font-weight: bold;">✅ 啟用統一通知的優點：</p>
+                        <ul style="margin-left: 20px; color: #a0a0c0;">
+                            <li>所有 BOSS 擊殺記錄自動發送到同一個頻道</li>
+                            <li>設定一次，終身受用</li>
+                            <li>適合團隊協作，所有成員都能即時看到</li>
+                            <li>不需要為每個 BOSS 單獨設定</li>
+                        </ul>
                     </div>
                 </div>
 
-                <!-- 使用教學 -->
-                <div class="section" style="margin-top: 30px; background: rgba(139, 92, 246, 0.05); border: 1px solid rgba(139, 92, 246, 0.3);">
-                    <h3 style="color: #a78bfa; margin-bottom: 15px;">📚 使用教學</h3>
+                <div class="notification-section">
+                    <h3>🎯 個別 BOSS 通知設定 (進階)</h3>
+                    <p style="color: #a0a0c0; margin-bottom: 15px;">
+                        為特定 BOSS 設定專屬的 Discord Webhook。這些設定會覆蓋統一通知（但兩個都會發送，如果都有設定）。
+                    </p>
                     
-                    <div style="color: #cbd5e1; line-height: 1.8;">
-                        <div style="background: rgba(16, 185, 129, 0.1); padding: 15px; border-radius: 8px; border-left: 4px solid #10b981; margin-bottom: 20px;">
-                            <p style="color: #34d399; font-weight: bold; margin-bottom: 8px;">🎯 三種通知方式說明</p>
-                            <ul style="margin-left: 20px; color: #6ee7b7;">
-                                <li><strong>統一通知</strong>：所有 BOSS 都發送到同一個頻道（適合懶人、個人使用）</li>
-                                <li><strong>個別通知</strong>：每個 BOSS 發送到專屬頻道（適合精細管理、團隊分工）</li>
-                                <li><strong>混合使用</strong>：兩種可以同時設定，互不影響（最大彈性）</li>
-                            </ul>
+                    <div class="input-group">
+                        <div class="input-field">
+                            <label>選擇 BOSS:</label>
+                            <select id="boss-webhook-select" onchange="loadBossWebhook()">
+                                <option value="">請選擇 BOSS...</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div id="boss-webhook-config" style="display: none;">
+                        <div class="input-group">
+                            <div class="input-field">
+                                <label>Discord Webhook URL:</label>
+                                <input type="url" id="boss-webhook-url" 
+                                       placeholder="https://discord.com/api/webhooks/...">
+                            </div>
                         </div>
 
-                        <p style="font-weight: bold; color: #a78bfa; margin-bottom: 10px;">🔹 步驟一：建立 Discord Webhook</p>
-                        <ol style="margin-left: 20px; margin-bottom: 20px;">
-                            <li>打開你的 Discord 伺服器</li>
-                            <li>在想要接收通知的頻道上點擊「編輯頻道」⚙️</li>
-                            <li>選擇「整合」→「Webhook」</li>
-                            <li>點擊「建立 Webhook」或「新增 Webhook」</li>
-                            <li>設定 Webhook 名稱（例如：楓之谷BOSS通知）</li>
-                            <li>點擊「複製 Webhook 網址」📋</li>
+                        <div class="button-group">
+                            <button type="button" onclick="saveBossWebhook()">
+                                💾 儲存設定
+                            </button>
+                            <button type="button" onclick="testBossWebhook()">
+                                🧪 測試通知
+                            </button>
+                            <button type="button" onclick="clearBossWebhook()" class="danger">
+                                🗑️ 清除此 BOSS 設定
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="info-box" style="margin-top: 15px;">
+                        <p style="color: #a78bfa; font-weight: bold;">💡 個別設定的使用場景：</p>
+                        <ul style="margin-left: 20px; color: #a0a0c0;">
+                            <li>重要 BOSS 發送到專屬頻道</li>
+                            <li>不同類型的 BOSS 分別發送到不同頻道</li>
+                            <li>某些 BOSS 需要 @特定角色 通知</li>
+                            <li>測試用途，避免打擾主頻道</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="notification-section">
+                    <h3>📋 已設定的 Webhook 一覽</h3>
+                    <div id="webhook-list" style="margin-top: 15px;">
+                        <!-- Webhook 列表將在這裡動態生成 -->
+                    </div>
+                </div>
+
+                <div class="info-box" style="margin-top: 20px;">
+                    <div style="background: rgba(99, 102, 241, 0.1); padding: 15px; border-radius: 8px; border-left: 4px solid #6366f1;">
+                        <p style="color: #818cf8; font-weight: bold; margin-bottom: 8px;">📖 如何取得 Discord Webhook？</p>
+                        <ol style="margin-left: 20px; color: #c7d2fe;">
+                            <li>在 Discord 伺服器中，選擇一個文字頻道</li>
+                            <li>點選頻道設定 (齒輪圖示)</li>
+                            <li>選擇「整合」→「Webhooks」</li>
+                            <li>點選「新 Webhook」</li>
+                            <li>複製 Webhook URL 並貼到上方欄位</li>
                         </ol>
+                    </div>
 
-                        <p style="font-weight: bold; color: #a78bfa; margin-bottom: 10px;">🔹 步驟二：選擇通知方式並設定</p>
-                        
-                        <div style="background: #0a0a1a; padding: 15px; border-radius: 8px; margin: 15px 0;">
-                            <p style="color: #10b981; font-weight: bold; margin-bottom: 8px;">💚 推薦：統一通知（適合大多數人）</p>
-                            <ol style="margin-left: 20px; color: #6ee7b7;">
-                                <li>將 Webhook 網址貼到上方「統一通知」的輸入框</li>
-                                <li>點擊「💾 儲存設定」</li>
-                                <li>點擊「🧪 測試通知」確認</li>
-                            </ol>
-                            <p style="color: #34d399; margin-top: 8px; font-size: 0.9em;">✨ 這樣所有 BOSS 的通知都會發送到這個頻道！</p>
-                        </div>
-
-                        <div style="background: #0a0a1a; padding: 15px; border-radius: 8px; margin: 15px 0;">
-                            <p style="color: #a78bfa; font-weight: bold; margin-bottom: 8px;">💜 進階：個別通知（需要精細管理）</p>
-                            <ol style="margin-left: 20px; color: #c4b5fd;">
-                                <li>點擊「📂 展開設定」按鈕</li>
-                                <li>為需要的 BOSS 單獨貼上 Webhook 網址</li>
-                                <li>點擊「💾 儲存所有設定」</li>
-                                <li>可以單獨測試每個 BOSS 的通知</li>
-                            </ol>
-                            <p style="color: #a78bfa; margin-top: 8px; font-size: 0.9em;">✨ 有設定個別的就發送到個別頻道，沒設定的會用統一通知！</p>
-                        </div>
-
-                        <p style="font-weight: bold; color: #a78bfa; margin-bottom: 10px;">🔹 Webhook 網址格式範例：</p>
-                        <div style="background: #0a0a1a; padding: 12px; border-radius: 5px; font-family: monospace; font-size: 0.85em; margin-bottom: 20px; overflow-x: auto;">
-                            https://discord.com/api/webhooks/1234567890123456789/AbCdEfGhIjKlMnOpQrStUvWxYz1234567890
-                        </div>
-
-                        <p style="font-weight: bold; color: #a78bfa; margin-bottom: 10px;">🔹 通知發送邏輯：</p>
-                        <div style="background: rgba(59, 130, 246, 0.1); padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-                            <p style="color: #60a5fa; margin-bottom: 10px;">當你記錄 BOSS 擊殺時，系統會：</p>
-                            <ol style="margin-left: 20px; color: #93c5fd;">
-                                <li>如果有設定該 BOSS 的<strong>個別 Webhook</strong> → 發送到個別頻道</li>
-                                <li>如果有設定<strong>統一 Webhook</strong> → 也發送到統一頻道</li>
-                                <li>兩種可以同時接收（互不影響）</li>
-                            </ol>
-                        </div>
-
-                        <p style="font-weight: bold; color: #a78bfa; margin-bottom: 10px;">🔹 通知內容說明：</p>
-                        <ul style="margin-left: 20px; margin-bottom: 20px;">
-                            <li>✅ 每次記錄 BOSS 擊殺時自動發送通知</li>
-                            <li>✅ 顯示 BOSS 名稱、頻道、地圖位置</li>
+                    <div style="background: rgba(16, 185, 129, 0.1); padding: 15px; border-radius: 8px; border-left: 4px solid #10b981; margin-top: 15px;">
+                        <p style="color: #34d399; font-weight: bold; margin-bottom: 8px;">✨ Discord 通知功能特色：</p>
+                        <ul style="margin-left: 20px; color: #6ee7b7;">
+                            <li>✅ 即時發送 BOSS 擊殺記錄</li>
+                            <li>✅ 顯示擊殺時間、頻道、地圖資訊</li>
                             <li>✅ 顯示預計重生時間範圍</li>
                             <li>✅ 使用 BOSS 專屬顏色的訊息嵌入</li>
                         </ul>
@@ -379,26 +342,57 @@
                     </div>
                 </div>
 
-                <div class="info-box" style="margin-top: 20px; background: rgba(255, 153, 0, 0.1); border-left-color: #ff9900;">
-                    <p style="color: #ffb347; font-weight: bold; margin-bottom: 10px;">📚 推薦工具</p>
-                    <p style="color: #cbd5e1; font-size: 0.95em; margin-bottom: 15px;">
-                        需要查詢 BOSS 或怪物資訊？推薦使用專業的 Artale 楓之谷怪物圖鑑！
+                <!-- 推薦工具區塊 - 整合版 -->
+                <div class="info-box" style="margin-top: 30px; background: rgba(255, 153, 0, 0.1); border-left-color: #ff9900;">
+                    <p style="color: #ffb347; font-weight: bold; margin-bottom: 10px; font-size: 1.1em;">
+                        🎮 推薦工具與資源
                     </p>
-                    <div style="text-align: center;">
-                        <a href="https://artalemaplestory.com/" target="_blank" rel="noopener noreferrer" 
-                           style="display: inline-flex; align-items: center; gap: 10px; 
-                                  padding: 12px 30px; background: linear-gradient(135deg, #ff9900 0%, #ff7700 100%); 
+                    <p style="color: #cbd5e1; font-size: 0.95em; margin-bottom: 20px;">
+                        需要查詢 BOSS 或怪物資訊？以下是精選的楓之谷相關實用工具！
+                    </p>
+                    
+                    <!-- 按鈕區域 -->
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; margin-bottom: 20px;">
+                        <!-- 怪物掉寶率網站 -->
+                        <a href="https://forum.gamer.com.tw/C.php?bsn=71458&snA=1641" target="_blank" rel="noopener noreferrer" 
+                           style="display: flex; align-items: center; gap: 12px; 
+                                  padding: 15px; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); 
                                   color: white; text-decoration: none; border-radius: 8px; 
-                                  font-weight: bold; font-size: 1.05em; 
+                                  font-weight: bold; font-size: 1em; 
+                                  transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);"
+                           onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 6px 25px rgba(59, 130, 246, 0.5)';"
+                           onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(59, 130, 246, 0.3)';">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="white" style="flex-shrink: 0;">
+                                <path d="M9 3v2H4v14h16V5h-5V3h7v18H2V3h7zm3 12l-4-4 4-4v3h4v2h-4v3z"/>
+                            </svg>
+                            <div style="text-align: left;">
+                                <div>怪物掉寶率網站</div>
+                                <div style="font-size: 0.75em; opacity: 0.9; font-weight: normal;">玩家共同蒐集的掉寶數據</div>
+                            </div>
+                        </a>
+
+                        <!-- Artale 怪物圖鑑 -->
+                        <a href="https://artalemaplestory.com/" target="_blank" rel="noopener noreferrer" 
+                           style="display: flex; align-items: center; gap: 12px; 
+                                  padding: 15px; background: linear-gradient(135deg, #ff9900 0%, #ff7700 100%); 
+                                  color: white; text-decoration: none; border-radius: 8px; 
+                                  font-weight: bold; font-size: 1em; 
                                   transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(255, 153, 0, 0.3);"
-                           onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 6px 25px rgba(255, 153, 0, 0.5)'; this.style.background='linear-gradient(135deg, #ffaa22 0%, #ff9900 100%)';"
-                           onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(255, 153, 0, 0.3)'; this.style.background='linear-gradient(135deg, #ff9900 0%, #ff7700 100%)';">
+                           onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 6px 25px rgba(255, 153, 0, 0.5)';"
+                           onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(255, 153, 0, 0.3)';">
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="white" style="flex-shrink: 0;">
                                 <path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/>
                             </svg>
-                            <span>Artale 楓之谷怪物圖鑑</span>
+                            <div style="text-align: left;">
+                                <div>Artale 怪物圖鑑</div>
+                                <div style="font-size: 0.75em; opacity: 0.9; font-weight: normal;">完整怪物資訊與 BOSS 攻略</div>
+                            </div>
                         </a>
                     </div>
+
+                    <p style="color: #94a3b8; font-size: 0.9em; font-style: italic; margin-top: 15px;">
+                        💭 如果你有其他推薦的工具或網站，歡迎透過上方「改善建議」告訴我們！
+                    </p>
                 </div>
             </div>
         </div>
