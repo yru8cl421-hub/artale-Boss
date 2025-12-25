@@ -1526,13 +1526,611 @@ function updateStatistics() {
     }).join('');
 }
 
-// 載入用戶 Webhook 設定
+// ========== 統一通知設定 ==========
+
+// 載入統一 Webhook
+function loadUnifiedWebhook() {
+    const saved = localStorage.getItem('unifiedWebhook');
+    if (saved) {
+        const input = document.getElementById('unified-webhook');
+        if (input) input.value = saved;
+        updateUnifiedWebhookStatus(true);
+    } else {
+        updateUnifiedWebhookStatus(false);
+    }
+    updateWebhookList();
+}
+
+// 更新統一 Webhook 狀態顯示
+function updateUnifiedWebhookStatus(hasWebhook) {
+    const statusDiv = document.getElementById('unified-webhook-status');
+    const statusText = document.getElementById('unified-webhook-status-text');
+    
+    if (!statusDiv || !statusText) return;
+    
+    statusDiv.style.display = 'block';
+    
+    if (hasWebhook) {
+        statusDiv.style.background = 'rgba(16, 185, 129, 0.2)';
+        statusDiv.style.border = '1px solid #10b981';
+        statusText.innerHTML = '✅ Webhook 已設定並保存';
+        statusText.style.color = '#10b981';
+    } else {
+        statusDiv.style.background = 'rgba(100, 116, 139, 0.2)';
+        statusDiv.style.border = '1px solid #64748b';
+        statusText.innerHTML = '⚙️ 尚未設定 Webhook';
+        statusText.style.color = '#94a3b8';
+    }
+}
+
+// 保存統一 Webhook
+function saveUnifiedWebhook() {
+    const input = document.getElementById('unified-webhook');
+    const url = input.value.trim();
+    
+    if (url && !url.startsWith('https://discord.com/api/webhooks/') && !url.startsWith('https://discordapp.com/api/webhooks/')) {
+        showNotification('請輸入有效的 Discord Webhook URL', 'error');
+        updateUnifiedWebhookStatus(false);
+        return;
+    }
+    
+    localStorage.setItem('unifiedWebhook', url);
+    
+    if (url) {
+        showNotification('統一通知 Webhook 已保存 ✅', 'success');
+        updateUnifiedWebhookStatus(true);
+    } else {
+        updateUnifiedWebhookStatus(false);
+    }
+    
+    updateWebhookList();
+}
+
+// 測試統一 Webhook
+async function testUnifiedWebhook() {
+    const input = document.getElementById('unified-webhook');
+    const url = input.value.trim();
+    
+    if (!url) {
+        showNotification('請先輸入 Webhook URL', 'warning');
+        return;
+    }
+    
+    if (!url.startsWith('https://discord.com/api/webhooks/') && !url.startsWith('https://discordapp.com/api/webhooks/')) {
+        showNotification('請輸入有效的 Discord Webhook URL', 'error');
+        return;
+    }
+    
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                embeds: [{
+                    title: '🧪 統一通知測試',
+                    description: '這是統一通知的測試訊息，如果您看到這則訊息，表示設定成功！',
+                    color: 0x00ff99,
+                    timestamp: new Date().toISOString(),
+                    footer: { text: '楓之谷BOSS重生時間系統 - 統一通知' }
+                }]
+            })
+        });
+        
+        if (response.ok) {
+            showNotification('✅ 測試成功！請檢查您的 Discord 頻道', 'success');
+        } else {
+            showNotification('❌ 測試失敗，請檢查 Webhook URL 是否正確', 'error');
+        }
+    } catch (error) {
+        console.error('測試失敗:', error);
+        showNotification('❌ 測試失敗，請檢查網路連線', 'error');
+    }
+}
+
+// 清除統一 Webhook
+function clearUnifiedWebhook() {
+    if (confirm('確定要清除統一通知設定嗎？')) {
+        localStorage.removeItem('unifiedWebhook');
+        const input = document.getElementById('unified-webhook');
+        if (input) input.value = '';
+        showNotification('統一通知設定已清除', 'success');
+        updateUnifiedWebhookStatus(false);
+        updateWebhookList();
+    }
+}
+
+// ========== 個別 BOSS 通知設定 ==========
+
+// 載入個別 BOSS Webhook
+function loadBossWebhook() {
+    const select = document.getElementById('boss-webhook-select');
+    const bossName = select.value;
+    const configDiv = document.getElementById('boss-webhook-config');
+    const urlInput = document.getElementById('boss-webhook-url');
+    
+    if (!bossName) {
+        configDiv.style.display = 'none';
+        return;
+    }
+    
+    configDiv.style.display = 'block';
+    
+    const individualWebhooks = loadIndividualWebhooks();
+    urlInput.value = individualWebhooks[bossName] || '';
+}
+
+// 保存個別 BOSS Webhook
+function saveBossWebhook() {
+    const select = document.getElementById('boss-webhook-select');
+    const bossName = select.value;
+    const urlInput = document.getElementById('boss-webhook-url');
+    const url = urlInput.value.trim();
+    
+    if (!bossName) {
+        showNotification('請先選擇 BOSS', 'warning');
+        return;
+    }
+    
+    if (url && !url.startsWith('https://discord.com/api/webhooks/') && !url.startsWith('https://discordapp.com/api/webhooks/')) {
+        showNotification('請輸入有效的 Discord Webhook URL', 'error');
+        return;
+    }
+    
+    const individualWebhooks = loadIndividualWebhooks();
+    
+    if (url) {
+        individualWebhooks[bossName] = url;
+        showNotification(`${bossName} 的 Webhook 已保存 ✅`, 'success');
+    } else {
+        delete individualWebhooks[bossName];
+        showNotification(`${bossName} 的 Webhook 已清除`, 'success');
+    }
+    
+    saveIndividualWebhooks(individualWebhooks);
+    updateWebhookList();
+}
+
+// 測試個別 BOSS Webhook
+async function testBossWebhook() {
+    const select = document.getElementById('boss-webhook-select');
+    const bossName = select.value;
+    const urlInput = document.getElementById('boss-webhook-url');
+    const url = urlInput.value.trim();
+    
+    if (!bossName) {
+        showNotification('請先選擇 BOSS', 'warning');
+        return;
+    }
+    
+    if (!url) {
+        showNotification('請先輸入 Webhook URL', 'warning');
+        return;
+    }
+    
+    if (!url.startsWith('https://discord.com/api/webhooks/') && !url.startsWith('https://discordapp.com/api/webhooks/')) {
+        showNotification('請輸入有效的 Discord Webhook URL', 'error');
+        return;
+    }
+    
+    try {
+        const bossData = BOSS_DATA[bossName];
+        const color = parseInt(bossData.color.replace('#', ''), 16);
+        
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                embeds: [{
+                    title: `🧪 ${bossName} 專屬通知測試`,
+                    description: `這是 **${bossName}** 的測試訊息，如果您看到這則訊息，表示設定成功！`,
+                    color: color,
+                    fields: [
+                        { name: '地圖位置', value: bossData.maps.join('、'), inline: false },
+                        { name: '重生時間', value: `${bossData.min} ~ ${bossData.max} 分鐘`, inline: false }
+                    ],
+                    timestamp: new Date().toISOString(),
+                    footer: { text: `楓之谷BOSS重生時間系統 - ${bossName} 專屬通知` }
+                }]
+            })
+        });
+        
+        if (response.ok) {
+            showNotification('✅ 測試成功！請檢查您的 Discord 頻道', 'success');
+        } else {
+            showNotification('❌ 測試失敗，請檢查 Webhook URL 是否正確', 'error');
+        }
+    } catch (error) {
+        console.error('測試失敗:', error);
+        showNotification('❌ 測試失敗，請檢查網路連線', 'error');
+    }
+}
+
+// 清除個別 BOSS Webhook
+function clearBossWebhook() {
+    const select = document.getElementById('boss-webhook-select');
+    const bossName = select.value;
+    
+    if (!bossName) {
+        showNotification('請先選擇 BOSS', 'warning');
+        return;
+    }
+    
+    if (confirm(`確定要清除 ${bossName} 的 Webhook 設定嗎？`)) {
+        const individualWebhooks = loadIndividualWebhooks();
+        delete individualWebhooks[bossName];
+        saveIndividualWebhooks(individualWebhooks);
+        
+        const urlInput = document.getElementById('boss-webhook-url');
+        if (urlInput) urlInput.value = '';
+        
+        showNotification(`${bossName} 的 Webhook 設定已清除`, 'success');
+        updateWebhookList();
+    }
+}
+
+// 更新 Webhook 列表顯示
+function updateWebhookList() {
+    const container = document.getElementById('webhook-list');
+    if (!container) return;
+    
+    const unifiedWebhook = localStorage.getItem('unifiedWebhook');
+    const individualWebhooks = loadIndividualWebhooks();
+    
+    let html = '';
+    
+    // 統一通知狀態
+    if (unifiedWebhook) {
+        html += `
+            <div style="background: rgba(16, 185, 129, 0.1); padding: 15px; border-radius: 8px; border-left: 4px solid #10b981; margin-bottom: 15px;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <p style="color: #10b981; font-weight: bold; margin-bottom: 5px;">✅ 統一通知</p>
+                        <p style="color: #a0a0c0; font-size: 0.9em;">所有 BOSS 擊殺都會發送到此 Webhook</p>
+                    </div>
+                    <span style="color: #10b981; font-size: 2em;">📢</span>
+                </div>
+            </div>
+        `;
+    } else {
+        html += `
+            <div style="background: rgba(239, 68, 68, 0.1); padding: 15px; border-radius: 8px; border-left: 4px solid #ef4444; margin-bottom: 15px;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <p style="color: #ef4444; font-weight: bold; margin-bottom: 5px;">❌ 統一通知未設定</p>
+                        <p style="color: #a0a0c0; font-size: 0.9em;">請在上方設定統一通知 Webhook</p>
+                    </div>
+                    <span style="color: #ef4444; font-size: 2em;">📢</span>
+                </div>
+            </div>
+        `;
+    }
+    
+    // 個別 BOSS 通知列表
+    const individualCount = Object.keys(individualWebhooks).length;
+    if (individualCount > 0) {
+        html += `
+            <div style="background: rgba(168, 85, 247, 0.1); padding: 15px; border-radius: 8px; border-left: 4px solid #a855f7; margin-bottom: 10px;">
+                <p style="color: #a855f7; font-weight: bold; margin-bottom: 10px;">🎯 已設定個別通知的 BOSS (${individualCount})</p>
+                <div style="display: grid; gap: 8px;">
+        `;
+        
+        for (const [bossName, webhookUrl] of Object.entries(individualWebhooks)) {
+            const bossData = BOSS_DATA[bossName];
+            html += `
+                <div style="background: rgba(0, 0, 0, 0.3); padding: 10px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center;">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        ${bossData.image ? `<img src="${bossData.image}" alt="${bossName}" style="width: 32px; height: 32px; object-fit: contain;">` : ''}
+                        <span style="color: ${bossData.color}; font-weight: bold;">${bossName}</span>
+                    </div>
+                    <span style="color: #10b981;">✅</span>
+                </div>
+            `;
+        }
+        
+        html += `
+                </div>
+            </div>
+        `;
+    } else {
+        html += `
+            <div style="background: rgba(100, 116, 139, 0.1); padding: 15px; border-radius: 8px; border-left: 4px solid #64748b;">
+                <p style="color: #94a3b8; font-weight: bold; margin-bottom: 5px;">🎯 個別通知</p>
+                <p style="color: #a0a0c0; font-size: 0.9em;">尚未設定任何個別 BOSS 通知</p>
+            </div>
+        `;
+    }
+    
+    container.innerHTML = html;
+}
+
+// 載入用戶 Webhook 設定 (更新以支持新介面)
 function loadUserWebhook() {
+    // 載入統一通知設定
+    loadUnifiedWebhook();
+    
+    // 生成所有 BOSS 的 Webhook 設定卡片
+    generateAllBossWebhookCards();
+    
+    // 保留舊版 webhook-url 的兼容性
     const saved = localStorage.getItem('userWebhook');
     if (saved) {
         const input = document.getElementById('webhook-url');
         if (input) input.value = saved;
         updateWebhookStatus();
+    }
+}
+
+// 展開/收起狀態
+let allBossWebhooksExpanded = false;
+
+// 切換展開/收起所有 BOSS Webhook
+function toggleAllBossWebhooks() {
+    allBossWebhooksExpanded = !allBossWebhooksExpanded;
+    const button = document.getElementById('toggle-all-boss-webhooks');
+    
+    if (allBossWebhooksExpanded) {
+        button.innerHTML = '📂 收起全部';
+        button.style.background = 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)';
+        button.style.borderColor = '#ef4444';
+    } else {
+        button.innerHTML = '📋 展開全部';
+        button.style.background = 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)';
+        button.style.borderColor = '#8b5cf6';
+    }
+    
+    // 更新所有卡片的展開狀態
+    const allCards = document.querySelectorAll('.boss-webhook-card-content');
+    allCards.forEach(card => {
+        card.style.display = allBossWebhooksExpanded ? 'block' : 'none';
+    });
+}
+
+// 切換單個 BOSS Webhook 卡片
+function toggleBossWebhookCard(bossName) {
+    const content = document.getElementById(`boss-webhook-content-${bossName.replace(/\s/g, '-')}`);
+    const icon = document.getElementById(`boss-webhook-icon-${bossName.replace(/\s/g, '-')}`);
+    
+    if (content.style.display === 'none' || content.style.display === '') {
+        content.style.display = 'block';
+        icon.textContent = '▼';
+    } else {
+        content.style.display = 'none';
+        icon.textContent = '▶';
+    }
+}
+
+// 生成所有 BOSS 的 Webhook 設定卡片
+function generateAllBossWebhookCards() {
+    const container = document.getElementById('all-boss-webhooks-container');
+    if (!container) return;
+    
+    const individualWebhooks = loadIndividualWebhooks();
+    let html = '';
+    
+    for (const [bossName, bossData] of Object.entries(BOSS_DATA)) {
+        const webhookUrl = individualWebhooks[bossName] || '';
+        const hasWebhook = webhookUrl !== '';
+        const statusColor = hasWebhook ? '#10b981' : '#64748b';
+        const statusText = hasWebhook ? '✅ 已設定' : '⚙️ 未設定';
+        const cardId = bossName.replace(/\s/g, '-');
+        
+        html += `
+            <div class="boss-webhook-card" style="margin-bottom: 12px; border-radius: 12px; overflow: hidden; 
+                 background: linear-gradient(135deg, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.3) 100%); 
+                 border: 2px solid ${hasWebhook ? '#10b981' : '#374151'};
+                 box-shadow: 0 4px 15px ${hasWebhook ? 'rgba(16, 185, 129, 0.2)' : 'rgba(0, 0, 0, 0.3)'};
+                 transition: all 0.3s ease;">
+                
+                <!-- 卡片標題 (可點擊展開/收起) -->
+                <div onclick="toggleBossWebhookCard('${bossName}')" 
+                     style="padding: 15px 18px; cursor: pointer; display: flex; justify-content: space-between; 
+                            align-items: center; 
+                            background: ${hasWebhook ? 'linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(5, 150, 105, 0.1) 100%)' : 'linear-gradient(135deg, rgba(55, 65, 81, 0.3) 0%, rgba(31, 41, 55, 0.2) 100%)'}; 
+                            transition: all 0.3s ease;"
+                     onmouseover="this.style.background='${hasWebhook ? 'linear-gradient(135deg, rgba(16, 185, 129, 0.25) 0%, rgba(5, 150, 105, 0.15) 100%)' : 'linear-gradient(135deg, rgba(75, 85, 99, 0.4) 0%, rgba(55, 65, 81, 0.3) 100%)'}'"
+                     onmouseout="this.style.background='${hasWebhook ? 'linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(5, 150, 105, 0.1) 100%)' : 'linear-gradient(135deg, rgba(55, 65, 81, 0.3) 0%, rgba(31, 41, 55, 0.2) 100%)'}'">
+                    
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        ${bossData.image ? `<img src="${bossData.image}" alt="${bossName}" style="width: 48px; height: 48px; object-fit: contain; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));">` : ''}
+                        <div>
+                            <div style="color: ${bossData.color}; font-weight: bold; font-size: 1.15em; 
+                                        text-shadow: 0 2px 4px rgba(0,0,0,0.5);">${bossName}</div>
+                            <div style="color: #94a3b8; font-size: 0.85em; margin-top: 2px;">
+                                ⏱️ 重生: ${bossData.min}~${bossData.max} 分鐘
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <span style="color: ${statusColor}; font-weight: bold; font-size: 0.95em; 
+                                     padding: 4px 12px; background: ${hasWebhook ? 'rgba(16, 185, 129, 0.2)' : 'rgba(100, 116, 139, 0.2)'};
+                                     border-radius: 20px; border: 1px solid ${statusColor};">
+                            ${statusText}
+                        </span>
+                        <span id="boss-webhook-icon-${cardId}" 
+                              style="color: #a0a0c0; font-size: 1em; font-weight: bold;">▶</span>
+                    </div>
+                </div>
+                
+                <!-- 卡片內容 (預設收起) -->
+                <div id="boss-webhook-content-${cardId}" class="boss-webhook-card-content" 
+                     style="display: none; padding: 20px; border-top: 2px solid ${hasWebhook ? 'rgba(16, 185, 129, 0.3)' : '#374151'};
+                            background: linear-gradient(135deg, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0.4) 100%);">
+                    
+                    <!-- 美化的 Webhook URL 輸入區域 -->
+                    <div style="margin-bottom: 15px;">
+                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px;">
+                            <span style="font-size: 1.2em;">🔗</span>
+                            <label style="color: #cbd5e1; font-weight: bold; font-size: 0.95em;">
+                                Discord Webhook URL
+                            </label>
+                        </div>
+                        
+                        <div style="position: relative;">
+                            <input type="url" 
+                                   id="individual-webhook-${cardId}" 
+                                   value="${webhookUrl}"
+                                   placeholder="https://discord.com/api/webhooks/..."
+                                   style="width: 100%; padding: 12px 18px; padding-left: 45px;
+                                          background: rgba(10, 10, 26, 0.8); 
+                                          border: 2px solid ${hasWebhook ? '#10b981' : '#4b5563'}; 
+                                          border-radius: 8px; 
+                                          color: #ffffff; 
+                                          font-size: 0.9em;
+                                          font-family: 'Courier New', monospace;
+                                          transition: all 0.3s ease;
+                                          box-shadow: 0 2px 8px ${hasWebhook ? 'rgba(16, 185, 129, 0.2)' : 'rgba(0, 0, 0, 0.3)'};"
+                                   onfocus="this.style.borderColor='${bossData.color}'; this.style.boxShadow='0 0 0 3px ${bossData.color}33';"
+                                   onblur="this.style.borderColor='${hasWebhook ? '#10b981' : '#4b5563'}'; this.style.boxShadow='0 2px 8px ${hasWebhook ? 'rgba(16, 185, 129, 0.2)' : 'rgba(0, 0, 0, 0.3)'}';">
+                            <span style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); 
+                                         color: ${hasWebhook ? '#10b981' : '#6b7280'}; font-size: 1.1em;">🌐</span>
+                        </div>
+                    </div>
+                    
+                    <!-- 操作按鈕 -->
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 15px;">
+                        <button type="button" onclick="saveIndividualBossWebhook('${bossName}')"
+                                style="flex: 1; min-width: 100px; padding: 10px 16px; 
+                                       background: linear-gradient(135deg, #10b981 0%, #059669 100%); 
+                                       border: 2px solid #10b981; border-radius: 8px; color: white; cursor: pointer;
+                                       font-weight: bold; transition: all 0.3s ease;
+                                       box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);"
+                                onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(16, 185, 129, 0.4)';"
+                                onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(16, 185, 129, 0.3)';">
+                            💾 儲存
+                        </button>
+                        <button type="button" onclick="testIndividualBossWebhook('${bossName}')"
+                                style="flex: 1; min-width: 100px; padding: 10px 16px; 
+                                       background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); 
+                                       border: 2px solid #3b82f6; border-radius: 8px; color: white; cursor: pointer;
+                                       font-weight: bold; transition: all 0.3s ease;
+                                       box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);"
+                                onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(59, 130, 246, 0.4)';"
+                                onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(59, 130, 246, 0.3)';">
+                            🧪 測試
+                        </button>
+                        <button type="button" onclick="clearIndividualBossWebhook('${bossName}')"
+                                style="flex: 1; min-width: 100px; padding: 10px 16px; 
+                                       background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); 
+                                       border: 2px solid #ef4444; border-radius: 8px; color: white; cursor: pointer;
+                                       font-weight: bold; transition: all 0.3s ease;
+                                       box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);"
+                                onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(239, 68, 68, 0.4)';"
+                                onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(239, 68, 68, 0.3)';">
+                            🗑️ 清除
+                        </button>
+                    </div>
+                    
+                    <!-- BOSS 資訊卡片 -->
+                    <div style="padding: 12px 15px; 
+                                background: linear-gradient(135deg, ${bossData.color}15 0%, ${bossData.color}08 100%); 
+                                border-radius: 8px; border-left: 4px solid ${bossData.color};
+                                box-shadow: 0 2px 8px ${bossData.color}20;">
+                        <p style="color: ${bossData.color}; font-size: 0.9em; margin: 0; font-weight: 500;">
+                            📍 地圖位置: ${bossData.maps.join(' / ')}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+    
+    container.innerHTML = html;
+}
+
+// 保存個別 BOSS Webhook (新版 - 用於全部展開的卡片)
+function saveIndividualBossWebhook(bossName) {
+    const cardId = bossName.replace(/\s/g, '-');
+    const input = document.getElementById(`individual-webhook-${cardId}`);
+    const url = input.value.trim();
+    
+    if (url && !url.startsWith('https://discord.com/api/webhooks/') && !url.startsWith('https://discordapp.com/api/webhooks/')) {
+        showNotification('請輸入有效的 Discord Webhook URL', 'error');
+        return;
+    }
+    
+    const individualWebhooks = loadIndividualWebhooks();
+    
+    if (url) {
+        individualWebhooks[bossName] = url;
+        showNotification(`${bossName} 的 Webhook 已保存 ✅`, 'success');
+    } else {
+        delete individualWebhooks[bossName];
+        showNotification(`${bossName} 的 Webhook 已清除`, 'success');
+    }
+    
+    saveIndividualWebhooks(individualWebhooks);
+    
+    // 重新生成卡片以更新狀態
+    generateAllBossWebhookCards();
+    updateWebhookList();
+}
+
+// 測試個別 BOSS Webhook (新版)
+async function testIndividualBossWebhook(bossName) {
+    const cardId = bossName.replace(/\s/g, '-');
+    const input = document.getElementById(`individual-webhook-${cardId}`);
+    const url = input.value.trim();
+    
+    if (!url) {
+        showNotification(`請先輸入 ${bossName} 的 Webhook URL`, 'warning');
+        return;
+    }
+    
+    if (!url.startsWith('https://discord.com/api/webhooks/') && !url.startsWith('https://discordapp.com/api/webhooks/')) {
+        showNotification('請輸入有效的 Discord Webhook URL', 'error');
+        return;
+    }
+    
+    try {
+        const bossData = BOSS_DATA[bossName];
+        const color = parseInt(bossData.color.replace('#', ''), 16);
+        
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                embeds: [{
+                    title: `🧪 ${bossName} 專屬通知測試`,
+                    description: `這是 **${bossName}** 的測試訊息，如果您看到這則訊息，表示設定成功！`,
+                    color: color,
+                    fields: [
+                        { name: '地圖位置', value: bossData.maps.join('、'), inline: false },
+                        { name: '重生時間', value: `${bossData.min} ~ ${bossData.max} 分鐘`, inline: false }
+                    ],
+                    timestamp: new Date().toISOString(),
+                    footer: { text: `楓之谷BOSS重生時間系統 - ${bossName} 專屬通知` }
+                }]
+            })
+        });
+        
+        if (response.ok) {
+            showNotification(`✅ ${bossName} 測試成功！請檢查您的 Discord 頻道`, 'success');
+        } else {
+            showNotification('❌ 測試失敗，請檢查 Webhook URL 是否正確', 'error');
+        }
+    } catch (error) {
+        console.error('測試失敗:', error);
+        showNotification('❌ 測試失敗，請檢查網路連線', 'error');
+    }
+}
+
+// 清除個別 BOSS Webhook (新版)
+function clearIndividualBossWebhook(bossName) {
+    if (confirm(`確定要清除 ${bossName} 的 Webhook 設定嗎？`)) {
+        const individualWebhooks = loadIndividualWebhooks();
+        delete individualWebhooks[bossName];
+        saveIndividualWebhooks(individualWebhooks);
+        
+        const cardId = bossName.replace(/\s/g, '-');
+        const input = document.getElementById(`individual-webhook-${cardId}`);
+        if (input) input.value = '';
+        
+        showNotification(`${bossName} 的 Webhook 設定已清除`, 'success');
+        
+        // 重新生成卡片以更新狀態
+        generateAllBossWebhookCards();
+        updateWebhookList();
     }
 }
 
@@ -1605,10 +2203,18 @@ async function testUserWebhook() {
     }
 }
 
-// 發送用戶 Webhook 通知
+// 發送用戶 Webhook 通知 (支持統一通知)
 async function sendUserWebhookNotification(record) {
-    const webhookUrl = localStorage.getItem('userWebhook');
+    // 優先使用新的統一通知
+    let webhookUrl = localStorage.getItem('unifiedWebhook');
+    
+    // 如果沒有統一通知，檢查是否有舊的 userWebhook (向下兼容)
+    if (!webhookUrl) {
+        webhookUrl = localStorage.getItem('userWebhook');
+    }
+    
     if (!webhookUrl) return;
+    
     const deathTime = new Date(record.deathTime);
     const respawnMin = new Date(record.respawnMin);
     const respawnMax = new Date(record.respawnMax);
@@ -1622,7 +2228,7 @@ async function sendUserWebhookNotification(record) {
             { name: '⏰ 預計重生時間', value: `**${formatDate(respawnMin)} ~ ${formatDate(respawnMax)}**`, inline: false }
         ],
         timestamp: new Date().toISOString(),
-        footer: { text: '楓之谷BOSS重生時間系統' }
+        footer: { text: '楓之谷BOSS重生時間系統 - 統一通知' }
     };
     try {
         await fetch(webhookUrl, {
@@ -1631,7 +2237,7 @@ async function sendUserWebhookNotification(record) {
             body: JSON.stringify({ embeds: [embed] })
         });
     } catch (error) {
-        console.error('用戶 Webhook 發送失敗:', error);
+        console.error('統一 Webhook 發送失敗:', error);
     }
 }
 
