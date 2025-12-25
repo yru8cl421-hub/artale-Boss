@@ -136,29 +136,67 @@
                 
                 <div class="notification-section">
                     <h3>📢 統一通知設定 (推薦)</h3>
-                    <p style="color: #a0a0c0; margin-bottom: 15px;">
+                    <p style="color: #a0a0c0; margin-bottom: 20px;">
                         設定一個 Discord Webhook，所有 BOSS 擊殺都會發送到同一個頻道。適合個人使用或團隊協作。
                     </p>
                     
-                    <div class="input-group">
-                        <div class="input-field">
-                            <label>Discord Webhook URL:</label>
+                    <!-- 美化的 Webhook URL 輸入區域 -->
+                    <div style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%); 
+                                padding: 20px; border-radius: 12px; border: 2px solid #6366f1; margin-bottom: 20px;">
+                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
+                            <span style="font-size: 1.5em;">🔗</span>
+                            <label style="color: #c7d2fe; font-weight: bold; font-size: 1.05em;">Discord Webhook URL</label>
+                        </div>
+                        
+                        <div style="position: relative;">
                             <input type="url" id="unified-webhook" 
-                                   placeholder="https://discord.com/api/webhooks/..."
-                                   onchange="saveUnifiedWebhook()">
+                                   placeholder="請貼上您的 Discord Webhook URL..."
+                                   onchange="saveUnifiedWebhook()"
+                                   style="width: 100%; padding: 14px 20px; padding-left: 50px;
+                                          background: rgba(10, 10, 26, 0.8); 
+                                          border: 2px solid #4f46e5; 
+                                          border-radius: 10px; 
+                                          color: #ffffff; 
+                                          font-size: 0.95em;
+                                          font-family: 'Courier New', monospace;
+                                          transition: all 0.3s ease;
+                                          box-shadow: 0 4px 15px rgba(99, 102, 241, 0.2);">
+                            <span style="position: absolute; left: 18px; top: 50%; transform: translateY(-50%); 
+                                         color: #818cf8; font-size: 1.2em;">🌐</span>
+                        </div>
+                        
+                        <div id="unified-webhook-status" style="margin-top: 10px; padding: 8px 12px; 
+                             border-radius: 6px; font-size: 0.9em; display: none;">
+                            <span id="unified-webhook-status-text"></span>
                         </div>
                     </div>
 
-                    <div class="button-group">
-                        <button type="button" onclick="testUnifiedWebhook()">
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <button type="button" onclick="testUnifiedWebhook()"
+                                style="flex: 1; min-width: 150px; padding: 12px 20px; 
+                                       background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); 
+                                       border: 2px solid #3b82f6; border-radius: 10px; 
+                                       color: white; font-weight: bold; font-size: 1em;
+                                       cursor: pointer; transition: all 0.3s ease;
+                                       box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);"
+                                onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(59, 130, 246, 0.4)';"
+                                onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(59, 130, 246, 0.3)';">
                             🧪 測試通知
                         </button>
-                        <button type="button" onclick="clearUnifiedWebhook()" class="danger">
+                        <button type="button" onclick="clearUnifiedWebhook()"
+                                style="flex: 1; min-width: 150px; padding: 12px 20px; 
+                                       background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); 
+                                       border: 2px solid #ef4444; border-radius: 10px; 
+                                       color: white; font-weight: bold; font-size: 1em;
+                                       cursor: pointer; transition: all 0.3s ease;
+                                       box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);"
+                                onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(239, 68, 68, 0.4)';"
+                                onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(239, 68, 68, 0.3)';">
                             🗑️ 清除設定
                         </button>
                     </div>
 
-                    <div class="info-box">
+                    <div class="info-box" style="margin-top: 20px;">
                         <p style="color: #10b981; font-weight: bold;">✅ 啟用統一通知的優點：</p>
                         <ul style="margin-left: 20px; color: #a0a0c0;">
                             <li>所有 BOSS 擊殺記錄自動發送到同一個頻道</li>
@@ -170,40 +208,22 @@
                 </div>
 
                 <div class="notification-section">
-                    <h3>🎯 個別 BOSS 通知設定 (進階)</h3>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <h3 style="margin: 0;">🎯 個別 BOSS 通知設定 (進階)</h3>
+                        <button type="button" id="toggle-all-boss-webhooks" onclick="toggleAllBossWebhooks()" 
+                                style="padding: 8px 16px; background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); 
+                                       border: 1px solid #8b5cf6; border-radius: 6px; color: white; cursor: pointer;
+                                       font-weight: bold; transition: all 0.3s ease;">
+                            📋 展開全部
+                        </button>
+                    </div>
                     <p style="color: #a0a0c0; margin-bottom: 15px;">
                         為特定 BOSS 設定專屬的 Discord Webhook。這些設定會覆蓋統一通知（但兩個都會發送，如果都有設定）。
                     </p>
                     
-                    <div class="input-group">
-                        <div class="input-field">
-                            <label>選擇 BOSS:</label>
-                            <select id="boss-webhook-select" onchange="loadBossWebhook()">
-                                <option value="">請選擇 BOSS...</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div id="boss-webhook-config" style="display: none;">
-                        <div class="input-group">
-                            <div class="input-field">
-                                <label>Discord Webhook URL:</label>
-                                <input type="url" id="boss-webhook-url" 
-                                       placeholder="https://discord.com/api/webhooks/...">
-                            </div>
-                        </div>
-
-                        <div class="button-group">
-                            <button type="button" onclick="saveBossWebhook()">
-                                💾 儲存設定
-                            </button>
-                            <button type="button" onclick="testBossWebhook()">
-                                🧪 測試通知
-                            </button>
-                            <button type="button" onclick="clearBossWebhook()" class="danger">
-                                🗑️ 清除此 BOSS 設定
-                            </button>
-                        </div>
+                    <!-- 所有 BOSS 的 Webhook 設定列表 -->
+                    <div id="all-boss-webhooks-container">
+                        <!-- 動態生成所有 BOSS 的設定卡片 -->
                     </div>
 
                     <div class="info-box" style="margin-top: 15px;">
