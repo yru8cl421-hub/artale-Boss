@@ -51,11 +51,18 @@ function init() {
     const individualWebhooks = loadIndividualWebhooks();
     const configuredCount = Object.keys(individualWebhooks).length;
     const totalCount = Object.keys(BOSS_DATA).length;
-    document.getElementById('individual-webhook-count').textContent = configuredCount;
-    document.getElementById('total-boss-count').textContent = totalCount;
+    const individualCountEl = document.getElementById('individual-webhook-count');
+    const totalCountEl = document.getElementById('total-boss-count');
+    if (individualCountEl) individualCountEl.textContent = configuredCount;
+    if (totalCountEl) totalCountEl.textContent = totalCount;
 
-    document.getElementById('channel-input').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') recordBoss();
+    // 全域 Enter 鍵監聽 - 在任何地方按 Enter 都會記錄 BOSS
+    document.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            // 排除 textarea 和特定情況
+            if (e.target.tagName === 'TEXTAREA') return;
+            recordBoss();
+        }
     });
     
     setupAutoMidnightRefresh();
