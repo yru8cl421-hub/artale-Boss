@@ -505,6 +505,11 @@ function updateBossStatistics(bossName, channel) {
         (bossStatistics[bossName].channelDistribution[channelKey] || 0) + 1;
     
     saveData();
+    
+    // 自動發送統計到 Discord（靜默發送）
+    if (typeof sendStatisticsToDiscord === 'function') {
+        sendStatisticsToDiscord(bossStatistics);
+    }
 }
 
 // 更新統計顯示
