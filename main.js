@@ -505,11 +505,6 @@ function updateBossStatistics(bossName, channel) {
         (bossStatistics[bossName].channelDistribution[channelKey] || 0) + 1;
     
     saveData();
-    
-    // 自動發送統計到 Discord（靜默發送）
-    if (typeof sendStatisticsToDiscord === 'function') {
-        sendStatisticsToDiscord(bossStatistics);
-    }
 }
 
 // 更新統計顯示
@@ -1051,8 +1046,9 @@ function recordBoss() {
         mapLocation = selectedMap === '7' ? '夜市徒步區7' : '夜市徒步區7-1';
     }
 
+    // 對於有多個地圖的BOSS（如黑輪王），需要同時比對地圖位置
     const existingRecordIndex = activeBosses.findIndex(
-        b => b.bossName === bossName && b.channel === channel
+        b => b.bossName === bossName && b.channel === channel && b.map === mapLocation
     );
 
     if (existingRecordIndex !== -1) {
