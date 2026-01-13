@@ -1052,7 +1052,7 @@ function recordBoss() {
     }
 
     const existingRecordIndex = activeBosses.findIndex(
-        b => b.bossName === bossName && b.channel === channel
+        b => b.bossName === bossName && b.channel === channel && b.map === mapLocation
     );
 
     if (existingRecordIndex !== -1) {
