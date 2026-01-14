@@ -287,11 +287,11 @@ function updateRecordDisplay() {
                             </div>
                             <div class="boss-info-item">
                                 <span style="color: #64748b;">|</span>
-                                <span>⚔️ 擊殺: ${killTime}</span>
+                                <span>⚔️ ${killTime}</span>
                             </div>
                             <div class="boss-info-item">
                                 <span style="color: #64748b;">|</span>
-                                <span>🕐 重生: ${respawnTimeRange}</span>
+                                <span>🕐 ${respawnTimeRange}</span>
                             </div>
                             ${patrolInfo}
                             <div class="boss-info-item">
