@@ -254,6 +254,9 @@ function updateRecordDisplay() {
         const mapInfo = record.map ? ` | ${record.map}` : '';
         const killTime = formatDateTime(new Date(record.deathTime));
         
+        // 可能重生時間範圍
+        const respawnTimeRange = `${formatDateTime(respawnMin)} ~ ${formatDateTime(respawnMax)}`;
+        
         let patrolInfo = '';
         if (record.lastPatrolTime) {
             const diff = Math.floor((now - new Date(record.lastPatrolTime)) / 60000);
@@ -285,6 +288,10 @@ function updateRecordDisplay() {
                             <div class="boss-info-item">
                                 <span style="color: #64748b;">|</span>
                                 <span>⚔️ 擊殺: ${killTime}</span>
+                            </div>
+                            <div class="boss-info-item">
+                                <span style="color: #64748b;">|</span>
+                                <span>🕐 重生: ${respawnTimeRange}</span>
                             </div>
                             ${patrolInfo}
                             <div class="boss-info-item">
