@@ -25,4 +25,7 @@ const BOSS_DATA = {
     "喵怪仙人": { min: 150, max: 170, maps: ["喵怪仙人的領域"], color: "#ffb6c1", image: "images/喵怪仙人.gif" },
     "巨大深山人蔘": { min: 60, max: 135, maps: ["豐饒的藥草田"], color: "#ffd700", image: "images/巨大深山人蔘.gif" },
     "海怒斯": { min: 180, max: 300, maps: ["海怒斯洞穴"], color: "#1e90ff", image: "images/海怒斯.gif" }
+    "噴火龍": { min: 60, max: 60, maps: ["海怒斯洞穴"], color: "#1e90ff", image: "images/噴火龍.gif" }
+    "格瑞芬多": { min: 60, max: 60, maps: ["海怒斯洞穴"], color: "#1e90ff", image: "images/格瑞芬多.gif" }
+    "寒霜冰龍": { min: 240, max: 720, maps: ["海怒斯洞穴"], color: "#1e90ff", image: "images/寒霜冰龍.gif" }
 };
