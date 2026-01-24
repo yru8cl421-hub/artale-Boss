@@ -6,7 +6,7 @@ const BOSS_DATA = {
     "巨居蟹": { min: 45, max: 60, maps: ["海龜沙灘"], color: "#ff9800", image: "images/巨居蟹.gif" },
     "殭屍猴王": { min: 38, max: 45, maps: ["巫婆森林1"], color: "#795548", image: "images/殭屍猴王.gif" },
     "蘑菇王": { min: 210, max: 240, maps: ["鋼之肥肥公園3"], color: "#ff5722", image: "images/蘑菇王.gif" },
-    "藍色蘑菇王": { min: 720, max: 1880, maps: ["天皇殿堂"], color: "#4169e1", image: "images/藍色蘑菇王.gif" },
+    "藍色蘑菇王": { min: 1000, max: 1880, maps: ["天皇殿堂"], color: "#4169e1", image: "images/藍色蘑菇王.gif" },
     "沼澤巨鱷": { min: 90, max: 105, maps: ["危險的黑鱷魚1"], color: "#4caf50", image: "images/沼澤巨鱷.gif" },
     "殭屍蘑菇王": { min: 195, max: 225, maps: ["蘑菇王之墓"], color: "#e91e63", image: "images/殭屍蘑菇王.gif" },
     "巴洛古": { min: 405, max: 540, maps: ["受詛咒的神殿"], color: "#ff0000", image: "images/巴洛古.gif" },
@@ -24,8 +24,8 @@ const BOSS_DATA = {
     "肯德熊": { min: 113, max: 128, maps: ["流浪熊的領土"], color: "#8b7355", image: "images/肯德熊.gif" },
     "喵怪仙人": { min: 150, max: 170, maps: ["喵怪仙人的領域"], color: "#ffb6c1", image: "images/喵怪仙人.gif" },
     "巨大深山人蔘": { min: 60, max: 135, maps: ["豐饒的藥草田"], color: "#ffd700", image: "images/巨大深山人蔘.gif" },
-    "海怒斯": { min: 180, max: 300, maps: ["海怒斯洞穴"], color: "#1e90ff", image: "images/海怒斯.gif" }
-    "噴火龍": { min: 60, max: 60, maps: ["噴火龍的森林"], color: "#1e90ff", image: "images/噴火龍.gif" }
-    "格瑞芬多": { min: 60, max: 60, maps: ["格瑞芬多森林"], color: "#1e90ff", image: "images/格瑞芬多.gif" }
-    "寒霜冰龍": { min: 240, max: 720, maps: ["深山凶屋"], color: "#1e90ff", image: "images/寒霜冰龍.gif" }
+    "海怒斯": { min: 180, max: 300, maps: ["海怒斯洞穴"], color: "#1e90ff", image: "images/海怒斯.gif" },
+    "噴火龍": { min: 60, max: 60, maps: ["噴火龍的森林"], color: "#ff4500", image: "images/噴火龍.gif" },
+    "格瑞芬多": { min: 60, max: 60, maps: ["格瑞芬多森林"], color: "#cd853f", image: "images/格瑞芬多.gif" },
+    "寒霜冰龍": { min: 240, max: 720, maps: ["深山凶屋"], color: "#00ffff", image: "images/寒霜冰龍.gif" }
 };
