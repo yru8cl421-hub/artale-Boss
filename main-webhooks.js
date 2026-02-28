@@ -804,6 +804,98 @@ function loadData() {
     }
 }
 
+// ============================================================
+// 資料備份與還原
+// ============================================================
+
+// 匯出所有資料為 JSON 備份檔
+function exportBackup() {
+    try {
+        const backup = {
+            version: '1.0',
+            exportTime: new Date().toISOString(),
+            data: {
+                unifiedWebhook:          localStorage.getItem('unifiedWebhook')          || '',
+                individualBossWebhooks:  localStorage.getItem('individualBossWebhooks')  || '{}',
+                activeBosses:            localStorage.getItem('activeBosses')            || '[]',
+                patrolRecords:           localStorage.getItem('patrolRecords')           || '[]',
+                bossStatistics:          localStorage.getItem('bossStatistics')          || '{}',
+                userWebhook:             localStorage.getItem('userWebhook')             || '',
+                scanArea:                localStorage.getItem('scanArea')                || '{}',
+                deviceId:                localStorage.getItem('deviceId')                || ''
+            }
+        };
+
+        const json     = JSON.stringify(backup, null, 2);
+        const blob     = new Blob([json], { type: 'application/json' });
+        const url      = URL.createObjectURL(blob);
+        const now      = new Date();
+        const dateStr  = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}_${String(now.getHours()).padStart(2,'0')}${String(now.getMinutes()).padStart(2,'0')}`;
+        const filename = `楓之谷BOSS系統備份_${dateStr}.json`;
+
+        const a    = document.createElement('a');
+        a.href     = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        showNotification(`✅ 備份成功！已下載「${filename}」`, 'success');
+    } catch (err) {
+        console.error('備份匯出失敗:', err);
+        showNotification('❌ 備份匯出失敗，請稍後再試', 'error');
+    }
+}
+
+// 匯入備份檔案並還原
+function importBackup(input) {
+    const file = input.files[0];
+    if (!file) return;
+
+    // 重置 input 以便同一個檔案可再次選擇
+    input.value = '';
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const backup = JSON.parse(e.target.result);
+
+            // 基本驗證
+            if (!backup.data || !backup.version) {
+                showNotification('❌ 備份檔案格式不正確', 'error');
+                return;
+            }
+
+            if (!confirm('⚠️ 確定要還原備份嗎？\n這將覆蓋目前所有設定與記錄。')) return;
+
+            const d = backup.data;
+
+            // 逐一還原各項資料（只覆蓋有值的欄位）
+            if (d.unifiedWebhook          !== undefined) localStorage.setItem('unifiedWebhook',         d.unifiedWebhook);
+            if (d.individualBossWebhooks  !== undefined) localStorage.setItem('individualBossWebhooks', d.individualBossWebhooks);
+            if (d.activeBosses            !== undefined) localStorage.setItem('activeBosses',           d.activeBosses);
+            if (d.patrolRecords           !== undefined) localStorage.setItem('patrolRecords',          d.patrolRecords);
+            if (d.bossStatistics          !== undefined) localStorage.setItem('bossStatistics',         d.bossStatistics);
+            if (d.userWebhook             !== undefined) localStorage.setItem('userWebhook',            d.userWebhook);
+            if (d.scanArea                !== undefined) localStorage.setItem('scanArea',               d.scanArea);
+            if (d.deviceId && !localStorage.getItem('deviceId')) localStorage.setItem('deviceId', d.deviceId);
+
+            const exportTime = backup.exportTime
+                ? new Date(backup.exportTime).toLocaleString('zh-TW')
+                : '未知';
+
+            showNotification(`✅ 還原成功！備份時間：${exportTime}\n即將重新載入頁面...`, 'success');
+
+            setTimeout(() => location.reload(), 2000);
+        } catch (err) {
+            console.error('備份還原失敗:', err);
+            showNotification('❌ 備份檔案損毀或格式錯誤，無法還原', 'error');
+        }
+    };
+    reader.readAsText(file, 'utf-8');
+}
+
 // 設定每天 00:00 自動重新整理
 function setupAutoMidnightRefresh() {
     const now = new Date();

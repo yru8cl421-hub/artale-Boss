@@ -245,6 +245,79 @@
                     </div>
                 </div>
 
+                <!-- 備份與還原區塊 -->
+                <div class="notification-section">
+                    <h3>💾 資料備份與還原</h3>
+                    <p style="color: #a0a0c0; margin-bottom: 20px;">
+                        將所有設定（Webhook、BOSS 記錄、統計資料）匯出為檔案保存，或從備份檔案還原。更換瀏覽器/裝置時非常實用。
+                    </p>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+                        <!-- 匯出備份 -->
+                        <div style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(5, 150, 105, 0.1) 100%);
+                                    padding: 20px; border-radius: 12px; border: 2px solid #10b981;">
+                            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
+                                <span style="font-size: 1.5em;">📤</span>
+                                <p style="color: #34d399; font-weight: bold; font-size: 1.05em;">匯出備份</p>
+                            </div>
+                            <p style="color: #a0a0c0; font-size: 0.9em; margin-bottom: 15px;">
+                                將目前所有設定與資料儲存為 <code style="color:#10b981;">.json</code> 備份檔。
+                            </p>
+                            <button type="button" onclick="exportBackup()"
+                                    style="width: 100%; padding: 12px 20px;
+                                           background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+                                           border: 2px solid #10b981; border-radius: 10px;
+                                           color: white; font-weight: bold; font-size: 1em;
+                                           cursor: pointer; transition: all 0.3s ease;
+                                           box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);"
+                                    onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(16, 185, 129, 0.5)';"
+                                    onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(16, 185, 129, 0.3)';">
+                                📥 下載備份檔案
+                            </button>
+                        </div>
+
+                        <!-- 匯入還原 -->
+                        <div style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(217, 119, 6, 0.1) 100%);
+                                    padding: 20px; border-radius: 12px; border: 2px solid #f59e0b;">
+                            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
+                                <span style="font-size: 1.5em;">📥</span>
+                                <p style="color: #fbbf24; font-weight: bold; font-size: 1.05em;">匯入還原</p>
+                            </div>
+                            <p style="color: #a0a0c0; font-size: 0.9em; margin-bottom: 15px;">
+                                選擇先前下載的備份檔案以還原所有設定。
+                            </p>
+                            <label style="display: block; width: 100%;">
+                                <input type="file" id="backup-file-input" accept=".json"
+                                       onchange="importBackup(this)" style="display:none;">
+                                <span onclick="document.getElementById('backup-file-input').click()"
+                                      style="display: block; width: 100%; padding: 12px 20px;
+                                             background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+                                             border: 2px solid #f59e0b; border-radius: 10px;
+                                             color: white; font-weight: bold; font-size: 1em;
+                                             cursor: pointer; transition: all 0.3s ease; text-align: center;
+                                             box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);"
+                                      onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(245, 158, 11, 0.5)';"
+                                      onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(245, 158, 11, 0.3)';">
+                                    📂 選擇備份檔案
+                                </span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div style="background: rgba(245, 158, 11, 0.1); padding: 15px; border-radius: 8px; border-left: 4px solid #f59e0b;">
+                        <p style="color: #fbbf24; font-weight: bold; margin-bottom: 8px;">📋 備份包含的資料：</p>
+                        <ul style="margin-left: 20px; color: #fcd34d; font-size: 0.9em;">
+                            <li>統一 Discord Webhook 設定</li>
+                            <li>所有 BOSS 個別 Webhook 設定</li>
+                            <li>目前追蹤中的 BOSS 記錄</li>
+                            <li>巡邏記錄與 BOSS 擊殺統計</li>
+                        </ul>
+                        <p style="color: #a0a0c0; font-size: 0.85em; margin-top: 10px;">
+                            ⚠️ 匯入時將覆蓋目前所有設定，請確認備份檔案正確後再執行。
+                        </p>
+                    </div>
+                </div>
+
                 <div class="info-box" style="margin-top: 20px;">
                     <div style="background: rgba(99, 102, 241, 0.1); padding: 15px; border-radius: 8px; border-left: 4px solid #6366f1;">
                         <p style="color: #818cf8; font-weight: bold; margin-bottom: 8px;">📖 如何取得 Discord Webhook？</p>
