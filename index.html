@@ -23,9 +23,17 @@
                 <div style="display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap;">
                     <div style="display: flex; flex-direction: column; gap: 5px; min-width: 150px;">
                         <label style="color: #a0a0c0; font-size: 0.9em;">選擇BOSS:</label>
-                        <select id="boss-select" onchange="onBossSelected()" style="padding: 10px;">
-                            <option value="">請選擇...</option>
-                        </select>
+                        <div style="display: flex; gap: 6px; align-items: center;">
+                            <select id="boss-select" onchange="onBossSelected()" style="padding: 10px; flex: 1;">
+                                <option value="">請選擇...</option>
+                            </select>
+                            <button type="button" id="swap-boss-btn" onclick="swapPairedBoss()"
+                                    style="display:none; padding: 8px 10px; background: linear-gradient(135deg, #ff69b4 0%, #d63384 100%);
+                                           border-color: #ff69b4; border-radius: 6px; color: white; font-size: 0.85em;
+                                           white-space: nowrap; cursor: pointer;" title="切換到配對BOSS">
+                                🔄
+                            </button>
+                        </div>
                     </div>
                     <div style="display: flex; flex-direction: column; gap: 5px; min-width: 120px;">
                         <label style="color: #a0a0c0; font-size: 0.9em;">擊殺時間:</label>
@@ -40,6 +48,7 @@
                         📝 記錄擊殺 Enter
                     </button>
                 </div>
+
 
                 <div id="scan-preview" style="display:none; margin-top:10px; padding:10px; background:#1a1a2e; border-radius:8px;">
                     <div style="color:#888; margin-bottom:5px;">掃描區域預覽：<span id="preview-countdown" style="color:#10b981;"></span></div>
