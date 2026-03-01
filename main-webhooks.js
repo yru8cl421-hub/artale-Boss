@@ -921,20 +921,60 @@ function importBossBackup(input) {
                 return;
             }
 
-            if (!confirm('⚠️ 確定要還原 BOSS 記錄嗎？\n這將覆蓋目前所有 BOSS 追蹤記錄與統計資料。')) return;
+            if (!confirm('確定要匯入 BOSS 記錄嗎？\n備份中的記錄將合併至目前資料，不會清除現有記錄。')) return;
 
             const d = backup.data;
-            if (d.activeBosses   !== undefined) localStorage.setItem('activeBosses',   d.activeBosses);
-            if (d.patrolRecords  !== undefined) localStorage.setItem('patrolRecords',  d.patrolRecords);
-            if (d.bossStatistics !== undefined) localStorage.setItem('bossStatistics', d.bossStatistics);
-            if (d.scanArea       !== undefined) localStorage.setItem('scanArea',       d.scanArea);
+
+            // ── activeBosses：合併，以 id 去重（備份資料優先）
+            const existing   = JSON.parse(localStorage.getItem('activeBosses')  || '[]');
+            const incoming   = JSON.parse(d.activeBosses  || '[]');
+            const mergedMap  = {};
+            existing.forEach(b => { mergedMap[b.id] = b; });
+            incoming.forEach(b => { mergedMap[b.id] = b; }); // 備份蓋掉同 id
+            localStorage.setItem('activeBosses', JSON.stringify(Object.values(mergedMap)));
+
+            // ── patrolRecords：直接合併陣列（巡邏記錄無固定唯一 id，全部保留）
+            const existingPatrol = JSON.parse(localStorage.getItem('patrolRecords') || '[]');
+            const incomingPatrol = JSON.parse(d.patrolRecords || '[]');
+            // 用 timestamp+bossName 去重
+            const patrolMap = {};
+            [...existingPatrol, ...incomingPatrol].forEach(r => {
+                const key = `${r.bossName}_${r.timestamp || r.id || Math.random()}`;
+                patrolMap[key] = r;
+            });
+            localStorage.setItem('patrolRecords', JSON.stringify(Object.values(patrolMap)));
+
+            // ── bossStatistics：合併，累加數字欄位
+            const existingStat = JSON.parse(localStorage.getItem('bossStatistics') || '{}');
+            const incomingStat = JSON.parse(d.bossStatistics || '{}');
+            Object.keys(incomingStat).forEach(bossName => {
+                if (!existingStat[bossName]) {
+                    existingStat[bossName] = incomingStat[bossName];
+                } else {
+                    const es = existingStat[bossName];
+                    const is = incomingStat[bossName];
+                    es.totalKills = (es.totalKills || 0) + (is.totalKills || 0);
+                    es.todayKills = (es.todayKills || 0) + (is.todayKills || 0);
+                    // channelDistribution 合併累加
+                    const cd = is.channelDistribution || {};
+                    if (!es.channelDistribution) es.channelDistribution = {};
+                    Object.keys(cd).forEach(ch => {
+                        es.channelDistribution[ch] = (es.channelDistribution[ch] || 0) + cd[ch];
+                    });
+                    // 保留較新的 lastKillTime
+                    if (is.lastKillTime && (!es.lastKillTime || is.lastKillTime > es.lastKillTime)) {
+                        es.lastKillTime = is.lastKillTime;
+                    }
+                }
+            });
+            localStorage.setItem('bossStatistics', JSON.stringify(existingStat));
 
             const exportTime = backup.exportTime ? new Date(backup.exportTime).toLocaleString('zh-TW') : '未知';
-            showNotification(`✅ BOSS 記錄還原成功！備份時間：${exportTime}\n即將重新載入頁面...`, 'success');
+            showNotification(`✅ BOSS 記錄匯入成功！備份時間：${exportTime}\n即將重新載入頁面...`, 'success');
             setTimeout(() => location.reload(), 2000);
         } catch (err) {
-            console.error('BOSS 記錄還原失敗:', err);
-            showNotification('❌ 備份檔案損毀或格式錯誤，無法還原', 'error');
+            console.error('BOSS 記錄匯入失敗:', err);
+            showNotification('❌ 備份檔案損毀或格式錯誤，無法匯入', 'error');
         }
     };
     reader.readAsText(file, 'utf-8');

@@ -286,20 +286,18 @@
                             <p style="color: #a0a0c0; font-size: 0.88em; margin-bottom: 15px;">
                                 選擇先前下載的 Webhook 備份檔案以還原 Webhook 設定。
                             </p>
-                            <label style="display: block; width: 100%;">
-                                <input type="file" id="webhook-backup-input" accept=".json"
-                                       onchange="importWebhookBackup(this)" style="display:none;">
-                                <span onclick="document.getElementById('webhook-backup-input').click()"
-                                      style="display: block; width: 100%; padding: 12px 20px;
-                                             background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-                                             border: 2px solid #f59e0b; border-radius: 10px;
-                                             color: white; font-weight: bold; font-size: 1em;
-                                             cursor: pointer; transition: all 0.3s ease; text-align: center;
-                                             box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);"
-                                      onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(245, 158, 11, 0.5)';"
-                                      onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(245, 158, 11, 0.3)';">
-                                    📂 選擇 Webhook 備份檔
-                                </span>
+                            <input type="file" id="webhook-backup-input" accept=".json"
+                                   onchange="importWebhookBackup(this)" style="display:none;">
+                            <label for="webhook-backup-input"
+                                  style="display: block; width: 100%; padding: 12px 20px;
+                                         background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+                                         border: 2px solid #f59e0b; border-radius: 10px;
+                                         color: white; font-weight: bold; font-size: 1em;
+                                         cursor: pointer; transition: all 0.3s ease; text-align: center;
+                                         box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3); box-sizing: border-box;"
+                                  onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(245, 158, 11, 0.5)';"
+                                  onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(245, 158, 11, 0.3)';">
+                                📂 選擇 Webhook 備份檔
                             </label>
                         </div>
                     </div>
@@ -350,22 +348,20 @@
                                 <p style="color: #fca5a5; font-weight: bold; font-size: 1em;">匯入 BOSS 記錄</p>
                             </div>
                             <p style="color: #a0a0c0; font-size: 0.88em; margin-bottom: 15px;">
-                                選擇先前下載的 BOSS 記錄備份檔案以還原記錄資料。
+                                選擇先前下載的 BOSS 記錄備份檔案，記錄將<strong style="color:#fbbf24;">合併</strong>至目前資料（不會清除現有記錄）。
                             </p>
-                            <label style="display: block; width: 100%;">
-                                <input type="file" id="boss-backup-input" accept=".json"
-                                       onchange="importBossBackup(this)" style="display:none;">
-                                <span onclick="document.getElementById('boss-backup-input').click()"
-                                      style="display: block; width: 100%; padding: 12px 20px;
-                                             background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-                                             border: 2px solid #ef4444; border-radius: 10px;
-                                             color: white; font-weight: bold; font-size: 1em;
-                                             cursor: pointer; transition: all 0.3s ease; text-align: center;
-                                             box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);"
-                                      onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(239, 68, 68, 0.5)';"
-                                      onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(239, 68, 68, 0.3)';">
-                                    📂 選擇 BOSS 記錄備份檔
-                                </span>
+                            <input type="file" id="boss-backup-input" accept=".json"
+                                   onchange="importBossBackup(this)" style="display:none;">
+                            <label for="boss-backup-input"
+                                  style="display: block; width: 100%; padding: 12px 20px;
+                                         background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+                                         border: 2px solid #ef4444; border-radius: 10px;
+                                         color: white; font-weight: bold; font-size: 1em;
+                                         cursor: pointer; transition: all 0.3s ease; text-align: center;
+                                         box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3); box-sizing: border-box;"
+                                  onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(239, 68, 68, 0.5)';"
+                                  onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(239, 68, 68, 0.3)';">
+                                📂 選擇 BOSS 記錄備份檔
                             </label>
                         </div>
                     </div>
@@ -375,7 +371,7 @@
                             📋 包含：追蹤中的 BOSS 記錄、巡邏記錄、BOSS 擊殺統計
                         </p>
                         <p style="color: #a0a0c0; font-size: 0.85em; margin-top: 6px;">
-                            ⚠️ 匯入時將覆蓋目前的 BOSS 記錄，請確認備份檔案正確後再執行。
+                            ⚠️ 匯入時將合併至目前的 BOSS 記錄（重複項目以備份資料為準），請確認備份檔案正確後再執行。
                         </p>
                     </div>
                 </div>
