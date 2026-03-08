@@ -27,5 +27,6 @@ const BOSS_DATA = {
     "海怒斯": { min: 180, max: 300, maps: ["海怒斯洞穴"], color: "#1e90ff", image: "images/海怒斯.gif" },
     "噴火龍": { min: 60, max: 60, maps: ["噴火龍的森林"], color: "#ff4500", image: "images/噴火龍.gif" },
     "格瑞芬多": { min: 60, max: 60, maps: ["格瑞芬多森林"], color: "#cd853f", image: "images/格瑞芬多.gif" },
-    "寒霜冰龍": { min: 240, max: 720, maps: ["深山凶屋"], color: "#00ffff", image: "images/寒霜冰龍.gif" }
+    "寒霜冰龍": { min: 240, max: 720, maps: ["深山凶屋"], color: "#00ffff", image: "images/寒霜冰龍.gif" },
+    "竹刀武士": { min: 113, max: 128, maps: ["暗夜松林"], color: "#7b8b3a", image: "images/竹刀武士.gif" }
 };
