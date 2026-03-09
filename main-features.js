@@ -78,8 +78,8 @@ function recordBoss() {
 
     let mapLocation = info.maps[0];
     if (info.hasMapSelect) {
-        const selectedMap = document.getElementById('map-select').value;
-        mapLocation = selectedMap === '7' ? '夜市徒步區7' : '夜市徒步區7-1';
+        const selectedIndex = parseInt(document.getElementById('map-select').value);
+        mapLocation = info.maps[selectedIndex] || info.maps[0];
     }
 
     const existingRecordIndex = activeBosses.findIndex(

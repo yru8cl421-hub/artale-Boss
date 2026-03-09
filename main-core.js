@@ -945,6 +945,14 @@ function onBossSelected() {
         
         if (info.hasMapSelect) {
             mapSelectContainer.style.display = 'block';
+            const mapSelect = document.getElementById('map-select');
+            mapSelect.innerHTML = '';
+            info.maps.forEach((mapName, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = mapName;
+                mapSelect.appendChild(option);
+            });
         } else {
             mapSelectContainer.style.display = 'none';
         }
