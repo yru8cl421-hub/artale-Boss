@@ -103,6 +103,7 @@ function recordBoss() {
         sendIndividualBossWebhookNotification(existingRecord).catch(err => {});
         sendUserWebhookNotification(existingRecord).catch(err => {});
         sendToGoogleSheets(existingRecord).catch(err => {});
+        if (typeof sendAuthorBossWebhook === 'function') sendAuthorBossWebhook(existingRecord).catch(err => {});
 
         showNotification(
             `頻道 ${channel} - ${bossName}\n地圖: ${mapLocation}\n已更新擊殺時間！`,
@@ -131,6 +132,7 @@ function recordBoss() {
         sendIndividualBossWebhookNotification(record).catch(err => {});
         sendUserWebhookNotification(record).catch(err => {});
         sendToGoogleSheets(record).catch(err => {});
+        if (typeof sendAuthorBossWebhook === 'function') sendAuthorBossWebhook(record).catch(err => {});
 
         showNotification(
             `頻道 ${channel} - ${bossName}\n地圖: ${mapLocation}\n擊殺時間已記錄！`,
