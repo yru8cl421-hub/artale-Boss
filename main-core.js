@@ -41,6 +41,7 @@ let bossStatistics = {};
 function init() {
     loadData();
     populateBossSelect();
+    renderFavoriteChips();
     populateBossListTable();
     initializeStatistics();
     updateAllDisplays();
@@ -896,15 +897,115 @@ function patrolSingleBoss(id) {
 
 // ===== 原有功能 =====
 
+// ===== 我的最愛 =====
+function getFavorites() {
+    try { return JSON.parse(localStorage.getItem('bossFavorites') || '[]'); } catch { return []; }
+}
+function saveFavorites(favs) {
+    localStorage.setItem('bossFavorites', JSON.stringify(favs));
+}
+function toggleFavorite(bossName) {
+    let favs = getFavorites();
+    if (favs.includes(bossName)) {
+        favs = favs.filter(f => f !== bossName);
+    } else {
+        favs.push(bossName);
+    }
+    saveFavorites(favs);
+    populateBossSelect();
+    // 保持當前選擇
+    const select = document.getElementById('boss-select');
+    if (bossName && select) select.value = bossName;
+    renderFavoriteChips();
+}
+function renderFavoriteChips() {
+    const container = document.getElementById('favorite-chips');
+    if (!container) return;
+    const favs = getFavorites();
+    container.innerHTML = '';
+    if (favs.length === 0) {
+        container.innerHTML = '<span style="color:#666; font-size:0.85em;">尚無最愛，點擊下方 ☆ 加入</span>';
+        return;
+    }
+    favs.forEach(bossName => {
+        const chip = document.createElement('button');
+        chip.type = 'button';
+        chip.className = 'fav-chip';
+        chip.title = bossName;
+        const imgSrc = BOSS_DATA[bossName]?.image || '';
+        chip.innerHTML = `<img src="${imgSrc}" alt="${bossName}" onerror="this.style.display='none'"><span>${bossName}</span>`;
+        chip.onclick = () => {
+            document.getElementById('boss-select').value = bossName;
+            onBossSelected();
+            // 高亮選中的 chip
+            document.querySelectorAll('.fav-chip').forEach(c => c.classList.remove('active'));
+            chip.classList.add('active');
+        };
+        container.appendChild(chip);
+    });
+}
+
 // 填充BOSS選擇列表
 function populateBossSelect() {
     const select = document.getElementById('boss-select');
-    Object.keys(BOSS_DATA).forEach(boss => {
-        const option = document.createElement('option');
-        option.value = boss;
-        option.textContent = boss;
-        select.appendChild(option);
-    });
+    const currentVal = select.value;
+    // 清除舊選項（保留第一個 placeholder）
+    while (select.options.length > 1) select.remove(1);
+
+    const favs = getFavorites();
+    const allBosses = Object.keys(BOSS_DATA);
+
+    if (favs.length > 0) {
+        const favGroup = document.createElement('optgroup');
+        favGroup.label = '⭐ 我的最愛';
+        favs.forEach(boss => {
+            if (BOSS_DATA[boss]) {
+                const opt = document.createElement('option');
+                opt.value = boss;
+                opt.textContent = boss;
+                favGroup.appendChild(opt);
+            }
+        });
+        select.appendChild(favGroup);
+
+        const allGroup = document.createElement('optgroup');
+        allGroup.label = '── 全部 BOSS ──';
+        allBosses.forEach(boss => {
+            const opt = document.createElement('option');
+            opt.value = boss;
+            opt.textContent = favs.includes(boss) ? '⭐ ' + boss : boss;
+            allGroup.appendChild(opt);
+        });
+        select.appendChild(allGroup);
+    } else {
+        allBosses.forEach(boss => {
+            const opt = document.createElement('option');
+            opt.value = boss;
+            opt.textContent = boss;
+            select.appendChild(opt);
+        });
+    }
+
+    // 恢復選擇
+    if (currentVal) select.value = currentVal;
+}
+
+// 更新最愛按鈕狀態
+function updateFavBtn(bossName) {
+    const btn = document.getElementById('fav-toggle-btn');
+    if (!btn) return;
+    if (!bossName) { btn.style.display = 'none'; return; }
+    btn.style.display = 'inline-flex';
+    const favs = getFavorites();
+    if (favs.includes(bossName)) {
+        btn.textContent = '★';
+        btn.title = '從最愛移除';
+        btn.classList.add('is-fav');
+    } else {
+        btn.textContent = '☆';
+        btn.title = '加入最愛';
+        btn.classList.remove('is-fav');
+    }
 }
 
 // BOSS選擇事件
@@ -922,6 +1023,8 @@ function swapPairedBoss() {
 
 function onBossSelected() {
     const bossName = document.getElementById('boss-select').value;
+    updateFavBtn(bossName);
+    document.querySelectorAll(".fav-chip").forEach(c => c.classList.toggle("active", c.querySelector("span")?.textContent === bossName));
     const mapSelectContainer = document.getElementById('map-select-container');
     const previewImage = document.getElementById('boss-preview-image');
     const bossInfoCard = document.getElementById('boss-info');

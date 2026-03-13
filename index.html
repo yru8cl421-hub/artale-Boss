@@ -20,6 +20,10 @@
         <div class="tab-content active" id="tab-record">
             <div class="section">
                 <h2>快速記錄 BOSS 擊殺</h2>
+                <div id="favorite-chips-wrapper" style="margin-bottom: 12px;">
+                    <div style="color: #a0a0c0; font-size: 0.82em; margin-bottom: 6px;">⭐ 我的最愛</div>
+                    <div id="favorite-chips" style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center; min-height: 36px;"></div>
+                </div>
                 <div style="display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap;">
                     <div style="display: flex; flex-direction: column; gap: 5px; min-width: 150px;">
                         <label style="color: #a0a0c0; font-size: 0.9em;">選擇BOSS:</label>
@@ -32,6 +36,12 @@
                                            border-color: #ff69b4; border-radius: 6px; color: white; font-size: 0.85em;
                                            white-space: nowrap; cursor: pointer;" title="切換到配對BOSS">
                                 🔄
+                            </button>
+                            <button type="button" id="fav-toggle-btn" onclick="toggleFavorite(document.getElementById('boss-select').value)"
+                                    style="display:none; padding: 8px 10px; border-radius: 6px; font-size: 1.1em;
+                                           white-space: nowrap; cursor: pointer; border: 1px solid rgba(255,200,0,0.5);"
+                                    title="加入最愛">
+                                ☆
                             </button>
                         </div>
                     </div>

@@ -929,3 +929,56 @@
         font-size: 0.8em;
     }
 }
+
+/* ===== 我的最愛 ===== */
+.fav-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 10px 5px 6px;
+    background: rgba(30, 41, 59, 0.9);
+    border: 1px solid rgba(100, 116, 139, 0.4);
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 0.88em;
+    color: #cbd5e1;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+.fav-chip img {
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+    border-radius: 4px;
+    background: rgba(255,255,255,0.05);
+}
+.fav-chip:hover {
+    background: rgba(0, 153, 204, 0.2);
+    border-color: #0099cc;
+    color: #fff;
+    transform: translateY(-1px);
+    box-shadow: 0 3px 10px rgba(0,153,204,0.25);
+}
+.fav-chip.active {
+    background: rgba(0, 153, 204, 0.3);
+    border-color: #0099cc;
+    color: #00ccff;
+    font-weight: bold;
+}
+#fav-toggle-btn {
+    background: rgba(15, 23, 42, 0.8);
+    color: #aaa;
+    transition: all 0.2s;
+}
+#fav-toggle-btn.is-fav {
+    color: #ffd700;
+    border-color: rgba(255, 200, 0, 0.6) !important;
+    background: rgba(255, 200, 0, 0.1);
+}
+#fav-toggle-btn:hover {
+    background: rgba(255, 200, 0, 0.15);
+    color: #ffd700;
+    border-color: #ffd700 !important;
+    transform: scale(1.1);
+    box-shadow: 0 0 10px rgba(255, 200, 0, 0.3);
+}
