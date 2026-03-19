@@ -30,7 +30,7 @@ const BOSS_DATA = {
     "寒霜冰龍": { min: 240, max: 720, maps: ["深山凶屋"], color: "#00ffff", image: "images/寒霜冰龍.gif" },
     "竹刀武士": { min: 113, max: 128, maps: ["暗夜松林"], color: "#7b8b3a", image: "images/竹刀武士.gif" },
     "仙人長老": { min: 68, max: 90, maps: ["仙人掌沙漠2"], color: "#d2b48c", image: "images/仙人長老.gif" },
-    "紅藍雙怪": { min: 113, max: 135, maps: ["研究所B-1區", "研究所B-3區", "研究所C-2區"], color: "#c71585", hasMapSelect: true, image: "images/紅藍雙怪.gif" },
+    "紅藍雙怪": { min: 113, max: 135, maps: ["研究所103號房"], color: "#c71585", image: "images/紅藍雙怪.gif" },
     "自動警備": { min: 158, max: 173, maps: ["閒人勿入"], color: "#708090", image: "images/自動警備.gif" },
     "迪特和洛伊": { min: 150, max: 165, maps: ["研究所C-3區"], color: "#4682b4", image: "images/迪特和洛伊.gif" },
     "奇美拉": { min: 120, max: 135, maps: ["研究所地底祕密通道"], color: "#8b0000", image: "images/奇美拉.gif" }
