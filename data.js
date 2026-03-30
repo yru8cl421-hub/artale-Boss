@@ -10,6 +10,7 @@ const BOSS_DATA = {
     "沼澤巨鱷": { min: 90, max: 105, maps: ["危險的黑鱷魚1"], color: "#4caf50", image: "images/沼澤巨鱷.gif" },
     "殭屍蘑菇王": { min: 195, max: 225, maps: ["蘑菇王之墓"], color: "#e91e63", image: "images/殭屍蘑菇王.gif" },
     "巴洛古": { min: 405, max: 540, maps: ["受詛咒的神殿"], color: "#ff0000", image: "images/巴洛古.gif" },
+    "地獄巴洛古": { min: 0, max: 0, maps: ["船"], color: "#8b0000", image: "images/地獄巴洛古.gif" },
     "艾利傑": { min: 118, max: 128, maps: ["天空階梯2"], color: "#00bcd4", image: "images/艾利傑.gif" },
     "雪山女巫": { min: 158, max: 180, maps: ["冰面1"], color: "#87ceeb", image: "images/雪山女巫.gif" },
     "雪毛怪人": { min: 45, max: 68, maps: ["雪人之谷"], color: "#f0f8ff", image: "images/雪毛怪人.gif" },
