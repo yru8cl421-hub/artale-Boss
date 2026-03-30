@@ -892,10 +892,9 @@ function exportBossBackup() {
             version:    '1.0',
             exportTime: new Date().toISOString(),
             data: {
-                activeBosses:   localStorage.getItem('activeBosses')   || '[]',
-                patrolRecords:  localStorage.getItem('patrolRecords')  || '[]',
-                bossStatistics: localStorage.getItem('bossStatistics') || '{}',
-                scanArea:       localStorage.getItem('scanArea')       || '{}'
+                activeBosses:  localStorage.getItem('activeBosses')  || '[]',
+                patrolRecords: localStorage.getItem('patrolRecords') || '[]',
+                scanArea:      localStorage.getItem('scanArea')      || '{}'
             }
         };
         downloadJson(backup, `BOSS記錄備份_${getDateStr()}.json`);
@@ -943,31 +942,6 @@ function importBossBackup(input) {
                 patrolMap[key] = r;
             });
             localStorage.setItem('patrolRecords', JSON.stringify(Object.values(patrolMap)));
-
-            // ── bossStatistics：合併，累加數字欄位
-            const existingStat = JSON.parse(localStorage.getItem('bossStatistics') || '{}');
-            const incomingStat = JSON.parse(d.bossStatistics || '{}');
-            Object.keys(incomingStat).forEach(bossName => {
-                if (!existingStat[bossName]) {
-                    existingStat[bossName] = incomingStat[bossName];
-                } else {
-                    const es = existingStat[bossName];
-                    const is = incomingStat[bossName];
-                    es.totalKills = (es.totalKills || 0) + (is.totalKills || 0);
-                    es.todayKills = (es.todayKills || 0) + (is.todayKills || 0);
-                    // channelDistribution 合併累加
-                    const cd = is.channelDistribution || {};
-                    if (!es.channelDistribution) es.channelDistribution = {};
-                    Object.keys(cd).forEach(ch => {
-                        es.channelDistribution[ch] = (es.channelDistribution[ch] || 0) + cd[ch];
-                    });
-                    // 保留較新的 lastKillTime
-                    if (is.lastKillTime && (!es.lastKillTime || is.lastKillTime > es.lastKillTime)) {
-                        es.lastKillTime = is.lastKillTime;
-                    }
-                }
-            });
-            localStorage.setItem('bossStatistics', JSON.stringify(existingStat));
 
             const exportTime = backup.exportTime ? new Date(backup.exportTime).toLocaleString('zh-TW') : '未知';
             showNotification(`✅ BOSS 記錄匯入成功！備份時間：${exportTime}\n即將重新載入頁面...`, 'success');

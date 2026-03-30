@@ -14,10 +14,12 @@
             <div class="tab" onclick="switchTab(1)">BOSS列表</div>
             <div class="tab" onclick="switchTab(2)">擊殺統計</div>
             <div class="tab" onclick="switchTab(3)">通知設定</div>
-            <div class="tab" onclick="switchTab(4)">改善建議</div>
+            <div class="tab" onclick="switchTab(4)">推薦工具與資源</div>
         </div>
 
         <div class="tab-content active" id="tab-record">
+
+
             <div class="section">
                 <h2>快速記錄 BOSS 擊殺</h2>
                 <div id="favorite-chips-wrapper" style="margin-bottom: 12px;">
@@ -313,73 +315,6 @@
                     </div>
                 </div>
 
-                <!-- BOSS 記錄備份與還原 -->
-                <div class="notification-section">
-                    <h3>📊 BOSS 記錄備份與還原</h3>
-                    <p style="color: #a0a0c0; margin-bottom: 15px;">
-                        備份目前追蹤中的 BOSS、巡邏記錄與擊殺統計資料。避免因清除瀏覽器資料而遺失。
-                    </p>
-
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
-                        <!-- 匯出 BOSS 記錄 -->
-                        <div style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(5, 150, 105, 0.1) 100%);
-                                    padding: 20px; border-radius: 12px; border: 2px solid #10b981;">
-                            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
-                                <span style="font-size: 1.4em;">📤</span>
-                                <p style="color: #34d399; font-weight: bold; font-size: 1em;">匯出 BOSS 記錄</p>
-                            </div>
-                            <p style="color: #a0a0c0; font-size: 0.88em; margin-bottom: 15px;">
-                                將 BOSS 追蹤、巡邏記錄與統計儲存為 <code style="color:#10b981;">.json</code> 檔。
-                            </p>
-                            <button type="button" onclick="exportBossBackup()"
-                                    style="width: 100%; padding: 12px 20px;
-                                           background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-                                           border: 2px solid #10b981; border-radius: 10px;
-                                           color: white; font-weight: bold; font-size: 1em;
-                                           cursor: pointer; transition: all 0.3s ease;
-                                           box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);"
-                                    onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(16, 185, 129, 0.5)';"
-                                    onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(16, 185, 129, 0.3)';">
-                                📥 下載 BOSS 記錄備份
-                            </button>
-                        </div>
-
-                        <!-- 匯入 BOSS 記錄 -->
-                        <div style="background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(220, 38, 38, 0.1) 100%);
-                                    padding: 20px; border-radius: 12px; border: 2px solid #ef4444;">
-                            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
-                                <span style="font-size: 1.4em;">📥</span>
-                                <p style="color: #fca5a5; font-weight: bold; font-size: 1em;">匯入 BOSS 記錄</p>
-                            </div>
-                            <p style="color: #a0a0c0; font-size: 0.88em; margin-bottom: 15px;">
-                                選擇先前下載的 BOSS 記錄備份檔案，記錄將<strong style="color:#fbbf24;">合併</strong>至目前資料（不會清除現有記錄）。
-                            </p>
-                            <input type="file" id="boss-backup-input" accept=".json"
-                                   onchange="importBossBackup(this)" style="display:none;">
-                            <label for="boss-backup-input"
-                                  style="display: block; width: 100%; padding: 12px 20px;
-                                         background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-                                         border: 2px solid #ef4444; border-radius: 10px;
-                                         color: white; font-weight: bold; font-size: 1em;
-                                         cursor: pointer; transition: all 0.3s ease; text-align: center;
-                                         box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3); box-sizing: border-box;"
-                                  onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(239, 68, 68, 0.5)';"
-                                  onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(239, 68, 68, 0.3)';">
-                                📂 選擇 BOSS 記錄備份檔
-                            </label>
-                        </div>
-                    </div>
-
-                    <div style="background: rgba(16, 185, 129, 0.08); padding: 12px 15px; border-radius: 8px; border-left: 4px solid #10b981;">
-                        <p style="color: #6ee7b7; font-size: 0.88em;">
-                            📋 包含：追蹤中的 BOSS 記錄、巡邏記錄、BOSS 擊殺統計
-                        </p>
-                        <p style="color: #a0a0c0; font-size: 0.85em; margin-top: 6px;">
-                            ⚠️ 匯入時將合併至目前的 BOSS 記錄（重複項目以備份資料為準），請確認備份檔案正確後再執行。
-                        </p>
-                    </div>
-                </div>
-
                 <div class="info-box" style="margin-top: 20px;">
                     <div style="background: rgba(99, 102, 241, 0.1); padding: 15px; border-radius: 8px; border-left: 4px solid #6366f1;">
                         <p style="color: #818cf8; font-weight: bold; margin-bottom: 8px;">📖 如何取得 Discord Webhook？</p>
@@ -427,173 +362,207 @@
 
         <div class="tab-content" id="tab-feedback">
             <div class="section">
-                <h2>💡 改善建議</h2>
-                <p style="color: #a0a0c0; margin-bottom: 20px;">
-                    如果您在使用過程中有任何改善建議或發現問題，歡迎透過下方表單告訴我們！
-                </p>
-                
-                <div class="input-group">
-                    <div class="input-field" style="grid-column: 1 / -1;">
-                        <label>建議類型:</label>
-                        <select id="feedback-type" style="width: 100%;">
-                            <option value="功能建議">功能建議</option>
-                            <option value="錯誤回報">錯誤回報</option>
-                            <option value="UI/UX改善">UI/UX改善</option>
-                            <option value="其他">其他</option>
-                        </select>
-                    </div>
-                </div>
+                <h2>🎮 推薦工具與資源</h2>
 
-                <div class="input-group">
-                    <div class="input-field" style="grid-column: 1 / -1;">
-                        <label>詳細說明:</label>
-                        <textarea id="feedback-content" 
-                                  style="width: 100%; min-height: 150px; padding: 10px; 
-                                         background: #0a0a1a; border: 1px solid #00ccff; 
-                                         border-radius: 5px; color: #ffffff; font-family: inherit; 
-                                         font-size: 1em; resize: vertical;"
-                                  placeholder="請詳細描述您的建議或問題..."></textarea>
-                    </div>
-                </div>
-
-                <div class="input-group">
-                    <div class="input-field">
-                        <label>聯絡方式 (選填):</label>
-                        <input type="text" id="feedback-contact" 
-                               placeholder="Email、遊戲ID 或其他聯絡方式"
-                               style="width: 100%;">
-                    </div>
-                </div>
-
-                <div class="button-group">
-                    <button type="button" onclick="submitFeedback()" style="padding: 15px 30px; font-size: 1.1em;">
-                        📨 提交建議
-                    </button>
-                    <button type="button" onclick="clearFeedbackForm()" class="danger">
-                        🔄 清空表單
-                    </button>
-                </div>
-
-                <div class="info-box" style="margin-top: 20px;">
-                    <p style="color: #00ff99; font-size: 0.9em;">
-                        ℹ️ 您的建議將會送達開發團隊,我們會仔細閱讀每一條建議並持續改進系統。感謝您的支持！
+                <!-- Discord 聯絡 -->
+                <div class="info-box" style="margin-bottom: 20px;">
+                    <p style="color: #a78bfa; font-size: 0.95em; margin-bottom: 12px;">
+                        💬 歡迎加入我們的 Discord 伺服器交流討論或提供建議！
                     </p>
-                    <p style="color: #a78bfa; font-size: 0.9em; margin-top: 15px; margin-bottom: 10px;">
-                        💬 也歡迎加入我們的 Discord 伺服器交流討論：
-                    </p>
-                    <div style="text-align: center; margin-top: 15px;">
-                        <a href="https://discord.gg/typTeSzUQr" target="_blank" rel="noopener noreferrer" 
-                           style="display: inline-flex; align-items: center; gap: 10px; 
-                                  padding: 12px 30px; background: linear-gradient(135deg, #5865F2 0%, #4752C4 100%); 
-                                  color: white; text-decoration: none; border-radius: 8px; 
-                                  font-weight: bold; font-size: 1.1em; 
+                    <div style="text-align: center;">
+                        <a href="https://discord.gg/typTeSzUQr" target="_blank" rel="noopener noreferrer"
+                           style="display: inline-flex; align-items: center; gap: 10px;
+                                  padding: 12px 30px; background: linear-gradient(135deg, #5865F2 0%, #4752C4 100%);
+                                  color: white; text-decoration: none; border-radius: 8px;
+                                  font-weight: bold; font-size: 1.1em;
                                   transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(88, 101, 242, 0.3);"
-                           onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 6px 25px rgba(88, 101, 242, 0.5)'; this.style.background='linear-gradient(135deg, #6674F4 0%, #5865F2 100%)';"
-                           onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(88, 101, 242, 0.3)'; this.style.background='linear-gradient(135deg, #5865F2 0%, #4752C4 100%)';">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="white" style="flex-shrink: 0;">
-                                <path d="M19.27 5.33C17.94 4.71 16.5 4.26 15 4a.09.09 0 0 0-.07.03c-.18.33-.39.76-.53 1.09a16.09 16.09 0 0 0-4.8 0c-.14-.34-.35-.76-.54-1.09c-.01-.02-.04-.03-.07-.03c-1.5.26-2.93.71-4.27 1.33c-.01 0-.02.01-.03.02c-2.72 4.07-3.47 8.03-3.1 11.95c0 .02.01.04.03.05c1.8 1.32 3.53 2.12 5.24 2.65c.03.01.06 0 .07-.02c.4-.55.76-1.13 1.07-1.74c.02-.04 0-.08-.04-.09c-.57-.22-1.11-.48-1.64-.78c-.04-.02-.04-.08-.01-.11c.11-.08.22-.17.33-.25c.02-.02.05-.02.07-.01c3.44 1.57 7.15 1.57 10.55 0c.02-.01.05-.01.07.01c.11.09.22.17.33.26c.04.03.04.09-.01.11c-.52.31-1.07.56-1.64.78c-.04.01-.05.06-.04.09c.32.61.68 1.19 1.07 1.74c.03.01.06.02.09.01c1.72-.53 3.45-1.33 5.25-2.65c.02-.01.03-.03.03-.05c.44-4.53-.73-8.46-3.1-11.95c-.01-.01-.02-.02-.04-.02zM8.52 14.91c-1.03 0-1.89-.95-1.89-2.12s.84-2.12 1.89-2.12c1.06 0 1.9.96 1.89 2.12c0 1.17-.84 2.12-1.89 2.12zm6.97 0c-1.03 0-1.89-.95-1.89-2.12s.84-2.12 1.89-2.12c1.06 0 1.9.96 1.89 2.12c0 1.17-.83 2.12-1.89 2.12z"/>
-                            </svg>
+                           onmouseover="this.style.transform='translateY(-3px)'; this.style.background='linear-gradient(135deg, #6674F4 0%, #5865F2 100%)';"
+                           onmouseout="this.style.transform='translateY(0)'; this.style.background='linear-gradient(135deg, #5865F2 0%, #4752C4 100%)';">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="white" style="flex-shrink:0;"><path d="M19.27 5.33C17.94 4.71 16.5 4.26 15 4a.09.09 0 0 0-.07.03c-.18.33-.39.76-.53 1.09a16.09 16.09 0 0 0-4.8 0c-.14-.34-.35-.76-.54-1.09c-.01-.02-.04-.03-.07-.03c-1.5.26-2.93.71-4.27 1.33c-.01 0-.02.01-.03.02c-2.72 4.07-3.47 8.03-3.1 11.95c0 .02.01.04.03.05c1.8 1.32 3.53 2.12 5.24 2.65c.03.01.06 0 .07-.02c.4-.55.76-1.13 1.07-1.74c.02-.04 0-.08-.04-.09c-.57-.22-1.11-.48-1.64-.78c-.04-.02-.04-.08-.01-.11c.11-.08.22-.17.33-.25c.02-.02.05-.02.07-.01c3.44 1.57 7.15 1.57 10.55 0c.02-.01.05-.01.07.01c.11.09.22.17.33.26c.04.03.04.09-.01.11c-.52.31-1.07.56-1.64.78c-.04.01-.05.06-.04.09c.32.61.68 1.19 1.07 1.74c.03.01.06.02.09.01c1.72-.53 3.45-1.33 5.25-2.65c.02-.01.03-.03.03-.05c.44-4.53-.73-8.46-3.1-11.95c-.01-.01-.02-.02-.04-.02zM8.52 14.91c-1.03 0-1.89-.95-1.89-2.12s.84-2.12 1.89-2.12c1.06 0 1.9.96 1.89 2.12c0 1.17-.84 2.12-1.89 2.12zm6.97 0c-1.03 0-1.89-.95-1.89-2.12s.84-2.12 1.89-2.12c1.06 0 1.9.96 1.89 2.12c0 1.17-.83 2.12-1.89 2.12z"/></svg>
                             <span>加入 Discord 伺服器</span>
                         </a>
                     </div>
                 </div>
 
-                <!-- 推薦工具區塊 - 整合版 -->
+                <!-- 推薦工具區塊 -->
                 <div class="info-box" style="margin-top: 30px; background: rgba(255, 153, 0, 0.1); border-left-color: #ff9900;">
-                    <p style="color: #ffb347; font-weight: bold; margin-bottom: 10px; font-size: 1.1em;">
-                        🎮 推薦工具與資源
-                    </p>
-                    <p style="color: #cbd5e1; font-size: 0.95em; margin-bottom: 20px;">
-                        需要查詢 BOSS 或怪物資訊？以下是精選的楓之谷相關實用工具！
-                    </p>
-                    
-                    <!-- 按鈕區域 -->
+                    <p style="color: #ffb347; font-weight: bold; margin-bottom: 10px; font-size: 1.1em;">🎮 推薦工具與資源</p>
+                    <p style="color: #cbd5e1; font-size: 0.95em; margin-bottom: 20px;">需要查詢 BOSS 或怪物資訊？以下是精選的楓之谷相關實用工具！</p>
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; margin-bottom: 20px;">
-                        <!-- 怪物掉寶率網站 -->
-                        <a href="https://forum.gamer.com.tw/C.php?bsn=71458&snA=1641" target="_blank" rel="noopener noreferrer" 
-                           style="display: flex; align-items: center; gap: 12px; 
-                                  padding: 15px; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); 
-                                  color: white; text-decoration: none; border-radius: 8px; 
-                                  font-weight: bold; font-size: 1em; 
-                                  transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);"
-                           onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 6px 25px rgba(59, 130, 246, 0.5)';"
-                           onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(59, 130, 246, 0.3)';">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="white" style="flex-shrink: 0;">
-                                <path d="M9 3v2H4v14h16V5h-5V3h7v18H2V3h7zm3 12l-4-4 4-4v3h4v2h-4v3z"/>
-                            </svg>
-                            <div style="text-align: left;">
-                                <div>怪物掉寶率網站</div>
-                                <div style="font-size: 0.75em; opacity: 0.9; font-weight: normal;">玩家共同蒐集的掉寶數據</div>
-                            </div>
+                        <a href="https://forum.gamer.com.tw/C.php?bsn=71458&snA=1641" target="_blank" rel="noopener noreferrer"
+                           style="display:flex;align-items:center;gap:12px;padding:15px;background:linear-gradient(135deg,#3b82f6,#2563eb);color:white;text-decoration:none;border-radius:8px;font-weight:bold;transition:all 0.3s ease;"
+                           onmouseover="this.style.transform='translateY(-3px)';" onmouseout="this.style.transform='translateY(0)';">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="white" style="flex-shrink:0;"><path d="M9 3v2H4v14h16V5h-5V3h7v18H2V3h7zm3 12l-4-4 4-4v3h4v2h-4v3z"/></svg>
+                            <div><div>怪物掉寶率網站</div><div style="font-size:0.75em;opacity:0.9;font-weight:normal;">玩家共同蒐集的掉寶數據</div></div>
                         </a>
-
-                        <!-- Artale 怪物圖鑑 -->
-                        <a href="https://artalemaplestory.com/" target="_blank" rel="noopener noreferrer" 
-                           style="display: flex; align-items: center; gap: 12px; 
-                                  padding: 15px; background: linear-gradient(135deg, #ff9900 0%, #ff7700 100%); 
-                                  color: white; text-decoration: none; border-radius: 8px; 
-                                  font-weight: bold; font-size: 1em; 
-                                  transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(255, 153, 0, 0.3);"
-                           onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 6px 25px rgba(255, 153, 0, 0.5)';"
-                           onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(255, 153, 0, 0.3)';">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="white" style="flex-shrink: 0;">
-                                <path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/>
-                            </svg>
-                            <div style="text-align: left;">
-                                <div>Artale 怪物圖鑑</div>
-                                <div style="font-size: 0.75em; opacity: 0.9; font-weight: normal;">完整怪物資訊與 BOSS 攻略</div>
-                            </div>
+                        <a href="https://artalemaplestory.com/" target="_blank" rel="noopener noreferrer"
+                           style="display:flex;align-items:center;gap:12px;padding:15px;background:linear-gradient(135deg,#ff9900,#ff7700);color:white;text-decoration:none;border-radius:8px;font-weight:bold;transition:all 0.3s ease;"
+                           onmouseover="this.style.transform='translateY(-3px)';" onmouseout="this.style.transform='translateY(0)';">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="white" style="flex-shrink:0;"><path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z"/></svg>
+                            <div><div>Artale 怪物圖鑑</div><div style="font-size:0.75em;opacity:0.9;font-weight:normal;">完整怪物資訊與 BOSS 攻略</div></div>
                         </a>
-
-                        <!-- 一四九 Twitch -->
-                        <a href="https://www.twitch.tv/149cm_0210" target="_blank" rel="noopener noreferrer" 
-                           style="display: flex; align-items: center; gap: 12px; 
-                                  padding: 15px; background: linear-gradient(135deg, #9146ff 0%, #6441a5 100%); 
-                                  color: white; text-decoration: none; border-radius: 8px; 
-                                  font-weight: bold; font-size: 1em; 
-                                  transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(145, 70, 255, 0.3);"
-                           onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 6px 25px rgba(145, 70, 255, 0.5)';"
-                           onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(145, 70, 255, 0.3)';">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="white" style="flex-shrink: 0;">
-                                <path d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714z"/>
-                            </svg>
-                            <div style="text-align: left;">
-                                <div>一四九 - Twitch</div>
-                                <div style="font-size: 0.75em; opacity: 0.9; font-weight: normal;">楓之谷實況直播頻道</div>
-                            </div>
+                        <a href="https://www.twitch.tv/149cm_0210" target="_blank" rel="noopener noreferrer"
+                           style="display:flex;align-items:center;gap:12px;padding:15px;background:linear-gradient(135deg,#9146ff,#6441a5);color:white;text-decoration:none;border-radius:8px;font-weight:bold;transition:all 0.3s ease;"
+                           onmouseover="this.style.transform='translateY(-3px)';" onmouseout="this.style.transform='translateY(0)';">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="white" style="flex-shrink:0;"><path d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714z"/></svg>
+                            <div><div>一四九 - Twitch</div><div style="font-size:0.75em;opacity:0.9;font-weight:normal;">楓之谷實況直播頻道</div></div>
                         </a>
-                        <!-- 魚板寶貝 Twitch -->
-                        <a href="https://www.twitch.tv/x1996317" rel="noopener noreferrer" 
-                           style="display: flex; align-items: center; gap: 12px; 
-                                  padding: 15px; background: linear-gradient(135deg, #9146ff 0%, #6441a5 100%); 
-                                  color: white; text-decoration: none; border-radius: 8px; 
-                                  font-weight: bold; font-size: 1em; 
-                                  transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(145, 70, 255, 0.3);"
-                           onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 6px 25px rgba(145, 70, 255, 0.5)';"
-                           onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(145, 70, 255, 0.3)';">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="white" style="flex-shrink: 0;">
-                                <path d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714z"/>
-                            </svg>
-                            <div style="text-align: left;">
-                                <div>魚板寶貝 - Twitch</div>
-                                <div style="font-size: 0.75em; opacity: 0.9; font-weight: normal;">楓之谷實況直播頻道</div>
-                            </div>
+                        <a href="https://www.twitch.tv/x1996317" rel="noopener noreferrer"
+                           style="display:flex;align-items:center;gap:12px;padding:15px;background:linear-gradient(135deg,#9146ff,#6441a5);color:white;text-decoration:none;border-radius:8px;font-weight:bold;transition:all 0.3s ease;"
+                           onmouseover="this.style.transform='translateY(-3px)';" onmouseout="this.style.transform='translateY(0)';">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="white" style="flex-shrink:0;"><path d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714z"/></svg>
+                            <div><div>魚板寶貝 - Twitch</div><div style="font-size:0.75em;opacity:0.9;font-weight:normal;">楓之谷實況直播頻道</div></div>
                         </a>
                     </div>
-
-                    <p style="color: #94a3b8; font-size: 0.9em; font-style: italic; margin-top: 15px;">
-                        💭 如果你有其他推薦的工具或網站，歡迎透過上方「改善建議」告訴我們！
-                    </p>
+                    <p style="color: #94a3b8; font-size: 0.9em; font-style: italic;">💭 如果你有其他推薦的工具或網站，歡迎告訴我們！</p>
                 </div>
+
+
+                <!-- ===== BOSS 記錄備份與還原 ===== -->
+                <div style="margin-top:30px; background:rgba(30,41,59,0.7); border-radius:16px; border:1px solid rgba(16,185,129,0.3); padding:24px;">
+                    <h2 style="color:#10b981; font-size:1.2em; margin-bottom:6px;">📊 BOSS 記錄備份與還原</h2>
+                    <p style="color:#a0a0c0; font-size:0.88em; margin-bottom:18px;">
+                        備份目前追蹤中的 BOSS 與巡邏記錄。避免因清除瀏覽器資料而遺失。
+                    </p>
+
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px; margin-bottom:15px;">
+                        <!-- 匯出 -->
+                        <div style="background:linear-gradient(135deg,rgba(16,185,129,0.1),rgba(5,150,105,0.1));
+                                    padding:20px; border-radius:12px; border:2px solid #10b981;">
+                            <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
+                                <span style="font-size:1.4em;">📤</span>
+                                <p style="color:#34d399; font-weight:bold; font-size:1em;">匯出 BOSS 記錄</p>
+                            </div>
+                            <p style="color:#a0a0c0; font-size:0.88em; margin-bottom:15px;">
+                                將 BOSS 追蹤與巡邏記錄儲存為 <code style="color:#10b981;">.json</code> 檔。
+                            </p>
+                            <button type="button" onclick="exportBossBackup()"
+                                    style="width:100%; padding:12px 20px;
+                                           background:linear-gradient(135deg,#10b981,#059669);
+                                           border:2px solid #10b981; border-radius:10px;
+                                           color:white; font-weight:bold; font-size:1em;
+                                           cursor:pointer; transition:all 0.3s ease;
+                                           box-shadow:0 4px 15px rgba(16,185,129,0.3);"
+                                    onmouseover="this.style.transform='translateY(-2px)';"
+                                    onmouseout="this.style.transform='translateY(0)';">
+                                📥 下載 BOSS 記錄備份
+                            </button>
+                        </div>
+
+                        <!-- 匯入 -->
+                        <div style="background:linear-gradient(135deg,rgba(239,68,68,0.1),rgba(220,38,38,0.1));
+                                    padding:20px; border-radius:12px; border:2px solid #ef4444;">
+                            <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
+                                <span style="font-size:1.4em;">📥</span>
+                                <p style="color:#fca5a5; font-weight:bold; font-size:1em;">匯入 BOSS 記錄</p>
+                            </div>
+                            <p style="color:#a0a0c0; font-size:0.88em; margin-bottom:15px;">
+                                選擇備份檔案，記錄將<strong style="color:#fbbf24;">合併</strong>至目前資料（不會清除現有記錄）。
+                            </p>
+                            <input type="file" id="boss-backup-input" accept=".json"
+                                   onchange="importBossBackup(this)" style="display:none;">
+                            <label for="boss-backup-input"
+                                   style="display:block; width:100%; padding:12px 20px;
+                                          background:linear-gradient(135deg,#ef4444,#dc2626);
+                                          border:2px solid #ef4444; border-radius:10px;
+                                          color:white; font-weight:bold; font-size:1em;
+                                          cursor:pointer; transition:all 0.3s ease; text-align:center;
+                                          box-shadow:0 4px 15px rgba(239,68,68,0.3); box-sizing:border-box;"
+                                   onmouseover="this.style.transform='translateY(-2px)';"
+                                   onmouseout="this.style.transform='translateY(0)';">
+                                📂 選擇 BOSS 記錄備份檔
+                            </label>
+                        </div>
+                    </div>
+
+                    <div style="background:rgba(16,185,129,0.08); padding:12px 15px; border-radius:8px; border-left:4px solid #10b981;">
+                        <p style="color:#6ee7b7; font-size:0.88em;">📋 包含：追蹤中的 BOSS 記錄、巡邏記錄</p>
+                        <p style="color:#a0a0c0; font-size:0.85em; margin-top:6px;">
+                            ⚠️ 匯入時將合併至目前的 BOSS 記錄（重複項目以備份資料為準），請確認備份檔案正確後再執行。
+                        </p>
+                    </div>
+                </div>
+
+                <!-- ===== 今天刷哪隻？翻牌小遊戲 ===== -->
+                <div style="margin-top:30px; background:rgba(30,41,59,0.7); border-radius:16px; border:1px solid rgba(0,153,204,0.3); padding:24px;">
+                    <h2 style="color:#0099cc; font-size:1.2em; margin-bottom:6px;">🃏 今天刷哪隻王？</h2>
+                    <p style="color:#a0a0c0; font-size:0.88em; margin-bottom:18px;">從勾選的 BOSS 中洗牌，翻開一張決定今天的目標！</p>
+
+                    <!-- BOSS 勾選清單 -->
+                    <div style="background:rgba(0,0,0,0.2); border-radius:10px; padding:14px; margin-bottom:16px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                            <span style="color:#0099cc; font-size:0.9em; font-weight:bold;">⚙️ 參與抽選的 BOSS</span>
+                            <div style="display:flex; gap:6px;">
+                                <button onclick="flipSelectAll()" style="padding:4px 10px; font-size:0.78em; border-radius:5px;">全選</button>
+                                <button onclick="flipSelectNone()" style="padding:4px 10px; font-size:0.78em; border-radius:5px;" class="danger">清除</button>
+                            </div>
+                        </div>
+                        <div style="color:#a0a0c0; font-size:0.8em; margin-bottom:8px;">
+                            已選 <span id="flip-selected-count" style="color:#0099cc;font-weight:bold;">0</span>
+                            / <span id="flip-total-count">0</span> 隻
+                        </div>
+                        <div id="flip-boss-list" style="
+                            max-height:200px; overflow-y:auto;
+                            display:grid; grid-template-columns:repeat(auto-fill,minmax(130px,1fr));
+                            gap:5px;
+                        "></div>
+                    </div>
+
+                    <!-- 牌區 + 結果 -->
+                    <div style="display:flex; gap:20px; align-items:flex-start; flex-wrap:wrap;">
+                        <!-- 牌堆 -->
+                        <div style="flex:1; min-width:260px;">
+                            <div id="flip-card-grid" style="
+                                display:grid;
+                                grid-template-columns:repeat(auto-fill,minmax(80px,1fr));
+                                gap:8px;
+                                background:rgba(0,0,0,0.25); border-radius:10px; padding:12px;
+                                min-height:110px;
+                            ">
+                                <div style="grid-column:1/-1;text-align:center;color:#556;padding:20px 0;font-size:0.9em;">
+                                    按下「洗牌抽選」開始！
+                                </div>
+                            </div>
+                            <button id="flip-start-btn" onclick="startFlipGame()"
+                                style="width:100%; margin-top:10px; padding:12px;
+                                       background:linear-gradient(135deg,#0099cc,#005f80);
+                                       border-color:#0099cc; border-radius:8px;
+                                       font-weight:bold; font-size:1em; letter-spacing:1px;">
+                                🔀 洗牌抽選
+                            </button>
+                        </div>
+
+                        <!-- 結果顯示 -->
+                        <div style="flex:0 0 auto; width:160px; display:flex; flex-direction:column; align-items:center; gap:10px;">
+                            <div style="color:#a0a0c0; font-size:0.85em;">🎯 今日目標</div>
+                            <div id="flip-result-card" style="
+                                width:140px; height:160px;
+                                background:rgba(0,0,0,0.35);
+                                border:2px dashed rgba(100,116,139,0.4);
+                                border-radius:12px;
+                                display:flex; flex-direction:column;
+                                align-items:center; justify-content:center;
+                                color:#556; font-size:0.85em; text-align:center;
+                                transition:all 0.4s;
+                            ">
+                                <span style="font-size:2em;">❓</span>
+                                <span style="margin-top:6px;">尚未抽選</span>
+                            </div>
+                            <div id="flip-status" style="color:#66ddee; font-size:0.82em; text-align:center; min-height:18px;"></div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>
 
     <script src="discord-notifications.js"></script>
-
     <script src="data.js"></script>
     <script src="main-core.js"></script>
     <script src="main-features.js"></script>
     <script src="main-webhooks.js"></script>
+
+    <script src="mini-game.js"></script>
 </body>
 </html>
