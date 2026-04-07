@@ -12,7 +12,7 @@ const BOSS_DATA = {
     "巴洛古": { min: 405, max: 540, maps: ["受詛咒的神殿"], color: "#ff0000", image: "images/巴洛古.gif" },
     "地獄巴洛古": { min: 0, max: 0, maps: ["船"], color: "#8b0000", image: "images/地獄巴洛古.gif" },
     "艾利傑": { min: 118, max: 128, maps: ["天空階梯2"], color: "#00bcd4", image: "images/艾利傑.gif" },
-    "雪山女巫": { min: 158, max: 180, maps: ["冰面1"], color: "#87ceeb", image: "images/雪山女巫.gif" },
+    "雪山女巫": { min: 158, max: 170, maps: ["冰面1"], color: "#87ceeb", image: "images/雪山女巫.gif" },
     "雪毛怪人": { min: 45, max: 68, maps: ["雪人之谷"], color: "#f0f8ff", image: "images/雪毛怪人.gif" },
     "厄運死神": { min: 45, max: 105, maps: ["死亡森林4"], color: "#2f4f4f", image: "images/厄運死神.gif" },
     "咕咕鐘": { min: 68, max: 90, maps: ["時間之路<3>"], color: "#daa520", image: "images/咕咕鐘.gif" },
