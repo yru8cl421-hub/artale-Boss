@@ -52,6 +52,23 @@ function updateStatistics() {
 
 // ========== 統一通知設定 ==========
 
+// 儲存玩家暱稱
+function savePlayerNickname() {
+    const input = document.getElementById('player-nickname');
+    if (!input) return;
+    const nickname = input.value.trim();
+    if (nickname) {
+        localStorage.setItem('playerNickname', nickname);
+    } else {
+        localStorage.removeItem('playerNickname');
+    }
+}
+
+// 取得玩家暱稱（沒有則回傳空字串）
+function getPlayerNickname() {
+    return localStorage.getItem('playerNickname') || '';
+}
+
 // 載入統一 Webhook
 function loadUnifiedWebhook() {
     const saved = localStorage.getItem('unifiedWebhook');
@@ -62,6 +79,11 @@ function loadUnifiedWebhook() {
     } else {
         updateUnifiedWebhookStatus(false);
     }
+
+    // 載入暱稱
+    const nicknameInput = document.getElementById('player-nickname');
+    if (nicknameInput) nicknameInput.value = getPlayerNickname();
+
     updateWebhookList();
 }
 
@@ -237,27 +259,29 @@ async function testBossWebhook() {
     }
     
     try {
-        const bossData = BOSS_DATA[bossName];
-        const color = parseInt(bossData.color.replace('#', ''), 16);
-        
+        const bossData    = BOSS_DATA[bossName];
+        const nickname    = getPlayerNickname();
+        const displayName = nickname ? nickname : bossName;
+        const now         = new Date();
+        const bossColor   = parseInt(bossData.color.replace('#', ''), 16);
+
+        const respawnMin = new Date(now.getTime() + bossData.min * 60000);
+        const respawnMax = new Date(now.getTime() + bossData.max * 60000);
+
         const response = await fetch(url, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 embeds: [{
-                    title: `🧪 ${bossName} 專屬通知測試`,
-                    description: `這是 **${bossName}** 的測試訊息，如果您看到這則訊息，表示設定成功！`,
-                    color: color,
-                    fields: [
-                        { name: '地圖位置', value: bossData.maps.join('、'), inline: false },
-                        { name: '重生時間', value: `${bossData.min} ~ ${bossData.max} 分鐘`, inline: false }
-                    ],
-                    timestamp: new Date().toISOString(),
-                    footer: { text: `楓之谷BOSS重生時間系統 - ${bossName} 專屬通知` }
+                    title: `⚔️ ${displayName} 擊殺回報`,
+                    color: bossColor,
+                    description: `**${bossName}** | 頻道 0 | ${bossData.maps[0]} | 重生 ${formatDiscordDateTime(respawnMin)} ~ ${formatDiscordDateTime(respawnMax)}`,
+                    timestamp: now.toISOString(),
+                    footer: { text: '楓之谷 Artale BOSS 回報系統' }
                 }]
             })
         });
-        
+
         if (response.ok) {
             showNotification('✅ 測試成功！請檢查您的 Discord 頻道', 'success');
         } else {
@@ -607,27 +631,30 @@ async function testIndividualBossWebhook(bossName) {
     }
     
     try {
-        const bossData = BOSS_DATA[bossName];
-        const color = parseInt(bossData.color.replace('#', ''), 16);
-        
+        const bossData    = BOSS_DATA[bossName];
+        const nickname    = getPlayerNickname();
+        const displayName = nickname ? nickname : bossName;
+        const now         = new Date();
+        const bossColor   = parseInt(bossData.color.replace('#', ''), 16);
+
+        // 模擬重生時間（現在 + min ~ max 分鐘）
+        const respawnMin = new Date(now.getTime() + bossData.min * 60000);
+        const respawnMax = new Date(now.getTime() + bossData.max * 60000);
+
         const response = await fetch(url, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 embeds: [{
-                    title: `🧪 ${bossName} 專屬通知測試`,
-                    description: `這是 **${bossName}** 的測試訊息，如果您看到這則訊息，表示設定成功！`,
-                    color: color,
-                    fields: [
-                        { name: '地圖位置', value: bossData.maps.join('、'), inline: false },
-                        { name: '重生時間', value: `${bossData.min} ~ ${bossData.max} 分鐘`, inline: false }
-                    ],
-                    timestamp: new Date().toISOString(),
-                    footer: { text: `楓之谷BOSS重生時間系統 - ${bossName} 專屬通知` }
+                    title: `⚔️ ${displayName} 擊殺回報`,
+                    color: bossColor,
+                    description: `**${bossName}** | 頻道 0 | ${bossData.maps[0]} | 重生 ${formatDiscordDateTime(respawnMin)} ~ ${formatDiscordDateTime(respawnMax)}`,
+                    timestamp: now.toISOString(),
+                    footer: { text: '楓之谷 Artale BOSS 回報系統' }
                 }]
             })
         });
-        
+
         if (response.ok) {
             showNotification(`✅ ${bossName} 測試成功！請檢查您的 Discord 頻道`, 'success');
         } else {
@@ -731,29 +758,28 @@ async function testUserWebhook() {
 async function sendUserWebhookNotification(record) {
     // 優先使用新的統一通知
     let webhookUrl = localStorage.getItem('unifiedWebhook');
-    
+
     // 如果沒有統一通知，檢查是否有舊的 userWebhook (向下兼容)
     if (!webhookUrl) {
         webhookUrl = localStorage.getItem('userWebhook');
     }
-    
+
     if (!webhookUrl) return;
-    
-    const deathTime = new Date(record.deathTime);
-    const respawnMin = new Date(record.respawnMin);
-    const respawnMax = new Date(record.respawnMax);
+
+    const nickname    = getPlayerNickname();
+    const displayName = nickname ? nickname : record.bossName;
+    const respawnMin  = new Date(record.respawnMin);
+    const respawnMax  = new Date(record.respawnMax);
+    const bossColor   = BOSS_DATA[record.bossName]?.color?.replace('#', '') || 'FF0000';
+
     const embed = {
-        title: '⚔️ BOSS擊殺記錄',
-        description: `**${record.bossName}** 已被擊殺！`,
-        color: parseInt(BOSS_DATA[record.bossName]?.color?.replace('#', '') || 'FF0000', 16),
-        fields: [
-            { name: '頻道', value: String(record.channel), inline: true },
-            { name: '地圖', value: record.map, inline: true },
-            { name: '⏰ 預計重生時間', value: `**${formatDate(respawnMin)} ~ ${formatDate(respawnMax)}**`, inline: false }
-        ],
+        title: `⚔️ ${displayName} 擊殺回報`,
+        color: parseInt(bossColor, 16),
+        description: `**${record.bossName}** | 頻道 ${record.channel} | ${record.map || BOSS_DATA[record.bossName]?.maps[0] || '未知'} | 重生 ${formatDiscordDateTime(respawnMin)} ~ ${formatDiscordDateTime(respawnMax)}`,
         timestamp: new Date().toISOString(),
-        footer: { text: '楓之谷BOSS重生時間系統 - 統一通知' }
+        footer: { text: '楓之谷 Artale BOSS 回報系統' }
     };
+
     try {
         await fetch(webhookUrl, {
             method: 'POST',

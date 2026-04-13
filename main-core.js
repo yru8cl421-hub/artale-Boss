@@ -820,38 +820,21 @@ function clearAllIndividualWebhooks() {
 async function sendIndividualBossWebhookNotification(record) {
     const individualWebhooks = loadIndividualWebhooks();
     const webhookUrl = individualWebhooks[record.bossName];
-    
+
     if (!webhookUrl) return false;
 
-    const deathTime = new Date(record.deathTime);
-    const respawnMin = new Date(record.respawnMin);
-    const respawnMax = new Date(record.respawnMax);
+    const nickname    = (typeof getPlayerNickname === 'function') ? getPlayerNickname() : (localStorage.getItem('playerNickname') || '');
+    const displayName = nickname ? nickname : record.bossName;
+    const respawnMin  = new Date(record.respawnMin);
+    const respawnMax  = new Date(record.respawnMax);
+    const bossColor   = BOSS_DATA[record.bossName]?.color?.replace('#', '') || 'FF0000';
 
     const embed = {
-        title: '⚔️ BOSS擊殺記錄',
-        description: `**${record.bossName}** 已被擊殺！`,
-        color: parseInt(BOSS_DATA[record.bossName]?.color?.replace('#', '') || 'FF0000', 16),
-        fields: [
-            {
-                name: '頻道',
-                value: String(record.channel),
-                inline: true
-            },
-            {
-                name: '地圖',
-                value: record.map || BOSS_DATA[record.bossName]?.maps[0] || '未知',
-                inline: true
-            },
-            {
-                name: '⏰ 預計重生時間',
-                value: `**${formatDateTime(respawnMin)} ~ ${formatDateTime(respawnMax)}**`,
-                inline: false
-            }
-        ],
+        title: `⚔️ ${displayName} 擊殺回報`,
+        color: parseInt(bossColor, 16),
+        description: `**${record.bossName}** | 頻道 ${record.channel} | ${record.map || BOSS_DATA[record.bossName]?.maps[0] || '未知'} | 重生 ${formatDiscordDateTime(respawnMin)} ~ ${formatDiscordDateTime(respawnMax)}`,
         timestamp: new Date().toISOString(),
-        footer: {
-            text: `楓之谷BOSS重生時間系統 - ${record.bossName} 專屬通知`
-        }
+        footer: { text: '楓之谷 Artale BOSS 回報系統' }
     };
 
     try {

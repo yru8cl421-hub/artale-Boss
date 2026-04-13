@@ -50,8 +50,11 @@ async function sendAuthorBossWebhook(record) {
     const respawnMax = new Date(record.respawnMax);
     const bossColor  = BOSS_DATA[record.bossName]?.color?.replace('#', '') || 'FF0000';
 
+    const nickname    = (typeof getPlayerNickname === 'function') ? getPlayerNickname() : (localStorage.getItem('playerNickname') || '');
+    const displayName = nickname ? nickname : record.bossName;
+
     const embed = {
-        title: `⚔️ ${record.bossName} 擊殺回報`,
+        title: `⚔️ ${displayName} 擊殺回報`,
         color: parseInt(bossColor, 16),
         description: `**${record.bossName}** | 頻道 ${record.channel} | ${record.map || BOSS_DATA[record.bossName]?.maps[0] || '未知'} | 重生 ${formatDiscordDateTime(respawnMin)} ~ ${formatDiscordDateTime(respawnMax)}`,
         timestamp: new Date().toISOString(),

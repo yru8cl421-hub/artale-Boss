@@ -150,6 +150,28 @@
                     <!-- 美化的 Webhook URL 輸入區域 -->
                     <div style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%); 
                                 padding: 20px; border-radius: 12px; border: 2px solid #6366f1; margin-bottom: 20px;">
+                        <!-- 玩家暱稱輸入 -->
+                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
+                            <span style="font-size: 1.5em;">👤</span>
+                            <label style="color: #c7d2fe; font-weight: bold; font-size: 1.05em;">玩家暱稱（選填）</label>
+                        </div>
+                        <div style="position: relative; margin-bottom: 18px;">
+                            <input type="text" id="player-nickname"
+                                   placeholder="輸入你的遊戲暱稱，會顯示在 Discord 通知中..."
+                                   onchange="savePlayerNickname()"
+                                   maxlength="20"
+                                   style="width: 100%; padding: 14px 20px; padding-left: 50px;
+                                          background: rgba(10, 10, 26, 0.8);
+                                          border: 2px solid #4f46e5;
+                                          border-radius: 10px;
+                                          color: #ffffff;
+                                          font-size: 0.95em;
+                                          transition: all 0.3s ease;
+                                          box-shadow: 0 4px 15px rgba(99, 102, 241, 0.2);">
+                            <span style="position: absolute; left: 18px; top: 50%; transform: translateY(-50%);
+                                         color: #818cf8; font-size: 1.2em;">👤</span>
+                        </div>
+
                         <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
                             <span style="font-size: 1.5em;">🔗</span>
                             <label style="color: #c7d2fe; font-weight: bold; font-size: 1.05em;">Discord Webhook URL</label>
