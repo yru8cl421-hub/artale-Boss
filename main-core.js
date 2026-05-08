@@ -1069,6 +1069,7 @@ function onBossSelected() {
 
 // 格式化時間範圍
 function formatTimeRange(min, max) {
+    if (min === 0 && max === 0) return '無固定重生';
     const minHour = Math.floor(min/60);
     const minMin = min%60;
     const maxHour = Math.floor(max/60);

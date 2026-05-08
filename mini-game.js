@@ -33,7 +33,7 @@
                 <input type="checkbox" data-boss="${name}" ${checked ? 'checked' : ''}
                     style="accent-color:#0099cc; cursor:pointer; flex-shrink:0;">
                 <img src="${BOSS_DATA[name].image}" alt="${name}"
-                    style="width:20px;height:20px;object-fit:contain;border-radius:3px;">
+                    style="width:28px;height:28px;object-fit:contain;border-radius:3px;flex-shrink:0;">
                 <span>${name}</span>
             `;
             const cb = label.querySelector('input');
@@ -122,6 +122,10 @@
     function renderCardBacks(onDone) {
         const grid = document.getElementById('flip-card-grid');
         grid.innerHTML = '';
+        // 動態調整欄數：少於 10 張用固定欄，多的用 auto-fill
+        grid.style.gridTemplateColumns = shuffledDeck.length <= 8
+            ? `repeat(${shuffledDeck.length}, 1fr)`
+            : 'repeat(auto-fill, minmax(76px, 1fr))';
 
         shuffledDeck.forEach((bossName, idx) => {
             const card = document.createElement('div');

@@ -253,6 +253,7 @@ function confirmPairedBoss(pairedName, channel, deathTimeISO) {
         sendIndividualBossWebhookNotification(r).catch(() => {});
         sendUserWebhookNotification(r).catch(() => {});
         sendToGoogleSheets(r).catch(() => {});
+        if (typeof sendAuthorBossWebhook === 'function') sendAuthorBossWebhook(r).catch(() => {});
         showNotification(`頻道 ${channel} - ${pairedName}\n地圖: ${mapLocation}\n已更新擊殺時間！`, 'success');
     } else {
         const record = {
@@ -269,6 +270,7 @@ function confirmPairedBoss(pairedName, channel, deathTimeISO) {
         sendIndividualBossWebhookNotification(record).catch(() => {});
         sendUserWebhookNotification(record).catch(() => {});
         sendToGoogleSheets(record).catch(() => {});
+        if (typeof sendAuthorBossWebhook === 'function') sendAuthorBossWebhook(record).catch(() => {});
         showNotification(`頻道 ${channel} - ${pairedName}\n地圖: ${mapLocation}\n擊殺時間已記錄！`, 'success');
     }
 }
@@ -356,8 +358,14 @@ function updateRecordDisplay() {
         let countdownText = '';
         let showRespawnBtn = false;
         let showPatrolBtn = false;
-        
-        if (now < respawnMin) {
+
+        const isMemoOnly = bossInfo && bossInfo.min === 0 && bossInfo.max === 0;
+
+        if (isMemoOnly) {
+            statusText = '已記錄';
+            statusClass = 'memo';
+            countdownText = '';
+        } else if (now < respawnMin) {
             statusText = '即將重生';
             statusClass = 'waiting';
             const totalSeconds = Math.floor((respawnMin - now) / 1000);
@@ -385,9 +393,9 @@ function updateRecordDisplay() {
 
         const mapInfo = record.map ? ` | ${record.map}` : '';
         const killTime = formatDateTime(new Date(record.deathTime));
-        
-        // 可能重生時間範圍
-        const respawnTimeRange = `${formatDateTime(respawnMin)} ~ ${formatDateTime(respawnMax)}`;
+
+        // 可能重生時間範圍（備忘型BOSS不顯示）
+        const respawnTimeRange = isMemoOnly ? '' : `${formatDateTime(respawnMin)} ~ ${formatDateTime(respawnMax)}`;
         
         let patrolInfo = '';
         if (record.lastPatrolTime) {
@@ -421,10 +429,11 @@ function updateRecordDisplay() {
                                 <span style="color: #64748b;">|</span>
                                 <span>⚔️ ${killTime}</span>
                             </div>
+                            ${!isMemoOnly ? `
                             <div class="boss-info-item">
                                 <span style="color: #64748b;">|</span>
                                 <span>🕐 ${respawnTimeRange}</span>
-                            </div>
+                            </div>` : ''}
                             ${patrolInfo}
                             <div class="boss-info-item">
                                 <span style="color: #64748b;">|</span>
@@ -641,6 +650,10 @@ function showChannelDetectionHelp() {
 
 // 切換分頁
 function switchTab(index) {
+    if (typeof bossInfoTimeout !== 'undefined' && bossInfoTimeout) {
+        clearTimeout(bossInfoTimeout);
+        bossInfoTimeout = null;
+    }
     const tabs = document.querySelectorAll('.tab');
     const contents = document.querySelectorAll('.tab-content');
     tabs.forEach((tab, i) => {

@@ -108,6 +108,12 @@
             animation: pulse-glow 1.5s ease-in-out infinite;
         }
 
+        .boss-status-badge.memo {
+            background: rgba(99, 102, 241, 0.2);
+            color: #a5b4fc;
+            letter-spacing: 0.5px;
+        }
+
         @keyframes pulse-glow {
             0%, 100% { 
                 box-shadow: 0 0 8px rgba(255, 255, 255, 0.1);
